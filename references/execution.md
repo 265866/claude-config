@@ -8,7 +8,7 @@ Record the authorized outcome, input revision or source scope, required work uni
 
 Prefer an existing deterministic command for a known transformation. Validate a newly authored transformation like any other code change. A long wait or a large file count alone does not require agent orchestration.
 
-Use one executor per run. Native Workflow schedules its nodes; an ordinary coordinator owns a smaller delegated run. Native Tasks shows coarse milestones. Keep design and acceptance in the Markdown plan rather than copying runtime node status into a second checklist.
+Use one executor per run. Native Workflow schedules its nodes; an ordinary coordinator owns a smaller delegated run. Native Tasks shows the matched playbook's steps and other coarse milestones. Keep design and acceptance in the Markdown plan rather than copying runtime node status into a second checklist.
 
 Stop at an unresolved product, material architecture, action-authorization, or delegation-boundary decision. A proven defect, failing check, or reviewer finding is none of these, except an `ask` result below; resolve it within the run: repair what is proven and in scope, report proven defects outside it, classify automated-review findings with references/review-bot-triage.md (an `ask` result is a decision that ends the run like those above), and dismiss disproven findings with evidence. Investigate other unproven findings until they are proven or disproven, or report them as unverified. Prepare the evidence and recommendation, return to the main conversation, and begin the next run only when that decision is resolved. Orchestration authorization is not approval for an external action.
 
