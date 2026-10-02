@@ -27,7 +27,8 @@ but `.gitignore` keeps them out of the repo.
 
 **Per language**, when you work in that kind of project
 
-- [pnpm](https://pnpm.io/installation) for JavaScript and TypeScript projects that already use it
+- JavaScript and TypeScript: Bun from the list above.
+  Projects that already use [pnpm](https://pnpm.io/installation) also need pnpm.
 - [uv](https://docs.astral.sh/uv/getting-started/installation/) for Python
 - [Go](https://go.dev/doc/install).
   Claude installs `gofumpt`, `golangci-lint`, and `govulncheck` when they are missing.
