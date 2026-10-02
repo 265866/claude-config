@@ -3,6 +3,8 @@
 !/.gitignore
 !/.gitattributes
 !/README.md
+!/UPSTREAM.md
+!/licenses/
 !/CLAUDE.md
 !/settings.json
 !/keybindings.json
