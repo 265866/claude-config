@@ -1,14 +1,6 @@
-<div align="center">
-
 # claude-config
 
-**My Claude Code profile:<br>instructions, skills, agents, playbooks, and helper tools.**
-
-![Claude Code](https://img.shields.io/badge/Claude_Code-profile-D97757)
-![platforms](https://img.shields.io/badge/platforms-Linux_%7C_Windows-2EA44F)
-![runtime](https://img.shields.io/badge/tools-bun-F9F1E1?logo=bun&logoColor=black)
-
-</div>
+My Claude Code profile: instructions, skills, agents, playbooks, and helper tools.
 
 This repo is the `~/.claude` directory itself.
 Clone it into place, and Claude Code loads every instruction, skill, and agent on its next start.
