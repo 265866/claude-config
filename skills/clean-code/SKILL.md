@@ -1,6 +1,6 @@
 ---
 name: clean-code
-description: Simplify a scoped diff, remove unnecessary comments and defensive code, and resolve type workarounds while preserving behavior and repository style.
+description: Simplify a scoped diff, remove unnecessary comments and defensive code, and resolve type workarounds while preserving behavior and repository style. Use before committing a code change, or for "clean this up", "deslop", "remove the slop", or a review-only cleanup pass over a diff.
 ---
 
 # Clean code

@@ -1,6 +1,6 @@
 ---
 name: recall
-description: "Reconstruct working context from scoped chat history and verify current state. Use for requests to recall prior work, catch up on a named thread, summarize recent activity, or resume work whose context is missing. Do not mine history before unrelated tasks or when a supplied state capsule is sufficient."
+description: "Reconstruct working context from scoped chat history and verify current state. Use for 'catch me up', 'what have I been working on', 'where did I leave off', or requests to recall prior work, catch up on a named thread, summarize recent activity, or resume work whose context is missing. Do not mine history before unrelated tasks or when a supplied state capsule is sufficient."
 ---
 
 # Recall

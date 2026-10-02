@@ -1,6 +1,6 @@
 ---
 name: architect
-description: "Ground consequential design choices, sketch caller usage, types and module boundaries, and verify implementation against the chosen design. Use for architecture requests or unresolved ownership, API, state, or layering decisions. Skip candidate comparisons for settled designs and mechanical edits."
+description: "Ground consequential design choices, sketch caller usage, types and module boundaries, and verify implementation against the chosen design. Use for architecture requests or unresolved ownership, API, state, or layering decisions. Skip candidate comparisons for settled designs and mechanical edits. Also use for 'architect this' or 'design this'."
 ---
 
 # Architect

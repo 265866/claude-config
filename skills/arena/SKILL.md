@@ -1,6 +1,6 @@
 ---
 name: arena
-description: "Compare independently produced artifacts against a rubric, then synthesize and verify one coherent result. Use when a consequential unresolved choice has materially different viable approaches, or the user requests competing attempts. Use swarm for evidence coverage without artifact synthesis."
+description: "Compare independently produced artifacts against a rubric, then synthesize and verify one coherent result. Use when a consequential unresolved choice has materially different viable approaches, or the user requests competing attempts. Use swarm for evidence coverage without artifact synthesis. Also use for /arena, 'arena this', or 'throw it in the arena'."
 ---
 
 # Arena

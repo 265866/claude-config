@@ -1,6 +1,6 @@
 ---
 name: swarm
-description: "Coordinate independently scoped workers and return a report accounting for every required result. Use for partitioned audits, complementary investigations, review gauntlets, or an explicitly requested candidate race. Use arena when the goal is to synthesize competing artifacts."
+description: "Coordinate independently scoped workers and return a report accounting for every required result. Use for partitioned audits, complementary investigations, review gauntlets, or an explicitly requested candidate race. Use arena when the goal is to synthesize competing artifacts. Also use for /swarm or 'swarm this'."
 ---
 
 # Swarm

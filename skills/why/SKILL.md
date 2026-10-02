@@ -1,6 +1,6 @@
 ---
 name: why
-description: "Investigate design rationale, historical constraints, regressions, postmortems, or data-backed thresholds using relevant authorized evidence. Return cited findings separated from inference and unknowns. Use how for runtime behavior."
+description: "Use for 'why does X work this way' or 'why did we pick Y'. Investigate design rationale, historical constraints, regressions, postmortems, or data-backed thresholds using relevant authorized evidence. Return cited findings separated from inference and unknowns. Use how for runtime behavior."
 ---
 
 # Why
