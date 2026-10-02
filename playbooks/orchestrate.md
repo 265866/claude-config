@@ -19,11 +19,11 @@ Resolve the bundled runtime once:
 bun "<profile>/tools/workflow/orch/orch.ts" --store "<store>" init
 ```
 
-Run the same entrypoint with `--store <store>` for subsequent commands. Use `--help` on its subcommands when the exact argument shape is needed. The helper records project facts; it never launches, resumes, waits for, or wakes an agent. Native execution owns dependencies, active workers, retries, and returned results. Tasks displays coarse milestones; neither Tasks nor this ledger is a second scheduler.
+Run the same entrypoint with `--store <store>` for subsequent commands; this playbook writes that full invocation as `orch`, which is shorthand, not an installed command. Use `--help` on its subcommands when the exact argument shape is needed. The helper records project facts; it never launches, resumes, waits for, or wakes an agent. Native execution owns dependencies, active workers, retries, and returned results. Tasks displays coarse milestones; neither Tasks nor this ledger is a second scheduler.
 
 The helper uses two kinds of lock. The store-level `.orch.lock` records its holder's PID. When that PID is dead, the helper replaces the lock automatically and says so on stderr. The global `--force` flag steals a lock whose holder is still alive; use it only after confirming that holder is not an active writer. Short per-file guard directories time out after five seconds and are never reclaimed automatically. If a writer was interrupted and its guard directory remains, verify that no writers still use that exact store or log before proposing removal of the error's exact guard path. Never remove a guard or force a lock to bypass a live writer.
 
-- `preferences.md` records numbered standing orders. Pass those orders into every new or resumed assignment.
+- `preferences.md` records numbered standing orders. Add them with `orch standing add` rather than editing the file. Pass those orders into every new or resumed assignment.
 - `overview.md` records program-level issues and references.
 - `units.tsv` records cross-run project milestones: unit ID, track, state, branch, PR, head SHA, and brief path. Its state describes the deliverable, not a live agent.
 - `ledger.tsv` records exact-head verification verdicts. A new head invalidates its earlier verdict.
@@ -52,12 +52,12 @@ Tell writers they share the codebase and must not revert others' work. A depende
 
 #### Steps
 
-1. Frame the countable done predicate, units, tracks, scope and resource budget. Route to autonomous-run if one agent could finish inside that budget. Record approval gates; a time budget or autonomous run never authorizes an external write; only the actions CLAUDE.md says a standing full-permission grant covers are pre-approved.
+1. Frame the countable done predicate, units, tracks, scope and resource budget. Route to autonomous-run if one agent could finish inside that budget. Schedule landing against the budget: by roughly 70% of it, stop starting new units and integrate what is verified, publishing or landing only within an explicit grant. Record approval gates; a time budget or autonomous run never authorizes an external write; only the actions CLAUDE.md says a standing full-permission grant covers are pre-approved.
 2. Initialize the project store, standing orders, coarse task checklist and decision trail. For a sustained run explicitly requested by the user, use native /goal with the same predicate. Timed supervision is only for external waits or checks on live background work. Record whether scheduled checks are self-paced or fixed; self-paced checks need restarting after resume, while restored fixed cron tasks need inspection before replacement.
 3. Pilot the first unit through implementation, checks, independent review when warranted, and local integration. External publishing or landing occurs only within an explicit action grant. Fix the actual brief/check failures before scaling.
-4. Execute bounded batches or dependent phases under the selected method, with resource and retry limits. Do not allocate more writers or verifiers than the machine and review capacity support. Stop the run before an unresolved architecture decision or missing action grant; start the next stage after resolution rather than expecting mid-run user input.
+4. Execute independent units or dependent phases under the selected method, with resource and retry limits. Do not allocate more writers or verifiers than the machine and review capacity support. Keep in-flight units as a rolling window that one reconcile pass can review, refilling as units finish rather than waiting for the slowest unit of a whole batch. Stop the run before an unresolved architecture decision or missing action grant; start the next stage after resolution rather than expecting mid-run user input.
 5. Reconcile returned results at safe phase boundaries and before a user report. Record accepted project facts with `unit`, exact-head verdicts with `ledger`, approval gates with `gate`, and derived reporting with `status`. Failed, stopped, and missing results remain gaps. A result is evidence to validate, not permission to interrupt an atomic integration step.
-6. Integrate verified units continuously within the authorized scope. Keep one integrator per shared branch or stack. Publishing, retargeting, replying, merging, and pushing require the appropriate explicit approval, including for automatic loops.
+6. Integrate verified units continuously within the authorized scope. A unit is done only when its output is recorded as it lands: committed locally on its branch, its ledger row written, and its receipts in the store. Do not batch this to the end of the run; work that exists only in a finished agent's worktree is not done. Keep one integrator per shared branch or stack. Publishing, retargeting, replying, merging, and pushing require the appropriate explicit approval, including for automatic loops.
 7. Close by reconciling every child to a terminal state, verifying the predicate on the actual artifact, checking receipts against current heads, and delivering the store and evidence. Keep explicit task artifacts intact for the requested review.
 
 #### Verification and liveness
@@ -66,7 +66,9 @@ Use worker checks for cheap deterministic units and fresh independent reviewers 
 
 Give each running child an expected result and bounded budget. Native execution owns its progress and final result; reconcile every launched unit. Use actual run/task status, saved receipts, repository state, and bounded Monitor output for external background work. Do not send a message just to probe liveness because SendMessage resumes a completed agent. Native Monitor limits and availability are described in the execution reference (Supervision and time).
 
-On a deadline, exhausted budget, or unexpected exit, record the last evidence and reconcile the unit before a bounded retry that addresses the observed failure. A late result must be checked against current files, frontier and verification receipts before acceptance. Never blindly merge it or turn a missing result into PASS.
+On a deadline, exhausted budget, or unexpected exit, record the last evidence and reconcile the unit before a bounded retry that addresses the observed failure. Retry by failure mode: a context or capacity limit respawns with a smaller scope, a network drop or transient tool failure retries as-is, a repeated tool error retries once with a revised brief, and an unknown failure retries once. After two retries, abandon the unit, record why, and replan around it. A late result must be checked against current files, frontier and verification receipts before acceptance. Never blindly merge it or turn a missing result into PASS.
+
+When continued spawning would produce bad output across the program (broken upstream output, wrong acceptance criteria, dead infrastructure), add a stop order with `orch standing add "STOP: <cause>. Start no new units until a later order clears this."`, let in-flight work finish, fix the cause, then add a later order that clears it. Do not hand-edit `preferences.md`; the helper rejects any line that breaks its `N. text` numbering. Bound your own retries the same way: after a few consecutive tool failures and one revised approach that also fails, stop retrying, write a terminal handoff to the store (what is done, where it lives, and the exact command to resume), and end the run.
 
 After restart, read standing orders and project facts, compare real branches/heads, and resume the recorded native session with `claude --resume <session-id>` when appropriate. Workflow replay is session-scoped; check artifacts and exact heads before relying on cached results. A fresh session starts a new run from verified remaining work. Restart self-paced checks and background process monitors; inspect restored fixed cron tasks before replacing expired or overdue tasks. Do not assume prior workers survived or repeat accepted external actions blindly.
 
@@ -75,5 +77,13 @@ After restart, read standing orders and project facts, compare real branches/hea
 The branch/base/head graph and exact-head receipts govern landing. One owner performs stack changes. Never close a base PR, retarget a chain, force-push, or mutate a remote as routine bookkeeping without approval. Read-only Git/GitHub queries may establish the graph; do not invent branch ancestry from old chat state.
 
 For a Graphite-managed stack, use the optional frontier command only in the checkout with its authoritative metadata, and capture a new generation after an approved stack mutation. For another stack, record its real branch/base/PR relationships directly in program artifacts rather than pretending it has Graphite metadata.
+
+#### Escalation
+
+Reaches the user, batched into one report rather than per item: actions behind the approval gates in CLAUDE.md, product or preference calls no experiment settles, a standing order that contradicts observed reality, and a program-level dead end that survived a replan. Park each with `orch gate park <id> --question <question> --options <options> --default <recommended answer>` before asking, and route other work around it. Do not hand-edit `gates.md`; the helper parses it.
+
+Never reaches the user: retries within budget, CI flake triage, review-thread triage (a rerun, reply, or push itself stays behind its approval gate), format fixes, scope the brief already forbids (refuse it and continue), and "should I keep going".
+
+A mid-run discovery that blocks or degrades the program's goal becomes a unit. Anything else parks as a follow-up in `overview.md` rather than widening a current unit; at this fan-out a small scope leak multiplies into changes nobody asked for.
 
 **Reply.** Predicate and counts from state, verified progress since the last report, current heads and verdicts, failed or abandoned work, concrete approval gates, and artifact paths. Do not repeat unchanged status tables.

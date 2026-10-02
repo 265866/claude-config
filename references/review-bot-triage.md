@@ -12,7 +12,7 @@ Classify each automated reviewer thread before acting. Apply these rules in orde
 4. `fix`: The issue is unproven, but the suggested fix is small and clearly reduces risk without changing product intent.
 5. `ask`: Anything else, such as a novel or ambiguous comment that a reproduction, a test, or the current code within reach cannot settle. Try those first; ask only when evidence cannot decide, and continue other work while asking.
 
-Pushing the fix, posting the reply, and resolving the thread are separate remote writes. Each needs explicit approval under the root authorization policy, as Babysit steps 5 and 8 describe. A local fix or disproof is a valid deliverable while that approval is pending.
+Pushing the fix, posting the reply, and resolving the thread are separate remote writes. Each needs explicit approval under the root authorization policy, as Babysit steps 5 and 9 describe. A local fix or disproof is a valid deliverable while that approval is pending.
 
 When evidence within reach cannot settle it, ask. Skipping a noisy code-quality comment is cheap; skipping a real data or security bug is not.
 
@@ -42,10 +42,10 @@ Use `candidate` for one or two examples. Use `recurring` after multiple real dis
 - Example signal: Comments about focus outlines, button sizes, spacing, or shared component visual defaults where the owner replies "intentional" or "intended".
 - Source: historical dismissals inherited from the upstream pstack triage reference; individual PRs were not recorded.
 
-### Upstack or stack-local usage automated reviewer cannot see
+### Upstack or stack-local usage the automated reviewer cannot see
 
 - Confidence: candidate
-- Skip when: automated reviewer flags an export, component, helper, or file as unused, and the active forge's PR list and diffs, upper-stack diffs, or PR context show it is used by a later PR in the stack.
+- Skip when: An automated reviewer flags an export, component, helper, or file as unused, and the active forge's PR list and diffs, upper-stack diffs, or PR context show it is used by a later PR in the stack.
 - Do not skip when: The current PR is not part of a stack, the symbol is public API, or the supposed upstack use cannot be verified.
 - Example signal: "Exported component is never used" with a human reply like "used upstack".
 - Source: historical dismissals inherited from the upstream pstack triage reference; individual PRs were not recorded.
@@ -99,7 +99,7 @@ During ordinary babysitting, propose useful candidate learnings in the task repo
 ### Manual reimplementations of native browser behavior
 
 - Confidence: candidate
-- Skip when: Practically never. When a diff replaces native browser behavior with a manual equivalent (native sticky → JS-positioned clones, native scroll targeting → forwarded wheel/touch events, paint-order occlusion → masks/clip-path), automated reviewer's logic-bug findings against that code have been consistently legitimate.
+- Skip when: Practically never. When a diff replaces native browser behavior with a manual equivalent (native sticky → JS-positioned clones, native scroll targeting → forwarded wheel/touch events, paint-order occlusion → masks/clip-path), the automated reviewer's logic-bug findings against that code have been consistently legitimate.
 - Do not skip when: The finding concerns event-forwarding gaps (wheel deltaMode, touch pans, scroll-chaining at edges, tap slop), mask/clip hit-testing divergence, or observer-vs-React state timing races in such code. Reproduce the claim first; in this code it has usually proven real, which makes it a rubric rule 1 `fix`.
 - Example signal: "masks do not affect hit-testing", "overlay blocks wheel scroll", "ignores deltaMode", "runs in the IntersectionObserver callback before React applies state".
 - Source: one sticky-occlusion PR: six automated reviewer passes, roughly eighteen findings, every one fixed rather than dismissed.
@@ -109,7 +109,7 @@ During ordinary babysitting, propose useful candidate learnings in the task repo
 - Confidence: candidate
 - Skip when: Never skip the verification itself; it costs one command. When a PR
   ships a contract test that pins protocol or documentation prose (regexes over
-  a SKILL.md, snapshot of doc wording), and automated reviewer claims "the test no longer
+  a SKILL.md, snapshot of doc wording), and the automated reviewer claims "the test no longer
   matches the doc" (or vice versa), run that test on the PR tip before
   classifying. A red run confirms the claim empirically; a green run is a
   concrete disproof for the dismissal reply.
