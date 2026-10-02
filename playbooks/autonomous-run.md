@@ -1,0 +1,13 @@
+### Autonomous run
+
+**You own the exit condition. Define done, then drive to it without stopping.**
+
+1. State the exit condition as a checkable predicate before the first iteration (the goal verified on the real artifact, repro fixed, all N PRs merged, pixel-diff zero; a green suite counts only when the suite passing is the goal).
+2. Choose execution through [the execution reference](../references/execution.md). Direct work or small delegation fits a narrow task; substantial repeated worker/check/repair coordination fits a bounded native cycle. Set round, retry, and no-progress limits before launching it, with a deadline and expected observable output when work can stall. Follow that reference for supervised external waits and resume mechanics.
+3. Each iteration makes the smallest change the evidence justifies, verifies it against the predicate, commits if it advanced, discards changes that didn't help. Belt-and-suspenders that "might help" gets reverted, not left to ride.
+   Sequence the work via the **principle-sequence-verifiable-units** skill: verify prerequisites before dependent work, allow independent units to run in parallel, check each unit before acceptance, and verify the combined artifact before calling it integrated.
+4. Address related reversible work that falls within the granted scope. A discovery that blocks or degrades the exit condition or the user's goal is related; fix it. Keep unrelated discoveries in a separate local proposal unless the user authorizes expansion. A sustained-run grant does not waive the root's per-action approval gates, except for the actions CLAUDE.md says a standing full-permission grant covers. Prepare concrete external operations before requesting missing authorization, and end the current native run before that gate; continue independent work and begin the next stage after resolution. Keep the predicate as the main drive and return to it after each justified side fix.
+5. Checkpoint every iteration via the **show-me-your-work** skill, a row for what changed and whether the predicate moved.
+6. Stop successfully only when the predicate is met. A no-progress limit ends the current cycle: inspect the evidence, revise the approach, and continue within the authorized budget when a justified next attempt exists. Surface a genuine blocker or exhausted budget rather than spinning. Account for failed or missing workers, and never relax the predicate to declare victory. Non-trivial implementation receives fresh-context review before completion.
+
+**Reply:** the exit condition, iterations run, what landed, what was discarded, final predicate state.

@@ -1,0 +1,21 @@
+# Ignore everything; only allowlisted paths below are tracked
+/*
+!/.gitignore
+!/.gitattributes
+!/README.md
+!/CLAUDE.md
+!/settings.json
+!/keybindings.json
+!/agents/
+!/automations/
+!/commands/
+!/hooks/
+!/output-styles/
+!/playbooks/
+!/references/
+!/rules/
+!/skills/
+!/tools/
+
+/skills/synced/
+node_modules/

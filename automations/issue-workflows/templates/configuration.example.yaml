@@ -1,0 +1,91 @@
+# Inactive schema example. Replace every required placeholder in an external file.
+# Supply its absolute path as ISSUE_CONFIG_PATH. This file activates nothing.
+schema_version: 1
+
+automations:
+  triage_name: "issue-triage"
+  reproduce_name: "issue-reproduction"
+
+write_policy:
+  require_explicit_action_authorization: true
+  unattended_without_grant: "stop-before-write"
+  worker_external_writes: false
+
+slack:
+  source_channel_id: "SOURCE_CHANNEL_ID"
+  operations_channel_id: "" # Optional; enables the operations status thread when set.
+  triage_identity_user_id: "TRIAGE_IDENTITY_USER_ID"
+  read_action: "configured-slack-read-action"
+  thread_post_action: "configured-slack-thread-post-action"
+  file_download_action: "configured-slack-file-download-action"
+  operations_edit_action: "" # Optional; required only for status edits.
+  allow_source_root_posts: false
+  allow_worker_slack_writes: false
+
+repository:
+  url: "https://github.com/example-org/example-repo"
+  default_branch: "main"
+  pull_request_action: "configured-draft-pull-request-action"
+  pull_request_url_format: "https://github.com/{owner}/{repo}/pull/{number}"
+  draft_only: true
+
+tracker:
+  type: "configured-tracker"
+  adapter_skill_name: "issue-tracker-adapter-placeholder"
+  team: "team-placeholder"
+  project: "project-placeholder"
+  labels:
+    bug: "bug-label-placeholder"
+    performance: "performance-label-placeholder"
+    intake: "intake-label-placeholder"
+    needs_repro: "needs-repro-label-placeholder"
+  status: "intake-status-placeholder"
+  source_link_title: "Slack report"
+  require_compensation_action: true
+
+routing:
+  map_path: "" # Optional; an absolute path is required when supplied.
+  owner_pings_default: false
+  allow_feature_owner_ping: false
+  allow_confirmed_regression_author_ping: false
+
+control:
+  skill_name: "control-target-app-placeholder"
+  feature_map_path: "REPLACE_WITH_ABSOLUTE_FEATURE_MAP_PATH"
+  environment: "safe-test-environment-placeholder"
+  artifact_directory: "REPLACE_WITH_ABSOLUTE_TEMPORARY_ARTIFACT_DIRECTORY"
+  artifact_retention_hours: 24
+
+verdict_markers:
+  bug: "[triage:bug]"
+  performance: "[triage:performance]"
+  other: "[triage:other]"
+  tracker_attribute: "tracker"
+
+# Operations-thread status text used by the reproduce-and-fix-issues skill.
+status_text:
+  reproducing: "Reproducing"
+  could_not_reproduce: "Could not reproduce"
+  blocked: "Blocked"
+  reproduced: "Reproduced"
+  verifying_existing_fix: "Verifying existing fix"
+  existing_fix_verified: "Existing fix verified"
+  existing_fix_insufficient: "Existing fix did not resolve it"
+  existing_fix_inconclusive: "Existing fix inconclusive"
+  attempting_fix: "Attempting bounded fix"
+  pull_request_opened: "Draft pull request opened"
+  fix_failed: "Fix did not land"
+
+budgets:
+  poll_seconds: 45
+  verdict_wait_minutes: 45
+  triage_follow_up_minutes: 10
+  triage_total_minutes: 30
+  repro_minutes: 60
+  rejection_window_minutes: 10
+  fix_minutes: 90
+  fix_attempts: 1
+  operations_follow_up_minutes: 45
+
+# Agents inherit the profile model and high effort. The profile ceiling is xhigh.
+# No model override, alternate provider, scheduling engine, or credentials here.

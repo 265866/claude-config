@@ -1,0 +1,718 @@
+import { spawn } from "node:child_process";
+import type * as T from "./types.ts";
+import { nonEmpty, parsePrNumber } from "./types.ts";
+export const REVIEW_THREADS_QUERY =
+  `query ReviewThreads($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
+    repository(owner: $owner, name: $repo) {
+      pullRequest(number: $pr) {
+        reviewThreads(first: 100, after: $endCursor) {
+          pageInfo { hasNextPage endCursor }
+          nodes {
+            id isResolved
+            comments(first: 1) {
+              nodes { body createdAt path line author { login } }
+            }
+          }
+        }
+      }
+    }
+  }`;
+export const OPEN_PULL_REQUESTS_QUERY =
+  `query OpenPullRequests($owner: String!, $repo: String!, $endCursor: String) {
+    repository(owner: $owner, name: $repo) {
+      pullRequests(states: [OPEN], first: 100, after: $endCursor) {
+        pageInfo { hasNextPage endCursor }
+        nodes { number headRefName baseRefName }
+      }
+    }
+  }`;
+export const PR_COMMIT_STATUS_QUERY =
+  "\nquery PrCommitStatuses($owner: String!, $repo: String!, $pr: Int!) {\n  repository(owner: $owner, name: $repo) {\n    pullRequest(number: $pr) {\n      commits(last: 50) {\n        nodes {\n          commit {\n            oid\n            statusCheckRollup {\n              state\n            }\n          }\n        }\n      }\n    }\n  }\n}\n";
+export const PR_CHECK_ROLLUP_QUERY = `query HeadCheckRollup($owner: String!, $repo: String!, $headOid: GitObjectID!, $after: String) {
+  repository(owner: $owner, name: $repo) {
+    object(oid: $headOid) {
+      __typename
+      ... on Commit {
+        oid
+        statusCheckRollup {
+          state
+          contexts(first: 100, after: $after) {
+            pageInfo { hasNextPage endCursor }
+            nodes {
+              __typename
+              ... on CheckRun { name status conclusion detailsUrl }
+              ... on StatusContext { context state targetUrl }
+            }
+          }
+        }
+      }
+    }
+  }
+}`;
+
+interface CommandResult {
+  readonly code: number;
+  readonly stdout: string;
+  readonly stderr: string;
+}
+export class WatcherQueryError extends Error {
+  readonly failure: T.QueryFailure;
+  constructor(failure: T.QueryFailure) {
+    super(failure.detail);
+    this.name = "WatcherQueryError";
+    this.failure = failure;
+  }
+}
+export class ChecksUnavailable extends WatcherQueryError {
+  constructor(detail: string) {
+    super({ kind: "checks-unavailable", retryable: true, detail });
+    this.name = "ChecksUnavailable";
+  }
+}
+const firstLine = (value: string): string =>
+  value.trim().split(/\r?\n/, 1)[0]?.slice(0, 240) ?? "";
+function run(argv: readonly [string, ...string[]]): Promise<CommandResult> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(argv[0], argv.slice(1), {
+      stdio: ["ignore", "pipe", "pipe"],
+      timeout: 30_000,
+    });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.setEncoding("utf8");
+    child.stderr.setEncoding("utf8");
+    child.stdout.on("data", (chunk: string) => {
+      stdout += chunk;
+    });
+    child.stderr.on("data", (chunk: string) => {
+      stderr += chunk;
+    });
+    child.on("error", (error) => reject(new WatcherQueryError({
+      kind: "command-exit",
+      retryable: true,
+      code: -1,
+      detail: error.message,
+    })));
+    child.on("close", (code) => resolve({ code: code ?? -1, stdout, stderr }));
+  });
+}
+function parseJson(text: string, label: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new WatcherQueryError({
+      kind: "json-parse",
+      retryable: true,
+      detail: `${label}: ${error instanceof Error ? error.message : String(error)}`,
+    });
+  }
+}
+async function runJson(argv: readonly [string, ...string[]]): Promise<unknown> {
+  const result = await run(argv);
+  if (result.code !== 0)
+    throw new WatcherQueryError({
+      kind: "command-exit",
+      retryable: true,
+      code: result.code,
+      detail:
+        firstLine(result.stderr) || `${argv.join(" ")} exited ${result.code}`,
+    });
+  return parseJson(result.stdout, argv.join(" "));
+}
+function raw(value: unknown): string {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+}
+function missing(path: string, value?: unknown): never {
+  throw new WatcherQueryError({
+    kind: "missing-key",
+    retryable: true,
+    detail:
+      value === undefined
+        ? `missing ${path}`
+        : `invalid ${path}: ${raw(value)}`,
+    ...(value === undefined ? {} : { rawValue: raw(value) }),
+  });
+}
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function record(value: unknown, path: string): Record<string, unknown> {
+  if (!isRecord(value)) missing(path, value);
+  return value;
+}
+function list(value: unknown, path: string): readonly unknown[] {
+  if (!Array.isArray(value)) missing(path, value);
+  return value;
+}
+function at(value: unknown, path: readonly string[]): unknown {
+  let current = value;
+  for (const key of path) {
+    const object = record(current, path.join("."));
+    if (!(key in object)) missing(path.join("."));
+    current = object[key];
+  }
+  return current;
+}
+function string(value: unknown, path: string): string {
+  if (typeof value !== "string") missing(path, value);
+  return value;
+}
+const optionalString = (value: unknown, path: string): string | null =>
+  value === null ? null : string(value, path);
+function enumValue<const V extends readonly string[]>(
+  value: unknown,
+  values: V,
+  path: string
+): V[number] {
+  if (typeof value === "string")
+    for (const candidate of values) if (candidate === value) return candidate;
+  return missing(path, value);
+}
+const nullableEnum = <const V extends readonly string[]>(
+  value: unknown,
+  values: V,
+  path: string
+): V[number] | null => (value === null ? null : enumValue(value, values, path));
+const MERGE_STATES = [
+  "BEHIND",
+  "BLOCKED",
+  "CLEAN",
+  "CONFLICTING",
+  "DIRTY",
+  "DRAFT",
+  "HAS_HOOKS",
+  "UNKNOWN",
+  "UNSTABLE",
+] as const satisfies readonly T.MergeStateStatus[];
+const ROLLUP_STATES = [
+  "ERROR",
+  "EXPECTED",
+  "FAILURE",
+  "PENDING",
+  "SUCCESS",
+] as const;
+const REVIEW_DECISIONS = [
+  "APPROVED",
+  "CHANGES_REQUESTED",
+  "REVIEW_REQUIRED",
+] as const;
+// `gh pr view` reports no review decision as "", not null. Only this field does
+// it, so the normalization stays here rather than in nullableEnum, where it
+// would stop a genuinely unexpected rollup state from failing closed.
+const reviewDecision = (value: unknown): T.ReviewDecision =>
+  nullableEnum(
+    value === "" ? null : value,
+    REVIEW_DECISIONS,
+    "pull request.reviewDecision"
+  );
+function parseRemote(value: string): T.Repository | null {
+  let normalized = value.trim();
+  if (normalized.startsWith("git@github.com:"))
+    normalized = `https://github.com/${normalized.slice(15)}`;
+  if (normalized.startsWith("ssh://git@github.com/"))
+    normalized = `https://github.com/${normalized.slice(21)}`;
+  try {
+    const url = new URL(normalized);
+    const parts = url.pathname
+      .replace(/\.git$/, "")
+      .split("/")
+      .filter(Boolean);
+    if (
+      url.protocol !== "https:" ||
+      url.hostname !== "github.com" ||
+      url.port ||
+      url.username ||
+      url.password ||
+      url.search ||
+      url.hash ||
+      parts.length !== 2
+    )
+      return null;
+    return { owner: parts[0], repo: parts[1] };
+  } catch {
+    return null;
+  }
+}
+function parsePrUrl(value: string): T.PrContext {
+  try {
+    const url = new URL(value);
+    const parts = url.pathname.split("/").filter(Boolean);
+    if (
+      url.protocol !== "https:" ||
+      url.hostname !== "github.com" ||
+      url.port ||
+      url.username ||
+      url.password ||
+      url.search ||
+      url.hash ||
+      parts.length !== 4 ||
+      parts[2] !== "pull"
+    )
+      throw new Error("not a canonical GitHub pull URL");
+    return {
+      owner: parts[0],
+      repo: parts[1],
+      number: parsePrNumber(Number(parts[3])),
+    };
+  } catch (error) {
+    throw new WatcherQueryError({
+      kind: "invalid-context-url",
+      retryable: false,
+      rawValue: value,
+      detail: `could not infer owner/repo from PR URL: ${value} (${error instanceof Error ? error.message : String(error)})`,
+    });
+  }
+}
+function checkDetails(value: Record<string, unknown>, nameKey: string) {
+  return {
+    name: string(value[nameKey], nameKey),
+    description: typeof value.description === "string" ? value.description : "",
+    link:
+      typeof value.link === "string"
+        ? value.link
+        : typeof value.detailsUrl === "string"
+          ? value.detailsUrl
+          : "",
+    workflow: typeof value.workflow === "string" ? value.workflow : "",
+  };
+}
+// The owner-approval gate is excluded from pending everywhere, so the rule has
+// one home. Classifying it as pending on either read path makes the watcher
+// wait on a human, which is the behaviour #172004 removed from the Python.
+function pendingOrGate(
+  details: {
+    readonly name: string;
+    readonly description: string;
+    readonly link: string;
+    readonly workflow: string;
+  },
+  reportedState: string
+): T.Check {
+  return details.name === "Code Review Gate"
+    ? {
+        ...details,
+        kind: "code-review-gate",
+        name: "Code Review Gate",
+        reportedState,
+      }
+    : { ...details, kind: "pending", reportedState };
+}
+export function mapRollupNode(value: unknown): T.Check {
+  const object = record(value, "rollup node");
+  const typename = object.__typename;
+  if (typename !== "CheckRun" && typename !== "StatusContext")
+    missing("rollup node.__typename", typename);
+  const details = checkDetails(
+    object,
+    typename === "CheckRun" ? "name" : "context"
+  );
+  const link =
+    typeof object.targetUrl === "string" ? object.targetUrl : details.link;
+  if (typename === "CheckRun") {
+    const status =
+      typeof object.status === "string" ? object.status.toUpperCase() : "";
+    const conclusion =
+      typeof object.conclusion === "string"
+        ? object.conclusion.toUpperCase()
+        : "";
+    if (status !== "COMPLETED")
+      return pendingOrGate({ ...details, link }, "PENDING");
+    if (conclusion === "SUCCESS")
+      return { ...details, link, kind: "passed", reportedState: "SUCCESS" };
+    if (conclusion === "NEUTRAL" || conclusion === "SKIPPED")
+      return { ...details, link, kind: "skipped", reportedState: conclusion };
+    return {
+      ...details,
+      link,
+      kind: "failed",
+      reportedState: conclusion === "ACTION_REQUIRED" ? conclusion : "FAILURE",
+    };
+  }
+  const state =
+    typeof object.state === "string" ? object.state.toUpperCase() : "";
+  if (state === "PENDING" || state === "EXPECTED")
+    return pendingOrGate({ ...details, link }, "PENDING");
+  return state === "SUCCESS"
+    ? { ...details, link, kind: "passed", reportedState: state }
+    : { ...details, link, kind: "failed", reportedState: state || "FAILURE" };
+}
+function parseComment(value: unknown): T.ReviewComment {
+  const object = record(value, "review comment");
+  const author =
+    object.author === null
+      ? null
+      : record(object.author, "review comment.author");
+  return {
+    authorLogin:
+      author === null
+        ? null
+        : optionalString(author.login, "review comment.author.login"),
+    body: string(object.body, "review comment.body"),
+    path: optionalString(object.path, "review comment.path"),
+    line:
+      object.line === null
+        ? null
+        : Number.isInteger(object.line)
+          ? Number(object.line)
+          : missing("review comment.line", object.line),
+    createdAt: string(object.createdAt, "review comment.createdAt"),
+  };
+}
+function isAutomatedReview(comment: T.ReviewComment | null): boolean {
+  if (comment === null) return false;
+  const author = (comment.authorLogin ?? "").toLowerCase();
+  const body = comment.body.toLowerCase();
+  return author.endsWith("[bot]") || author === "review-bot" ||
+    body.includes("automated_review_id:");
+}
+function passKey(comment: T.ReviewComment | null): string | null {
+  if (comment === null) return null;
+  for (const pattern of [
+    /RUN_ID:\s*([a-zA-Z0-9_.:-]+)/,
+    /AUTOMATED_REVIEW_ID:\s*([a-zA-Z0-9_.:-]+)/,
+  ]) {
+    const match = pattern.exec(comment.body);
+    if (match?.[1]) return match[1];
+  }
+  return null;
+}
+export function parseReviewThreads(value: unknown): readonly T.ReviewThread[] {
+  const nodes = connectionNodes(value, ["data", "repository", "pullRequest", "reviewThreads"]);
+  const threads: {
+    readonly id: string;
+    readonly firstComment: T.ReviewComment | null;
+    readonly resolved: boolean;
+  }[] = [];
+  for (const node of nodes) {
+    const thread = record(node, "review thread");
+    if (typeof thread.isResolved !== "boolean")
+      missing("review thread.isResolved", thread.isResolved);
+    const comments = list(
+      at(thread, ["comments", "nodes"]),
+      "review thread.comments.nodes"
+    );
+    threads.push({
+      id: string(thread.id, "review thread.id"),
+      firstComment: comments.length === 0 ? null : parseComment(comments[0]),
+      resolved: thread.isResolved,
+    });
+  }
+  const keys = new Set<string>();
+  let keyless = false;
+  for (const thread of threads) {
+    if (!isAutomatedReview(thread.firstComment)) continue;
+    const key = passKey(thread.firstComment);
+    if (key === null) keyless = true;
+    else keys.add(key);
+  }
+  const passes = keys.size > 0 ? keys.size : keyless ? 1 : 0;
+  return threads
+    .filter((thread) => !thread.resolved)
+    .map(({ id, firstComment }) => ({
+      id,
+      firstComment,
+      isAutomatedReview: isAutomatedReview(firstComment),
+      automatedReviewPasses: passes,
+    }));
+}
+
+function connectionNodes(value: unknown, path: readonly string[]): readonly unknown[] {
+  const pages = list(value, "GraphQL pages");
+  if (pages.length === 0) missing("GraphQL pages must contain a response");
+  const nodes: unknown[] = [];
+  const seen = new Set<string>();
+  for (const [index, response] of pages.entries()) {
+    const connection = record(at(response, path), path.join("."));
+    const page = record(connection.pageInfo, "connection.pageInfo");
+    if (typeof page.hasNextPage !== "boolean") missing("connection.pageInfo.hasNextPage", page.hasNextPage);
+    const continuation = optionalString(page.endCursor, "connection.pageInfo.endCursor");
+    if (page.hasNextPage) {
+      if (!continuation || seen.has(continuation) || index === pages.length - 1) {
+        missing("connection has incomplete or repeated pagination", page);
+      }
+      seen.add(continuation);
+    } else if (index !== pages.length - 1) {
+      missing("connection includes pages after its final page");
+    }
+    nodes.push(...list(connection.nodes, "connection.nodes"));
+  }
+  return nodes;
+}
+
+export function parseOpenPullRequests(value: unknown): readonly T.OpenPullRequest[] {
+  return connectionNodes(value, ["data", "repository", "pullRequests"]).map((item, index) => {
+    const object = record(item, `open PRs[${index}]`);
+    return {
+      number: parsePrNumber(object.number, `open PRs[${index}].number`),
+      headRefName: string(object.headRefName, `open PRs[${index}].headRefName`),
+      baseRefName: string(object.baseRefName, `open PRs[${index}].baseRefName`),
+    };
+  });
+}
+export function parsePullRequest(
+  value: unknown,
+  context: T.PrContext
+): T.PullRequestFacts {
+  const object = record(value, "pull request");
+  if (typeof object.isDraft !== "boolean")
+    missing("pull request.isDraft", object.isDraft);
+  return {
+    context,
+    mergeable: enumValue(
+      object.mergeable,
+      ["MERGEABLE", "CONFLICTING", "UNKNOWN"] as const,
+      "pull request.mergeable"
+    ),
+    mergeStateStatus: enumValue(
+      object.mergeStateStatus,
+      MERGE_STATES,
+      "pull request.mergeStateStatus"
+    ),
+    reviewDecision: reviewDecision(object.reviewDecision),
+    headRefOid: optionalString(object.headRefOid, "pull request.headRefOid"),
+    headRefName: string(object.headRefName, "pull request.headRefName"),
+    baseRefName: string(object.baseRefName, "pull request.baseRefName"),
+    state: enumValue(
+      object.state,
+      ["OPEN", "CLOSED", "MERGED"] as const,
+      "pull request.state"
+    ),
+    mergedAt: optionalString(object.mergedAt, "pull request.mergedAt"),
+    isDraft: object.isDraft,
+  };
+}
+export function parseCheckRollupPage(value: unknown, headRefOid: string): T.RollupPage {
+  const commit = record(at(value, ["data", "repository", "object"]), "head commit");
+  if (commit.__typename !== "Commit") missing("head commit.__typename", commit.__typename);
+  const sourceOid = string(commit.oid, "head commit.oid");
+  if (sourceOid !== headRefOid) missing("head commit.oid does not match observed head", sourceOid);
+  if (commit.statusCheckRollup === null)
+    return { sourceOid, state: null, checks: [], endCursor: null };
+  const rollup = record(commit.statusCheckRollup, "head commit.statusCheckRollup");
+  const state = enumValue(rollup.state, ROLLUP_STATES, "head commit.statusCheckRollup.state");
+  const contexts = record(rollup.contexts, "contexts");
+  const checks = list(contexts.nodes, "contexts.nodes").map(mapRollupNode);
+  const page = record(contexts.pageInfo, "contexts.pageInfo");
+  if (typeof page.hasNextPage !== "boolean") missing("contexts.pageInfo.hasNextPage", page.hasNextPage);
+  const continuation = optionalString(page.endCursor, "contexts.pageInfo.endCursor");
+  if (page.hasNextPage && !continuation?.trim()) missing("contexts has incomplete pagination", page);
+  return { sourceOid, state, checks, endCursor: page.hasNextPage ? continuation : null };
+}
+function graphqlArgs(
+  query: string,
+  context: T.PrContext
+): [string, ...string[]] {
+  return [
+    "gh",
+    "api",
+    "graphql",
+    "-f",
+    `query=${query}`,
+    "-f",
+    `owner=${context.owner}`,
+    "-f",
+    `repo=${context.repo}`,
+    "-F",
+    `pr=${context.number}`,
+  ];
+}
+
+export class GhGitHubReader implements T.GitHubReader {
+  async originRepo(): Promise<T.Repository | null> {
+    const result = await run(["git", "remote", "get-url", "origin"]);
+    return result.code === 0 ? parseRemote(result.stdout) : null;
+  }
+  async currentPr(pr: T.PrNumber | null): Promise<T.PrContext> {
+    const argv: [string, ...string[]] = ["gh", "pr", "view"];
+    if (pr !== null) argv.push(String(pr));
+    argv.push("--json", "number,url");
+    const object = record(await runJson(argv), "current PR");
+    const parsed = parsePrUrl(string(object.url, "current PR.url"));
+    return {
+      ...parsed,
+      number: pr ?? parsePrNumber(object.number, "current PR.number"),
+    };
+  }
+  async pullRequest(context: T.PrContext): Promise<T.PullRequestFacts> {
+    return parsePullRequest(
+      await runJson([
+        "gh",
+        "pr",
+        "view",
+        String(context.number),
+        "--repo",
+        `${context.owner}/${context.repo}`,
+        "--json",
+        "mergeable,mergeStateStatus,reviewDecision,headRefOid,headRefName,baseRefName,state,mergedAt,isDraft",
+      ]),
+      context
+    );
+  }
+  async openPullRequests(
+    repository: T.Repository
+  ): Promise<readonly T.OpenPullRequest[]> {
+    return parseOpenPullRequests(await runJson([
+      "gh", "api", "graphql", "--paginate", "--slurp",
+      "-f", `query=${OPEN_PULL_REQUESTS_QUERY}`,
+      "-f", `owner=${repository.owner}`, "-f", `repo=${repository.repo}`,
+    ]));
+  }
+  async checkRollupPage(
+    context: T.PrContext,
+    headRefOid: string,
+    after: string | null
+  ): Promise<T.RollupPage> {
+    const argv: [string, ...string[]] = [
+      "gh", "api", "graphql", "-f", `query=${PR_CHECK_ROLLUP_QUERY}`,
+      "-f", `owner=${context.owner}`, "-f", `repo=${context.repo}`,
+      "-f", `headOid=${headRefOid}`,
+    ];
+    if (after !== null) argv.push("-f", `after=${after}`);
+    return parseCheckRollupPage(await runJson(argv), headRefOid);
+  }
+  async reviewThreads(
+    context: T.PrContext
+  ): Promise<readonly T.ReviewThread[]> {
+    return parseReviewThreads(
+      await runJson([...graphqlArgs(REVIEW_THREADS_QUERY, context), "--paginate", "--slurp"])
+    );
+  }
+  async commitRollups(
+    context: T.PrContext
+  ): Promise<readonly T.CommitRollup[]> {
+    const value = await runJson(graphqlArgs(PR_COMMIT_STATUS_QUERY, context));
+    const commits = list(
+      at(value, ["data", "repository", "pullRequest", "commits", "nodes"]),
+      "commits.nodes"
+    );
+    return commits.map((item, index) => {
+      const commit = record(at(item, ["commit"]), `commits[${index}].commit`);
+      const rollup = commit.statusCheckRollup;
+      return {
+        oid: string(commit.oid, `commits[${index}].oid`),
+        state:
+          rollup === null
+            ? null
+            : nullableEnum(
+                at(rollup, ["state"]),
+                ROLLUP_STATES,
+                `commits[${index}].statusCheckRollup.state`
+              ),
+      };
+    });
+  }
+}
+
+export async function resolveChecks(
+  reader: T.GitHubReader,
+  context: T.PrContext,
+  headRefOid: string,
+  beforeRead: () => void
+): Promise<T.CheckRead> {
+  const checks: T.Check[] = [];
+  const seen = new Set<string>();
+  let after: string | null = null;
+  let state: T.RollupState | undefined;
+  do {
+    beforeRead();
+    const page = await reader.checkRollupPage(context, headRefOid, after);
+    if (page.sourceOid !== headRefOid)
+      missing("rollup source does not match observed head", page.sourceOid);
+    if (state !== undefined && page.state !== state)
+      throw new ChecksUnavailable("head rollup state changed during pagination");
+    state = page.state;
+    checks.push(...page.checks);
+    after = page.endCursor;
+    if (after !== null) {
+      if (!after.trim() || seen.has(after)) missing("contexts has incomplete or repeated pagination", after);
+      seen.add(after);
+    }
+  } while (after !== null);
+  const complete = nonEmpty(checks);
+  if (complete === null || state === null || state === undefined)
+    throw new ChecksUnavailable("could not read checks for the observed head: rollup was empty");
+  return { source: "graphql-rollup", sourceOid: headRefOid, state, checks: complete };
+}
+export async function resolveContext(args: {
+  readonly reader: T.GitHubReader;
+  readonly owner: string | null;
+  readonly repo: string | null;
+  readonly pr: T.PrNumber | null;
+}): Promise<T.PrContext> {
+  if (args.pr !== null && args.owner !== null && args.repo !== null)
+    return { owner: args.owner, repo: args.repo, number: args.pr };
+  if (args.pr !== null) {
+    const origin = await args.reader.originRepo();
+    if (origin !== null)
+      return {
+        owner: args.owner ?? origin.owner,
+        repo: args.repo ?? origin.repo,
+        number: args.pr,
+      };
+  }
+  const inferred = await args.reader.currentPr(args.pr);
+  return {
+    owner: args.owner ?? inferred.owner,
+    repo: args.repo ?? inferred.repo,
+    number: args.pr ?? inferred.number,
+  };
+}
+export function orderStack(
+  context: T.PrContext,
+  open: readonly T.OpenPullRequest[]
+): T.NonEmpty<T.PrContext> {
+  const byNumber = new Map(open.map((pr) => [pr.number, pr]));
+  const byHead = new Map(open.map((pr) => [pr.headRefName, pr]));
+  const children = new Map<string, T.OpenPullRequest[]>();
+  for (const pr of open)
+    children.set(pr.baseRefName, [...(children.get(pr.baseRefName) ?? []), pr]);
+  for (const values of children.values())
+    values.sort((a, b) => a.number - b.number);
+  const start = byNumber.get(context.number);
+  if (start === undefined) return [context];
+  const down: T.OpenPullRequest[] = [];
+  const ancestors = new Set<T.PrNumber>([start.number]);
+  let current = start;
+  while (byHead.has(current.baseRefName)) {
+    const parent = byHead.get(current.baseRefName);
+    if (parent === undefined) break;
+    if (ancestors.has(parent.number)) {
+      throw new WatcherQueryError({ kind: "invalid-stack", retryable: false, detail: "cyclic pull request base graph" });
+    }
+    ancestors.add(parent.number);
+    down.push(parent);
+    current = parent;
+  }
+  const seen = new Set<T.PrNumber>([
+    ...down.map((pr) => pr.number),
+    start.number,
+  ]);
+  const up: T.OpenPullRequest[] = [];
+  const visit = (parent: T.OpenPullRequest): void => {
+    for (const child of children.get(parent.headRefName) ?? []) {
+      if (seen.has(child.number)) continue;
+      seen.add(child.number);
+      up.push(child);
+      visit(child);
+    }
+  };
+  visit(start);
+  return (
+    nonEmpty(
+      [...down.reverse(), start, ...up].map((pr) => ({
+        ...context,
+        number: pr.number,
+      }))
+    ) ?? [context]
+  );
+}
+export async function discoverStack(
+  reader: T.GitHubReader,
+  context: T.PrContext
+): Promise<T.NonEmpty<T.PrContext>> {
+  return orderStack(context, await reader.openPullRequests(context));
+}
