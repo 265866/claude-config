@@ -24,7 +24,7 @@ The N candidates will receive the same prompt, so the prompt is the contract.
 
 1. State the artifact each candidate is producing.
 2. Derive the rubric. State what success looks like for *this* task, then turn it into 3-6 concrete gradeable criteria. The rubric is the picker's tool in Phase D. Candidates only see the task.
-3. Pick independent runners that inherit the profile model. Choose enough candidates to cover the substantive design directions; same-model independent attempts are the supported default. Do not claim model diversity.
+3. Pick independent runners that inherit the profile model. Default to three candidates; add more only when the task has more than three substantive design directions. Same-model independent attempts are the supported default. Do not claim model diversity.
 4. Assign isolated outputs under the execution guide's ownership rules. Use the **principle-separate-before-serializing-shared-state** skill. If the design is settled or the task is mechanical, skip the candidate comparison and use the applicable narrower procedure.
 
 ## Phase B: Fan out

@@ -16,6 +16,12 @@ The author's stated intent for this change:
 
 You are reviewing whether the code achieves this intent well. Do NOT question the intent itself. Assume the goal is correct and challenge the execution.
 
+## Primary Focus
+
+{FOCUS}
+
+Give this focus extra depth, but still review through the whole rubric below.
+
 ## Code Under Review
 
 {DIFF_OR_FILES}

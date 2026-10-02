@@ -5,7 +5,15 @@ description: "Use for \"interrogate\", \"adversarial review\", \"multi-reviewer 
 
 # Interrogate
 
-Assign independent fresh-context reviewers. Give all of them the full prompt and rubric; complementary focus areas may guide attention, but do not replace complete coverage. The signal comes from independently examined evidence, not claimed model diversity.
+Assign three independent fresh-context reviewers by default, each with a different primary focus. Every reviewer still gets the full prompt and rubric; the focus adds depth and does not replace complete coverage. Reviewers inherit the same model, so the focus split is what keeps them from finding the same things. Do not claim model diversity.
+
+| Reviewer | Primary focus |
+|----------|---------------|
+| A | Correctness and failure modes: edge cases, error paths, concurrency, data loss, security. |
+| B | Contracts and blast radius: callers, public interfaces, persisted data, platform and environment differences, compatibility. |
+| C | Design and simplicity: unnecessary code or abstraction, reader load, and whether the tests prove the behavior. |
+
+Add a reviewer with its own focus only when the change has a distinct risk the three do not cover, such as performance or UI behavior.
 
 The main coordinator selects the executor using [execution guidance](${CLAUDE_SKILL_DIR}/../../references/execution.md). Reviewers perform their assigned review without restarting routing or launching the enclosing review procedure.
 
@@ -43,8 +51,9 @@ Read `references/reviewer-prompt.md` and fill in the template with:
 2. The diff or file contents
 3. The review rubric from `references/rubric.md`
 4. The code-quality lens from `references/code-quality-review.md`
+5. That reviewer's primary focus from the table above
 
-The same filled template goes to all reviewers, so every reviewer applies the code-quality lens.
+Apart from the focus, every reviewer gets the same filled template, so every reviewer applies the full rubric and the code-quality lens.
 
 ## Step 4, Synthesize
 
