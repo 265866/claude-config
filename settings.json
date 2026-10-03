@@ -36,6 +36,7 @@
   "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
   "autoMemoryEnabled": false,
+  "disableClaudeAiConnectors": true,
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
   "autoCompactEnabled": true,
