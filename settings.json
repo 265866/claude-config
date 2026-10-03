@@ -5,7 +5,17 @@
     "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "1",
     "DISABLE_EXTRA_USAGE_COMMAND": "1",
     "CLAUDE_CODE_ENABLE_TODO_TOOLS": "1",
-    "CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS": "3600000"
+    "CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS": "3600000",
+    "ANTHROPIC_BASE_URL": "http://moss:8317",
+    "ANTHROPIC_AUTH_TOKEN": "(\\__/) (='.'=) (\")_(\") bunny guards this fake key",
+    "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
+    "API_TIMEOUT_MS": "600000",
+    "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "BASH_MAX_TIMEOUT_MS": "600000",
+    "MCP_TIMEOUT": "30000",
+    "MCP_TOOL_TIMEOUT": "600000",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "90",
+    "DISABLE_TELEMETRY": "1"
   },
   "attribution": {
     "commit": "",
@@ -23,10 +33,13 @@
       "effortLevel": "high"
     }
   },
+  "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
   "autoMemoryEnabled": false,
   "skipDangerousModePermissionPrompt": true,
+  "skipWorkflowUsageWarning": true,
+  "autoCompactEnabled": true,
   "theme": "dark",
   "agentPushNotifEnabled": true,
-  "autoUpdatesChannel": "latest"
+  "switchModelsOnFlag": false
 }
