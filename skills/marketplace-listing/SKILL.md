@@ -51,9 +51,9 @@ price the listing quotes.
 **Comps** set the ask. They never appear in the copy.
 
 Both sources sit behind a login, so both need the user's signed-in browser. Use the
-**authenticated-browser** skill and run one worker per source; the two can run concurrently. In
-each brief's task part, name the exact product and variant confirmed in step 1, so the worker skips
-parts, accessories, and other models:
+**authenticated-browser** skill and run one worker per source; start both, and they run one after
+the other. In each brief's task part, name the exact product and variant confirmed in step 1, so the
+worker skips parts, accessories, and other models:
 
 - **eBay sold, last 90 days.** Search the product, then filter to Sold Items. What actually sold
   beats active asks, which only show what sellers hoped for. Signed-out eBay hits a login wall on

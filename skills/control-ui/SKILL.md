@@ -5,7 +5,7 @@ description: Build or adapt a local browser/CDP harness to drive and inspect a w
 
 # Control UI
 
-Use local browser automation to verify UI behavior with evidence. First reuse the repo's own Playwright, browser, or Electron harness if it exists; otherwise use an available MCP browser tool that runs its own browser, or a local harness around the app's dev server or Chromium debug port. Do not use the Claude Code Chrome integration for local checks; it drives the user's signed-in Chrome, which authenticated-browser owns. Discover the actual tool inventory; no built-in browser API is assumed. When a host app's browser-preview tool is off or missing, do not retry it; fall back to the repo's harness or the Generic Web Harness below. Never point automation at the user's own browser profiles. A site that needs the user's own sign-in goes to authenticated-browser.
+Use local browser automation to verify UI behavior with evidence. First reuse the repo's own Playwright, browser, or Electron harness if it exists; otherwise use an available MCP browser tool that runs its own browser, or a local harness around the app's dev server or Chromium debug port. Do not attach to the agent Chrome that authenticated-browser runs from its `agent-chrome` profile; it holds the user's sign-ins. Discover the actual tool inventory; no built-in browser API is assumed. When a host app's browser-preview tool is off or missing, do not retry it; fall back to the repo's harness or the Generic Web Harness below. Never point automation at the user's own browser profiles. A site that needs the user's own sign-in goes to authenticated-browser.
 
 ## What It Is Used For
 

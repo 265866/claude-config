@@ -29,8 +29,10 @@ but `.gitignore` keeps them out of the repo.
 
 **Optional**
 
-- [Google Chrome](https://www.google.com/chrome/) with the [Claude in Chrome](https://claude.com/claude-in-chrome) extension,
-  for the skill that reads pages behind your sign-ins
+- [Google Chrome](https://www.google.com/chrome/), kept for agents only,
+  for the skill that reads pages behind your sign-ins.
+  See [Signed-in browsing](#signed-in-browsing).
+  On Linux, also install `xdotool` so that Chrome stays minimized.
 - [tmux](https://github.com/tmux/tmux/wiki/Installing), for driving terminal apps
 
 ## Install
@@ -54,6 +56,39 @@ git checkout -f main
 > [!WARNING]
 > `git checkout -f` replaces your local `CLAUDE.md`, `settings.json`, and any other tracked file.
 > Untracked runtime files stay as they are.
+
+## Signed-in browsing
+
+The `authenticated-browser` skill reads pages behind your sign-ins through a Chrome that only agents use.
+It needs Google Chrome 149 or later.
+The skill runs Chrome from its own profile folder, which keeps your sign-ins:
+
+- Windows: `%LOCALAPPDATA%\agent-chrome`
+- macOS: `~/Library/Application Support/agent-chrome`
+- Linux: `$XDG_DATA_HOME/agent-chrome`, by default `~/.local/share/agent-chrome`
+
+During a task, Chrome runs out of your way with a local debugging port, and the skill closes it when the task ends.
+On Windows it starts minimized and on macOS hidden.
+On Linux it is minimized only when [xdotool](https://github.com/jordansissel/xdotool) is installed and the session has an X11 or XWayland display;
+otherwise its window shows while a task runs.
+On Linux the skill expects Google's package, which installs Chrome at `/opt/google/chrome`.
+Its workers drive Chrome with [Chrome DevTools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp),
+which Bun downloads on first use at the version pinned in `skills/authenticated-browser/scripts/agent-chrome.ts`.
+Nothing needs installing beyond Chrome and Bun.
+
+Sign in to the sites you want agents to read:
+
+```bash
+bun ~/.claude/skills/authenticated-browser/scripts/agent-chrome.ts signin
+```
+
+A normal Chrome window opens. Sign in to each account, keep "stay signed in" checked, and close the window.
+Chrome closes after every task, so a sign-in that lasts only until the browser closes does not carry over.
+When a task reports that a site needs a sign-in, run the same command again.
+
+> [!NOTE]
+> Sign in through that command, not through a running agent Chrome.
+> Chrome reports itself as automated while its debugging endpoint is open, and sign-in pages such as Google's refuse it.
 
 ## Sync between machines
 
