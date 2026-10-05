@@ -383,8 +383,10 @@ async function runInChrome(base: string, workDir: string, brief: string, timeout
       "--no-session-persistence",
       "--restricted",
       "--strict-mcp-config", "--mcp-config", mcpConfig,
-      "--tools", "ToolSearch",
-      "--allowedTools", `mcp__${SERVER}`,
+      // Claude Code saves a large page snapshot to a file in the run folder and returns its path, so the
+      // worker reads it back with Read and Grep; restricted mode keeps those tools inside that folder.
+      "--tools", "ToolSearch,Read,Grep",
+      "--allowedTools", `mcp__${SERVER},Read,Grep`,
       "--disallowedTools", DISALLOWED_TOOLS.map((tool) => `mcp__${SERVER}__${tool}`).join(","),
       "--permission-prompts", "none",
       "--output-format", "json",
