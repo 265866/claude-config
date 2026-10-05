@@ -87,8 +87,8 @@ Chrome closes after every task, so a sign-in that lasts only until the browser c
 When a task reports that a site needs a sign-in, run the same command again.
 
 > [!NOTE]
-> Sign in through that command, not through a running agent Chrome.
-> Chrome reports itself as automated while its debugging endpoint is open, and sign-in pages such as Google's refuse it.
+> Sign in through that command, not through an agent Chrome that a task opened.
+> That command opens Chrome without its debugging port, which sign-in pages such as Google's may detect and refuse.
 
 ## Sync between machines
 

@@ -9,7 +9,7 @@ import { join } from "node:path";
 const CHROME_DEVTOOLS_MCP = "chrome-devtools-mcp@1.10.1";
 const SERVER = "chrome-devtools";
 // Screenshots, select_page, and Lighthouse bring the minimized window to the front and take focus.
-// upload_file would let page text talk the worker into sending a local file to a site.
+// Reading pages never needs upload_file.
 const DISALLOWED_TOOLS = ["take_screenshot", "select_page", "lighthouse_audit", "upload_file"];
 // The coordinator's Bash calls stop at 600 seconds. The lock wait gets whatever this budget leaves
 // after the worker's timeout; starting, minimizing, and closing Chrome take the rest.
@@ -74,16 +74,28 @@ async function endpoint(): Promise<Chrome | undefined> {
   }
 }
 
+// The path has to end where the argument ends, so a profile such as agent-chrome-old does not count.
+const profileArgument = new RegExp(
+  `--user-data-dir="?${profileDir.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}("|\\s|$)`,
+  os === "win32" ? "i" : "",
+);
+
 function profileProcessRunning(): boolean {
-  const needle = profileDir.toLowerCase();
-  const commandLines =
-    os === "win32"
-      ? Bun.spawnSync([
-          "powershell", "-NoProfile", "-Command",
-          "Get-CimInstance Win32_Process -Filter \"Name='chrome.exe'\" | ForEach-Object { $_.CommandLine }",
-        ])
-      : Bun.spawnSync(["ps", "-axww", "-o", "command="]);
-  return commandLines.stdout.toString().toLowerCase().includes(needle);
+  if (os === "win32") {
+    return Bun.spawnSync([
+      "powershell", "-NoProfile", "-Command",
+      "Get-CimInstance Win32_Process -Filter \"Name='chrome.exe'\" | ForEach-Object { $_.CommandLine }",
+    ])
+      .stdout.toString()
+      .split("\n")
+      .some((line) => profileArgument.test(line));
+  }
+  // Only Chrome's own processes count; a shell or editor can have the profile path in its command line too.
+  const chromeBinary = os === "darwin" ? "/Google Chrome.app/Contents/" : "/opt/google/chrome/";
+  return Bun.spawnSync(["ps", "-axww", "-o", "command="])
+    .stdout.toString()
+    .split("\n")
+    .some((line) => line.includes(chromeBinary) && profileArgument.test(line));
 }
 
 function powershell(script: string): void {
@@ -98,9 +110,8 @@ const startProcessArgument = (arg: string) =>
 const startProcess = (file: string, args: string[]) =>
   `Start-Process -FilePath ${psQuote(file)} -ArgumentList @(${args.map(startProcessArgument).join(",")})`;
 
-// debugging=false opens a normal, visible window for the user to sign in. Chrome sets
-// navigator.webdriver on every page while a debugging port is open, and sign-in pages such as
-// Google's refuse browsers that report it.
+// debugging=false opens a normal, visible window for the user to sign in, with no debugging port that
+// sign-in pages such as Google's may detect.
 function launch(debugging: boolean): void {
   const args = [
     `--user-data-dir=${profileDir}`,
@@ -110,6 +121,9 @@ function launch(debugging: boolean): void {
       ? [
           // Port 0 lets Chrome pick a free port and record it in DevToolsActivePort.
           "--remote-debugging-port=0",
+          // With a debugging port open, Chrome otherwise reports navigator.webdriver, which sites use
+          // to challenge or block automated browsers.
+          "--disable-blink-features=AutomationControlled",
           // A minimized window otherwise throttles background tabs until navigations take tens of seconds.
           "--disable-renderer-backgrounding",
           "--disable-backgrounding-occluded-windows",
@@ -159,7 +173,7 @@ function minimizeOnX11(): void {
       .stdout.toString()
       .split("\n")
       .map((line) => line.trim().match(/^(\d+)\s+(.*)$/))
-      .find((match) => match?.[2]?.startsWith(`${chrome} `) && match[2].includes(profileDir) && !match[2].includes("--type="))?.[1];
+      .find((match) => match?.[2]?.startsWith(`${chrome} `) && profileArgument.test(match[2]) && !match[2].includes("--type="))?.[1];
     const windows = browserPid
       ? Bun.spawnSync(["xdotool", "search", "--onlyvisible", "--pid", browserPid]).stdout.toString().split("\n").filter(Boolean)
       : [];
@@ -210,9 +224,8 @@ async function pages(base: string): Promise<Target[]> {
   return ((await response.json()) as Target[]).filter((target) => target.type === "page");
 }
 
-// Workers run one at a time: a worker's URL allowlist also takes hold of tabs another worker opens
-// in the same Chrome and cuts them off from the network. A listening port is the lock because the
-// OS releases it when the holder exits, however it exits.
+// Workers run one at a time, because each run closes the Chrome that all workers would share. A
+// listening port is the lock because the OS releases it when the holder exits, however it exits.
 function tryLock(): boolean {
   try {
     Bun.listen({ hostname: "127.0.0.1", port: LOCK_PORT, socket: { data() {} } });
@@ -288,7 +301,7 @@ const WORKER_ENV =
 
 type Outcome = Record<string, unknown>;
 
-async function runWorker(brief: string, allow: string[], timeoutSeconds: number): Promise<Outcome> {
+async function runWorker(brief: string, timeoutSeconds: number): Promise<Outcome> {
   const lockWait = RUN_BUDGET_SECONDS - timeoutSeconds;
   if (!(await poll(lockWait, 1000, () => (tryLock() ? true : undefined)))) {
     return { status: "busy", detail: `Another worker held the agent Chrome for over ${lockWait} seconds.` };
@@ -303,7 +316,7 @@ async function runWorker(brief: string, allow: string[], timeoutSeconds: number)
   let outcome: Outcome;
   try {
     workDir = mkdtempSync(join(tmpdir(), "agent-chrome-worker-"));
-    outcome = await runInChrome(chrome.base, workDir, brief, allow, timeoutSeconds);
+    outcome = await runInChrome(chrome.base, workDir, brief, timeoutSeconds);
   } catch (error) {
     outcome = { status: "error", detail: message(error) };
   }
@@ -316,7 +329,7 @@ async function runWorker(brief: string, allow: string[], timeoutSeconds: number)
   return { ...outcome, chromeClosed };
 }
 
-async function runInChrome(base: string, workDir: string, brief: string, allow: string[], timeoutSeconds: number): Promise<Outcome> {
+async function runInChrome(base: string, workDir: string, brief: string, timeoutSeconds: number): Promise<Outcome> {
   // Tabs a session restored or a killed run left behind would otherwise sit beside the worker's.
   for (const page of (await pages(base)).slice(1)) {
     await fetch(`${base}/json/close/${page.id}`, { signal: AbortSignal.timeout(2000) }).catch(() => undefined);
@@ -345,7 +358,6 @@ async function runInChrome(base: string, workDir: string, brief: string, allow: 
             "--no-category-network",
             "--no-category-emulation",
             "--no-category-memory",
-            ...allow.flatMap((pattern) => ["--allowedUrlPattern", pattern]),
           ],
           env: {
             CHROME_DEVTOOLS_MCP_NO_UPDATE_CHECKS: "1",
@@ -411,13 +423,12 @@ async function runInChrome(base: string, workDir: string, brief: string, allow: 
   };
 }
 
-function parseRunOptions(args: string[]): { brief?: string; allow: string[]; timeout: number } {
-  const options = { brief: undefined as string | undefined, allow: [] as string[], timeout: MAX_TIMEOUT_SECONDS };
+function parseRunOptions(args: string[]): { brief?: string; timeout: number } {
+  const options = { brief: undefined as string | undefined, timeout: MAX_TIMEOUT_SECONDS };
   for (let i = 0; i < args.length; i += 2) {
     const [flag, value] = [args[i], args[i + 1]];
     if (value === undefined) throw new Error(`${flag} needs a value.`);
-    if (flag === "--allow") options.allow.push(value);
-    else if (flag === "--brief") options.brief = value;
+    if (flag === "--brief") options.brief = value;
     else if (flag === "--timeout") {
       options.timeout = Number(value);
       if (!Number.isInteger(options.timeout) || options.timeout < 1 || options.timeout > MAX_TIMEOUT_SECONDS) {
@@ -425,13 +436,11 @@ function parseRunOptions(args: string[]): { brief?: string; allow: string[]; tim
       }
     } else throw new Error(`Unknown option ${flag}.`);
   }
-  // Without a pattern Chrome DevTools MCP blocks nothing, file:// URLs included.
-  if (options.allow.length === 0) throw new Error("Pass at least one --allow URL pattern.");
   return options;
 }
 
 const USAGE = `Usage: agent-chrome.ts <command>
-  run --brief <file> --allow <URL pattern> [--allow <URL pattern>]... [--timeout <seconds>]
+  run --brief <file> [--timeout <seconds>]
             Run one browser worker and print its outcome as JSON. The timeout defaults to ${MAX_TIMEOUT_SECONDS} seconds.
   signin    Open the agent Chrome as a normal window, without debugging, for the user to sign in.
   status    Report whether the agent Chrome is open, whether it has its debugging port, whether a worker runs, and open tabs.
@@ -441,9 +450,10 @@ async function main(command: string | undefined, rest: string[]): Promise<void> 
   switch (command) {
     case "run": {
       const options = parseRunOptions(rest);
-      const brief = options.brief ? readFileSync(options.brief, "utf8") : await new Response(Bun.stdin.stream()).text();
-      if (!brief.trim()) throw new Error("Pass the brief with --brief <file> or on standard input.");
-      console.log(JSON.stringify(await runWorker(brief, options.allow, options.timeout), null, 2));
+      if (!options.brief) throw new Error("Pass the brief with --brief <file>.");
+      const brief = readFileSync(options.brief, "utf8");
+      if (!brief.trim()) throw new Error(`The brief file ${options.brief} is empty.`);
+      console.log(JSON.stringify(await runWorker(brief, options.timeout), null, 2));
       return;
     }
     case "signin": {
