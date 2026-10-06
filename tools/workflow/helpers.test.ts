@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { validatePlan } from "./check-plan.ts";
 import { appendDecision } from "./decision-log.ts";
-import { auditWorktrees, parseWorktrees, projectDirectoryName, resolveAuditProfile } from "./worktree-audit.ts";
+import { auditWorktrees, comparablePath, parseWorktrees, projectDirectoryName, resolveAuditProfile } from "./worktree-audit.ts";
 
 const directories: string[] = [];
 async function directory(): Promise<string> {
@@ -156,6 +156,13 @@ describe("native worktree audit", () => {
     expect(parseWorktrees("worktree C:/repo with spaces\nHEAD abc\nbranch refs/heads/work/test\nlocked active job\n\n"))
       .toEqual([{ path: "C:/repo with spaces", head: "abc", branch: "work/test", locked: true }]);
     expect(parseWorktrees("")).toEqual([]);
+  });
+
+  it("compares session and worktree paths case-insensitively on Windows and macOS only", () => {
+    expect(comparablePath("/Work/Repo/", "win32")).toBe(comparablePath("/work/repo", "win32"));
+    expect(comparablePath("/Work/Repo/", "darwin")).toBe(comparablePath("/work/repo", "darwin"));
+    expect(comparablePath("/Work/Repo", "linux")).not.toBe(comparablePath("/work/repo", "linux"));
+    expect(comparablePath("/Work/Repo/", "linux")).toBe(comparablePath("/Work/Repo", "linux"));
   });
 
   it("matches Claude Code 2.1.285 project encoding at the length and Unicode boundaries", () => {

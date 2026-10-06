@@ -64,9 +64,10 @@ async function treeBytes(path: string): Promise<number | null> {
   } catch { return null; }
 }
 
-function normalized(path: string): string {
+export function comparablePath(path: string, platform: NodeJS.Platform = process.platform): string {
   const value = resolve(path).replace(/\\/g, "/").replace(/\/$/, "");
-  return process.platform === "win32" ? value.toLowerCase() : value;
+  // NTFS and default APFS volumes are case-insensitive; folding case on macOS errs toward "in use".
+  return platform === "win32" || platform === "darwin" ? value.toLowerCase() : value;
 }
 
 export function projectDirectoryName(path: string): string {
@@ -92,7 +93,7 @@ async function recentSessions(profile: string, paths: readonly string[]): Promis
     for (const spelling of new Set([path, resolve(path)])) {
       const name = projectDirectoryName(spelling);
       const targets = directories.get(name) ?? new Set<string>();
-      targets.add(normalized(path));
+      targets.add(comparablePath(path));
       directories.set(name, targets);
     }
   }
@@ -116,7 +117,7 @@ async function recentSessions(profile: string, paths: readonly string[]): Promis
           let record: unknown;
           try { record = JSON.parse(line); } catch { continue; }
           if (record === null || typeof record !== "object" || !("cwd" in record) || typeof record.cwd !== "string") continue;
-          const cwd = normalized(record.cwd);
+          const cwd = comparablePath(record.cwd);
           if (!targets.has(cwd)) break;
           const date = (await handle.stat()).mtime.toISOString();
           if ((sessions.get(cwd) ?? "") < date) sessions.set(cwd, date);
@@ -146,7 +147,7 @@ export async function auditWorktrees(repo: string, options: {
       porcelain.split(/\r?\n/).some((line) => !line.startsWith("??")) ? "tracked" : "untracked";
     const timestamp = Number(optionalGit(worktree.path, ["log", "-1", "--format=%ct", "HEAD"]) ?? 0);
     const remoteHead = worktree.branch === "" ? null : optionalGit(repo, ["rev-parse", "--verify", `refs/remotes/origin/${worktree.branch}`]);
-    const lastSession = sessions.get(normalized(worktree.path)) ?? null;
+    const lastSession = sessions.get(comparablePath(worktree.path)) ?? null;
     const recent = lastSession !== null && Date.now() - Date.parse(lastSession) <= 4 * 86_400_000;
     const merged = optionalGit(repo, ["merge-base", "--is-ancestor", worktree.head, base]) !== null;
     rows.push({
