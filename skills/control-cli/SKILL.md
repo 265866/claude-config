@@ -30,7 +30,7 @@ Use a repeatable local harness to exercise an interactive CLI instead of poking 
 
 - Repo-native harness: prefer checked-in scripts because they know the app's startup, env, and prompts.
 - `tmux`: managed sessions, `capture-pane`, `send-keys`, attach/detach.
-- PTY probe: use an existing Bun/Node/Expect terminal library or harness. Run Python helpers through uv; do not add a PTY dependency or tool to the project without approval; throwaway installs outside it follow the profile's toolchain rules.
+- PTY probe: use an existing Bun/Node/Expect terminal library or harness. Run Python helpers through uv. Bun's built-in `Bun.spawn(cmd, { terminal: { cols, rows, data } })` provides a PTY without a dependency on macOS and Linux, and on Windows through ConPTY as of Bun 1.4.2. Bun 1.3's types document it as POSIX only, so check `bun --version` on Windows. Prefer it before adding node-pty. Add a PTY dependency or tool to the project when the harness needs it, and report it. Throwaway installs outside it follow the profile's toolchain rules.
 - Runtime inspector: use Node or Bun inspector for CPU profiles, heap snapshots, and live evaluation.
 - Terminal recorder: use repo-local demo tools or asciinema-compatible tools when the user asks for a demo.
 

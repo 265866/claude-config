@@ -2,6 +2,23 @@
 
 Use the project's configured commands and established stack first. Add a dependency or tool to a project, its manifests, or its lockfile when the task needs it, and report it. Install throwaway tooling used only to build, test, or inspect the work (for example a portable toolchain, a browser driver, or a harness library) into a fresh temporary directory outside the project and remove it when the task no longer needs it; on a remote machine, use that machine's temporary directory. A package manager's normal download cache, and ephemeral runners such as `uvx` or `bunx`, count as throwaway. Report what you installed and removed. System-wide or user-profile installs, such as OS package-manager installs, global package or tool installs, global binaries, or shell profile changes, are allowed when the task needs them; report each one by name with what it changed. Do not change versions or lockfiles unless dependencies, package metadata, toolchain requirements, or the requested release require it.
 
+## Installs and environment changes per OS
+
+The agent's shell cannot answer a password prompt, a UAC dialog, or a confirmation question. Run every install non-interactively, and treat a prompt or an elevation failure as missing access rather than retrying or asking for a password. Prefer a user-scope install to a machine-wide one. Preview first, report what the preview shows, and ask first when it would upgrade or remove other packages, because the old versions cannot be restored.
+
+- Windows. Use `winget install --id <id> --exact --source winget --scope user --disable-interactivity --accept-source-agreements --accept-package-agreements --no-upgrade`, or scoop. Without `--id` and `--exact`, winget treats the name as a search and can pick a different package. Do not use choco or a machine-scope install, which need an admin shell.
+- macOS. Preview with `brew install --dry-run <formula>`. Install with `HOMEBREW_NO_ASK=1 HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_UPGRADE=1 HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 HOMEBREW_NO_INSTALL_CLEANUP=1 brew install <formula>`. Homebrew asks for confirmation by default, upgrades installed formulae and their dependents, and runs `brew cleanup` afterward, which uninstalls old versions.
+- Debian and Ubuntu. Run `sudo -n apt-get update`, preview with `apt-get install -s <package>`, then install with `sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install -y <package>`.
+- Fedora and RHEL family. Preview with `sudo -n dnf install --assumeno <package>`, which exits 1 by design; dnf 4 needs root even to preview. Install with `sudo -n dnf install -y <package>`.
+- Other systems. Use the native package manager's equivalent non-interactive preview and install, with root only through `sudo -n`.
+
+Prefer calling a new tool by its absolute path over changing PATH or a shell profile. A PATH or profile change does not reach the current session, so call the tool by its absolute path for the rest of the task either way. When a persistent change is needed, save the old value first.
+
+- Windows. Back up with `reg export HKCU\Environment <file>`. In a PowerShell `.ps1` script, read the raw value with `(Get-Item HKCU:\Environment).GetValue('Path', '', 'DoNotExpandEnvironmentNames')` and write it back with `Set-ItemProperty HKCU:\Environment Path $value -Type ExpandString`, which keeps `%VAR%` entries. Never use `setx`, which truncates PATH to 1024 characters. New terminals see the change after the next sign-in.
+- macOS and Linux. Edit the login profile for the user's shell: `~/.zprofile` for zsh, which is the macOS default, and `~/.bash_profile` or `~/.profile` for bash.
+
+Git commands that may need credentials run with `GIT_TERMINAL_PROMPT=0 GIT_ASKPASS= SSH_ASKPASS= GCM_INTERACTIVE=false GIT_SSH_COMMAND="ssh -o BatchMode=yes"`, so a missing credential fails instead of opening a sign-in window or askpass dialog. Treat that failure as missing access.
+
 ## JavaScript and TypeScript
 
 Never use npm or yarn. Use pnpm when the project has pnpm-lock.yaml, pnpm-workspace.yaml or a pnpm packageManager entry; otherwise use Bun. Prefer precise types, generics, or unknown with narrowing to any. Keep an unavoidable any narrow with a one-line reason.
@@ -14,9 +31,9 @@ uv is the Python executor. Use uv run, uvx, uv add/remove or uv pip as appropria
 
 ## Go
 
-Use explicit error returns, context propagation and structured resource lifetimes. Never discard a real error or silence it with a broad suppression. gofumpt, golangci-lint and govulncheck are pre-authorized to install via go install if missing: `go install mvdan.cc/gofumpt@latest`, `go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest`, `go install golang.org/x/vuln/cmd/govulncheck@latest`.
+Use explicit error returns, context propagation and structured resource lifetimes. Never discard a real error or silence it with a broad suppression. Install gofumpt, golangci-lint and govulncheck if missing with `go install mvdan.cc/gofumpt@latest`, `go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest`, and `go install golang.org/x/vuln/cmd/govulncheck@latest`. They land in `$(go env GOBIN)`, or `$(go env GOPATH)/bin` when GOBIN is empty. When that directory is not on PATH, call the tool by its full path there.
 
-Before committing, run in order: `go build ./...`; `gofumpt -l -w .` followed by `gofumpt -l .` expecting no output; `go mod tidy` followed by `git diff --exit-code go.mod go.sum`; `go vet ./...`; `golangci-lint run`; `go test -race -cover ./...`; `govulncheck ./...`. Report each result and fix real failures without weakening checks.
+Before committing, run in order: `go build ./...`; `gofumpt -l -w .` followed by `gofumpt -l .` expecting no output; `go mod tidy` followed by `git diff --exit-code go.mod go.sum`; `go vet ./...`; `golangci-lint run`; `go test -race -cover ./...`; `govulncheck ./...`. `-race` needs cgo, a C compiler, and race-detector support for the GOOS/GOARCH pair. When any is missing, which is common on Windows, run `go test -cover ./...`, report `-race` as not run, and run it in WSL or CI when either is available. Report each result and fix real failures without weakening checks.
 
 ## Rust
 

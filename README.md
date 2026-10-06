@@ -61,6 +61,7 @@ git checkout -f main
 
 The `authenticated-browser` skill reads pages behind your sign-ins through a Chrome that only agents use.
 It needs Google Chrome 149 or later.
+It supports Windows, macOS, and Linux with Google's Chrome package, and other Unix-like systems are unsupported.
 The skill runs Chrome from its own profile folder, which keeps your sign-ins:
 
 - Windows: `%LOCALAPPDATA%\agent-chrome`

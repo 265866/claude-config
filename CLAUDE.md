@@ -8,7 +8,7 @@ Resolve the profile root from CLAUDE_CONFIG_DIR, otherwise the directory contain
 
 Read applicable project CLAUDE.md and AGENTS.md before editing. Keep implementation and task evidence in the target project or run directory. One-off execution scripts are runtime artifacts. Create scratch files and temporary directories inside the temporary directory the operating system reports (for example `mktemp -d` or `os.tmpdir()`), never at a drive or filesystem root, in the home directory, or loose in the working directory. Updating installed instructions or saving reusable personal workflows belongs to requested profile maintenance.
 
-Use the existing stack and dependencies. Use pnpm for an established pnpm project and Bun otherwise; never npm or yarn. Use uv for Python. Follow rules/toolchains.md for the configured checks and approved toolchain exceptions.
+Use the existing stack and dependencies. Use pnpm for an established pnpm project and Bun otherwise; never npm or yarn. Use uv for Python. Follow rules/toolchains.md for the configured checks and per-OS install rules.
 
 A question is an investigation unless it requests a change. A plan request stops at the plan. Establish the requested outcome, scope, and acceptance condition before choosing execution. The acceptance condition is the user's actual goal, such as working on every platform the deliverable ships for, not a proxy that a store rule, reviewer, or green check measures. Skill guidance does not expand action authorization.
 
