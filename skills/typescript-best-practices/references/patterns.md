@@ -147,12 +147,12 @@ function parseUser(input: unknown): User {
 
 Use `safeParse` when failure is an expected branch. Use the equivalent inference helper when the repository uses another schema library. Do not add a new schema dependency for one guard. This rule prefers the schema system the codebase already trusts.
 
-When the type comes first, annotate the schema with the type it proves. The compiler then rejects a schema that proves less than the type. Remove `name` from the object below and the assignment fails to compile.
+When the type comes first, check the schema against the type it proves with `satisfies`. The compiler then rejects a schema that proves less than the type. Remove `name` from the object below and it fails to compile. Prefer `satisfies` to a `z.ZodType<User>` annotation, which erases the object schema's methods, such as `.extend`.
 
 ```ts
 type User = { id: string; name: string };
 
-const UserSchema: z.ZodType<User> = z.object({ id: z.string(), name: z.string() });
+const UserSchema = z.object({ id: z.string(), name: z.string() }) satisfies z.ZodType<User>;
 ```
 
 ## No `as` casts

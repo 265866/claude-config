@@ -51,8 +51,8 @@ A caller can import a module's internals. An agent takes the shortest path that 
 Make internals unreachable from outside the module, so an import from outside fails the build. Use the language's own boundary where it has one:
 
 - Go: put internals under an `internal/` directory.
-- Rust: keep them private, or `pub(crate)`.
-- TypeScript: list the public entry points in the package's `exports` field. Inside one package, add a lint rule such as `no-restricted-imports`.
+- Rust: keep them private to the module. Use `pub(crate)` only when the boundary is the whole crate.
+- TypeScript: list the public entry points in the package's `exports` field. TypeScript enforces it only for imports by package name, with `moduleResolution` set to `node16`, `nodenext`, or `bundler`. Inside one package, add a lint rule such as `no-restricted-imports` that runs in CI.
 - Python: the language cannot enforce this. Prefix internals with `_` and add an import-linter contract that runs in CI.
 
 ## Hand-synced list

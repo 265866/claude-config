@@ -98,7 +98,7 @@ These are the profile's clarity rules. Related reading: Kohl, The Global English
 ## Voice and repo specifics
 
 - Apply the **edit-prose** skill to every doc this skill touches. That skill owns the slop-pattern catalog: AI vocabulary, filler, hedging, formatting tells.
-- PR descriptions and commit messages are writing too. Every layer except Diátaxis applies to them, with two exceptions. A commit subject follows the commit-agent's subject format (imperative and terse, articles optional). A PR title and body follow the [Opening a PR](../../playbooks/opening-a-pr.md) playbook. Commit bodies follow every layer. Do not paste swarm logs, SHA lists, or metric tables into either. Link them.
+- PR descriptions and commit messages are writing too. Every layer except Diátaxis applies to them, with two exceptions. A commit subject follows the commit-agent's subject format (imperative and terse, articles optional). A PR title and body take their structure from the [Opening a PR](../../playbooks/opening-a-pr.md) playbook, and the sentence-level layers still apply. Commit bodies follow every layer. Do not paste swarm logs, SHA lists, or metric tables into either. Link them.
 - Product UI strings are not documentation. Use your product's copy guidelines for those.
 - Indent code snippets the way the language and repository require (YAML, for example, forbids tabs). Write real paths and real symbols. Make every count or tree claim true at the commit that lands it, and include the command that regenerates it.
 

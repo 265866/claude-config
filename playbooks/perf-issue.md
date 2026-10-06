@@ -2,9 +2,9 @@
 
 **You own the measurement story. Plan, review, verify the numbers.** Tie every fix to a measurement. Don't read source instead of measuring.
 
-1. Capture a baseline trace via the matching control skill. Vet the baseline, and each later number, with the **benchmark-checklist** skill.
+1. Capture a baseline trace via the matching control skill. Vet the baseline, and each later number, with the **benchmark-checklist** skill. Record the target: the user's number, or the point where the complaint no longer reproduces on the baseline workload.
 2. `how` to ground hypotheses. Don't claim a perf ceiling without running it first.
-   Try the performance mantras in order, cheapest first. A mantra earns an attempt only when the trace or the `how` pass shows its signal. When an earlier mantra meets the target, stop.
+   Try the performance mantras in order, from most to least effective. A mantra earns an attempt only when the trace or the `how` pass shows its signal. When an earlier mantra meets the target, stop.
    1. **Don't do it.** Stop work whose result nothing uses, rather than making it cheaper. The trace shows what's slow, never that it's deletable, so this one needs the `how` pass.
    2. **Do it, but don't do it again.** Cache repeated work on identical inputs, and name what invalidates the cache.
    3. **Do it less.** Batch small operations that each pay a fixed overhead, or prune the input.

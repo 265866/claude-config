@@ -119,24 +119,26 @@ Go through the new upstream commits one at a time, oldest first, together with t
 For each change in a commit, decide together whether it fits this profile.
 
 1. From the profile root, clone `cursor/plugins` into a temporary directory.
-   `BASE` is read from the full hash under [Base commit](#base-commit):
+   `BASE` is read from the full hash under [Base commit](#base-commit).
+   Shell variables do not persist between tool calls, so note the clone path
+   and set `UP` and `BASE` again at the top of each later command:
 
    ```bash
    BASE=$(grep -m1 -E '^[0-9a-f]{40}$' UPSTREAM.md)
    UP=$(mktemp -d)
-   git clone --filter=blob:none https://github.com/cursor/plugins.git "$UP"
+   git clone --filter=blob:none https://github.com/cursor/plugins.git "${UP:?}"
    ```
 
 2. List the upstream commits since the base, oldest first:
 
    ```bash
-   git -C "$UP" log --reverse --oneline "$BASE"..origin/main -- pstack cursor-team-kit
+   git -C "${UP:?}" log --reverse --oneline "${BASE:?}"..origin/main -- pstack cursor-team-kit
    ```
 
 3. Take the oldest commit that is left, and read its diff:
 
    ```bash
-   git -C "$UP" show <commit> -- pstack cursor-team-kit
+   git -C "${UP:?}" show <commit> -- pstack cursor-team-kit
    ```
 
 4. Present each change in the commit to the user, one at a time. For each change, give:
@@ -156,8 +158,8 @@ For each change in a commit, decide together whether it fits this profile.
    Read each plugin's version at this commit:
 
    ```bash
-   git -C "$UP" show <commit>:pstack/.cursor-plugin/plugin.json
-   git -C "$UP" show <commit>:cursor-team-kit/.cursor-plugin/plugin.json
+   git -C "${UP:?}" show <commit>:pstack/.cursor-plugin/plugin.json
+   git -C "${UP:?}" show <commit>:cursor-team-kit/.cursor-plugin/plugin.json
    ```
 
 7. Make one local commit for this upstream commit.
