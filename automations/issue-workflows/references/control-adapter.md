@@ -154,7 +154,7 @@ Hardware prompts, operating-system permission dialogs, device-only APIs, and una
 
 ## Runtime capability preflight
 
-Before accepting a repro attempt, perform this bounded capability check in the configured disposable test environment. Fixture setup that configures existing test accounts and fixtures through the adapter's own documented actions is allowed when the adapter can fully undo it. Undo it in the cleanup step and report it. Creating new accounts and changing account integrations stay forbidden. Obtain approval first for any other external fixture or account mutation. This is a runtime preflight, not an installation or activation workflow:
+Before accepting a repro attempt, perform this bounded capability check in the configured disposable test environment. Fixture setup that configures existing test accounts and fixtures through the adapter's own documented actions is allowed when the adapter can fully undo it. Undo it in the cleanup step and report it. Obtain approval first for any other external fixture or account mutation, including creating accounts and changing account integrations. This is a runtime preflight, not an installation or activation workflow:
 
 1. Bring up the app.
 2. Confirm the stable app marker.
@@ -166,4 +166,4 @@ Before accepting a repro attempt, perform this bounded capability check in the c
 8. Record a short clip.
 9. Clean up.
 
-Proceed to repro work only when all nine steps succeed and no source-channel Slack post is involved. If the target feature or a required capability cannot be checked, return `Blocked`. Never install a service, activate a schedule, or modify account integrations as a substitute.
+Proceed to repro work only when all nine steps succeed and no source-channel Slack post is involved. If the target feature or a required capability cannot be checked, return `Blocked` rather than installing a service, activating a schedule, or modifying account integrations to get past the check without explicit approval for that change.

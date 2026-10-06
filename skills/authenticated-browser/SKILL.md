@@ -27,7 +27,7 @@ Only the script and its workers touch the agent Chrome. Never launch it, close i
 
 A task that needs a signed-in page covers browsing the sites it calls for. It also covers completing a sign-in, account chooser, "Continue as", or OAuth consent screen the task needs. Report each sign-in and grant with the site, the account, and what it granted.
 
-Changing an account setting, buying, bidding, messaging, and posting are ask-first actions (CLAUDE.md, Authorization and ownership). Before asking, show the site, the account, the control the worker will click, what it does, and why. An approval covers that exact action and nothing more. A timeout is never approval.
+Buying, bidding, messaging, and posting are ask-first actions in CLAUDE.md (Authorization and ownership). This skill also treats changing any account setting as ask-first, except a reversible change, other than to access or visibility, on a resource the task itself created, because the worker acts inside the user's real account. Before asking, show the site, the account, the control the worker will click, what it does, and why. An approval covers that exact action and nothing more. A timeout is never approval.
 
 The worker completes a sign-in only by choosing an account that the agent Chrome already has signed in. It never types a password, secret, API key, or 2FA code, and it never works around a CAPTCHA or account checkpoint. A flow that needs any of those goes to the user.
 
@@ -90,7 +90,7 @@ The blockers in the worker's report:
 
 - `page_error` or `other`: retry once with a revised brief before passing it on.
 
-Pass each remaining blocker and its `human_action` to the user. For a `needs_approval` blocker, apply the Authorization section. When it allows the action, run a worker whose brief names it and report the action. For an ask-first action, ask the user first and run that worker after approval. Apart from that one retry, do not send another worker to a blocked site until the user approves the action or says the blocker is cleared.
+Pass each remaining blocker and its `human_action` to the user. For a `needs_approval` blocker, apply the Authorization section. When it allows the action, run a worker whose brief names it and report the action. For an ask-first action, ask the user first and run that worker after approval. Apart from that one retry and the worker for a `needs_approval` action the Authorization section allows, do not send another worker to a blocked site until the user approves the action or says the blocker is cleared.
 
 For a `not_signed_in` blocker, tell the user which site and account need a sign-in. When the user is ready, run `agent-chrome.ts signin`. It opens the agent Chrome as a normal, visible window without the debugging port, which sign-in pages such as Google's may detect. Ask the user to sign in, keep "stay signed in" checked, and close the window when done. `signin` refuses while a worker runs, and it brings a window to the front, so run it only when the user is ready. `agent-chrome.ts status` reports whether the agent Chrome is open, whether it has its debugging port, whether a worker runs, and its open tabs. When it shows the debugging port open with no worker running, run `agent-chrome.ts close`.
 

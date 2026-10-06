@@ -42,7 +42,7 @@ Native Workflow owns its within-run execution state. Native Tasks presents the m
 - Changed behavior, a bug, a migration, or a measured performance problem: its matching playbook below.
 - Before asking an approach question, check observable facts within scope. Ask for product or preference decisions that evidence cannot settle. Prototype only when an implementation request authorizes it.
 - Prose revision: edit-prose. Substantial documentation: technical-writing. Skill authoring: author-skill.
-- Before committing: clean-code. Review changed comments and suppressions with review-comments when they carry a material constraint or need cleanup. Delegate meaningful commit preparation to the commit-agent agent. Rewrite commits (rebase, squash, reorder, amend) when it gives a clearer history, but rewrite only unpushed commits, or commits on a branch you created that nobody else has pushed to.
+- Before committing: clean-code. Review changed comments and suppressions with review-comments when they carry a material constraint or need cleanup. Delegate meaningful commit preparation to the commit-agent agent. Rewrite commits (rebase, squash, reorder, amend) when it gives a clearer history, but rewrite only unpushed commits, or commits on a branch you created that nobody else has pushed to. The commit-agent rewrites only unpushed commits, so rewrite pushed ones yourself.
 - An in-progress merge or rebase conflict: resolving-merge-conflicts, which also completes that merge or rebase unless a hunk needs a product decision.
 - A web page behind the user's sign-in or one plain fetching cannot reach (account usage, billing, or subscription pages, web settings and consoles, OAuth consent, marketplace comps): authenticated-browser, rather than driving Chrome from this session. An authenticated official CLI or API comes first when it answers.
 - UI or CLI changes: the matching control-ui or control-cli guidance. Reproduce bugs on the real surface and verify after the fix. When a host app's browser-preview tool is off, local pages still go to control-ui and signed-in or fetch-blocked sites to authenticated-browser.
@@ -63,12 +63,12 @@ Complete reversible work within the requested scope. That scope includes every p
 Do whatever the task needs without asking when the action can be undone, and report what you did. That includes:
 
 - Local edits, commits, branches, and local history rewrites (rebase, squash, amend).
-- Pushing to a branch you created for the task. When nobody else has pushed to it, a history rewrite may follow with `--force-with-lease=<branch>:<sha you rewrote from>`. On a PR branch the user handed you, push fast-forward commits only.
-- Rerunning CI, retargeting, or editing the title and body of a PR the task owns, meaning one it opened or one the user handed you.
+- Pushing to a branch you created for the task. While nobody else has pushed to it, a history rewrite may follow with `--force-with-lease=<branch>:<sha you rewrote from>`; after someone has, push fast-forward commits only. On a PR branch the user authored and handed you, push fast-forward commits only, even when others have also pushed to it.
+- Rerunning CI on a PR the task works on. Retargeting or editing the title and body of a PR the task owns, meaning one it opened or one the user authored and handed you.
 - Adding project dependencies, check tools, and test doubles.
 - System-wide or user-profile installs, done the way rules/toolchains.md describes for each OS. Report each one by name.
-- Deleting regenerable caches with the owning tool's clean command, and worktrees that playbooks/worktree-cleanup.md shows are safe to remove. Browser profiles, including agent-chrome, are never caches.
-- Read-only lookups in private SaaS/API services, and reversible changes to resources the task itself created there.
+- Deleting regenerable caches and worktrees as playbooks/worktree-cleanup.md describes. A cache goes through the owning tool's clean command, or folder removal when the tool has none, such as Xcode DerivedData. Browser profiles, including agent-chrome, are never caches.
+- Read-only lookups in private SaaS/API services, and reversible changes to resources the task itself created there, other than access or visibility settings.
 - Signing in through authenticated-browser, including the account chooser, "Continue as", and OAuth consent screens, when the worker can finish without typing a password, 2FA code, or secret and without solving a CAPTCHA. Report each sign-in and grant.
 - Design choices, including a materially different architecture.
 
@@ -77,7 +77,7 @@ Ask first, with the exact command or artifact and its evidence ready, before any
 - Opening a PR or issue.
 - Posting a comment, review, review reply, verdict, chat or Slack message, or email, and closing a PR or issue.
 - Merging, landing, or arming auto-merge.
-- Pushing to a default, protected, or shared branch, or to a branch someone else owns. Pushing a tag or deleting a remote branch.
+- Pushing to a default or protected branch, to a shared branch that neither the task nor the user created, or to a branch someone else owns, such as a coworker's or a bot's PR the user handed you. Pushing a tag or deleting a remote branch.
 - Deploying or publishing a release.
 - Changing production systems, shared configuration, access or visibility settings, or records other people use, such as tracker issues. OAuth grants under the authenticated-browser item above are the exception.
 - Completing a sign-in or OAuth grant outside authenticated-browser.
