@@ -176,3 +176,27 @@ For each change in a commit, decide together whether it fits this profile.
 9. At the end of the sync, check that [Base commit](#base-commit) names the last upstream commit you reviewed,
    and that both versions match that commit's `plugin.json` files.
    If anything is off, fix it in its own commit.
+
+10. Check the sync for contradictions, and repeat until a round comes back clean.
+    - Start fresh, read-only reviewers on the sync's whole diff,
+      from the commit before the first sync commit to `HEAD`.
+      Split them by area:
+      - CLAUDE.md, `rules/`, `references/`, `agents/`, and README.md
+      - `playbooks/`
+      - `skills/`
+
+      Each reviewer reads its area in full.
+      It looks for new text that contradicts existing text, the same rule stated two ways,
+      a weakened safeguard (authorization, ask-first actions, verification, or toolchain rules),
+      dangling references, and terms that clash.
+      It also checks new text against other new text.
+    - Add one more reviewer that checks the diff itself:
+      factual claims, commands, links, and the profile's writing rules.
+    - The user's port and skip decisions are settled.
+      Reviewers check that what landed is consistent, not whether it should have landed.
+    - Fix every finding that holds up, in one commit per round.
+      A fix that would change what the user decided goes to the user first.
+    - Start a new round of fresh reviewers on the updated diff.
+      Give them the earlier findings and fixes,
+      so they confirm the fixes hold and don't reopen settled points.
+    - Stop when a round finds nothing to fix.
