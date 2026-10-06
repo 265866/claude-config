@@ -307,5 +307,6 @@ describe("native worktree audit", () => {
     expect((await auditWorktrees(repo, { base: "main", profile, includeSize: true })).find((row) => row.branch === ""))
       .toMatchObject({ bucket: "hold-lock", locked: true });
     expect(git(feature, ["status", "--porcelain"])).toContain("tracked.txt");
-  });
+    // Each git call spawns a process; on Windows the whole test can exceed Bun's 5-second default.
+  }, 30_000);
 });
