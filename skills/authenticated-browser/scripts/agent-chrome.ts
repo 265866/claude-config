@@ -4,7 +4,7 @@
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { homedir, platform, tmpdir } from "node:os";
-import { join } from "node:path";
+import { isAbsolute, join } from "node:path";
 
 const CHROME_DEVTOOLS_MCP = "chrome-devtools-mcp@1.10.1";
 const SERVER = "chrome-devtools";
@@ -23,10 +23,16 @@ const SCRIPT = import.meta.path;
 const os = platform();
 const profileDir = process.env.AGENT_CHROME_PROFILE ?? defaultProfileDir();
 
+// An empty or relative base directory would put the profile under the current directory; the XDG spec says to ignore it.
+function absoluteEnv(name: string): string | undefined {
+  const value = process.env[name];
+  return value && isAbsolute(value) ? value : undefined;
+}
+
 function defaultProfileDir(): string {
-  if (os === "win32") return join(process.env.LOCALAPPDATA ?? join(homedir(), "AppData", "Local"), "agent-chrome");
+  if (os === "win32") return join(absoluteEnv("LOCALAPPDATA") ?? join(homedir(), "AppData", "Local"), "agent-chrome");
   if (os === "darwin") return join(homedir(), "Library", "Application Support", "agent-chrome");
-  return join(process.env.XDG_DATA_HOME ?? join(homedir(), ".local", "share"), "agent-chrome");
+  return join(absoluteEnv("XDG_DATA_HOME") ?? join(homedir(), ".local", "share"), "agent-chrome");
 }
 
 function chromePath(): string {
