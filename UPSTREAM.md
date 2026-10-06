@@ -17,13 +17,13 @@ Both plugins come from the same commit of `cursor/plugins`:
 
 | Plugin | Version | Commit |
 | --- | --- | --- |
-| pstack | 0.15.5 | [`12d587d`](https://github.com/cursor/plugins/tree/12d587dfb20741cafc376c42c696c5f6e2a64487/pstack) |
-| cursor-team-kit | 1.2.0 | [`12d587d`](https://github.com/cursor/plugins/tree/12d587dfb20741cafc376c42c696c5f6e2a64487/cursor-team-kit) |
+| pstack | 0.15.6 | [`23e4138`](https://github.com/cursor/plugins/tree/23e4138daa01c42d4969f7a5465f82704e64f798/pstack) |
+| cursor-team-kit | 1.2.0 | [`23e4138`](https://github.com/cursor/plugins/tree/23e4138daa01c42d4969f7a5465f82704e64f798/cursor-team-kit) |
 
 Full hash:
 
 ```text
-12d587dfb20741cafc376c42c696c5f6e2a64487
+23e4138daa01c42d4969f7a5465f82704e64f798
 ```
 
 ## Where each file came from
@@ -72,9 +72,10 @@ Anything not listed here is original to this profile.
 
 These come from the skill of the same name under pstack's `skills/`:
 
-`architect`, `arena`, `blast-radius`, `create-verification-skill`,
-`figure-it-out`, `how`, `interrogate`, `maintain-verification-skill`,
-`recall`, `reflect`, `show-me-your-work`, `swarm`, `tdd`, `teach`,
+`architect`, `arena`, `benchmark-checklist`, `blast-radius`,
+`create-verification-skill`, `figure-it-out`, `how`, `interrogate`,
+`maintain-verification-skill`, `recall`, `reflect`, `show-me-your-work`,
+`swarm`, `tdd`, `teach`,
 `technical-writing`, `typescript-best-practices`, `why`,
 and every `principle-*` skill.
 

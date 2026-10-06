@@ -40,6 +40,7 @@ Native Workflow owns its within-run execution state. Native Tasks presents the m
 - An unresolved consequential structural choice: architect. Compare concrete alternatives when they can change the decision. Settled mechanical work follows the existing pattern.
 - Partitioned investigation or coverage: swarm. Competing artifacts with base selection and grafting: arena. Complementary independent review: interrogate.
 - Changed behavior, a bug, a migration, or a measured performance problem: its matching playbook below.
+- Running a benchmark, measuring performance yourself, or reporting a speedup or regression you measured: benchmark-checklist, before you report or act on the number.
 - Before asking an approach question, check observable facts within scope. Ask for product or preference decisions that evidence cannot settle. Prototype only when an implementation request authorizes it.
 - Prose revision: edit-prose. Substantial documentation: technical-writing. Skill authoring: author-skill.
 - Before committing: clean-code. Review changed comments and suppressions with review-comments when they carry a material constraint or need cleanup. Delegate meaningful commit preparation to the commit-agent agent. Rewrite commits (rebase, squash, reorder, amend) when it gives a clearer history, but rewrite only unpushed commits, or commits on a branch you created that nobody else has pushed to. The commit-agent rewrites only unpushed commits, so rewrite pushed ones yourself.
