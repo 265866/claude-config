@@ -75,5 +75,5 @@ Compiled languages without a runtime profiler, such as Rust, use the native samp
 
 ## How this fits the other perf material
 
-- The [Perf issue](../../playbooks/perf-issue.md) playbook finds and fixes slowness, and its strategy families generate the fixes. This skill vets its baseline before the playbook plans from it, and every number after that.
+- The [Perf issue](../../playbooks/perf-issue.md) playbook finds and fixes slowness, and the performance mantras in its step 2 generate the fixes. This skill vets its baseline before the playbook plans from it, and every number after that.
 - The [Hillclimb](../../playbooks/hillclimb.md) playbook loops on one metric. This skill vets its harness before the harness is frozen. The frozen harness then prints error and work counts, so each keep-or-revert checks questions 4 and 7 for free.
