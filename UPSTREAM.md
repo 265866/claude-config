@@ -110,29 +110,66 @@ They are worth reading if you want to understand where this setup comes from.
   - [ASD-STE100 Simplified Technical English](https://www.asd-ste100.org/)
   - John R. Kohl, *The Global English Style Guide* (SAS Press)
 
-## Check for upstream changes
+## Sync with upstream
 
-1. Clone `cursor/plugins` into a temporary directory:
+This profile has drifted far from pstack, so a sync is a review, not a merge.
+Nothing is ported by default.
+Go through the new upstream commits one at a time, oldest first, together with the user.
+For each change in a commit, decide together whether it fits this profile.
+
+1. From the profile root, clone `cursor/plugins` into a temporary directory.
+   `BASE` is read from the full hash under [Base commit](#base-commit):
 
    ```bash
-   BASE=12d587dfb20741cafc376c42c696c5f6e2a64487
+   BASE=$(grep -m1 -E '^[0-9a-f]{40}$' UPSTREAM.md)
    UP=$(mktemp -d)
    git clone --filter=blob:none https://github.com/cursor/plugins.git "$UP"
    ```
 
-2. List the upstream commits since the base commit:
+2. List the upstream commits since the base, oldest first:
 
    ```bash
-   git -C "$UP" log --oneline "$BASE"..origin/main -- pstack cursor-team-kit
+   git -C "$UP" log --reverse --oneline "$BASE"..origin/main -- pstack cursor-team-kit
    ```
 
-3. Read the diff for one upstream path, such as the `swarm` skill:
+3. Take the oldest commit that is left, and read its diff:
 
    ```bash
-   git -C "$UP" diff "$BASE" origin/main -- pstack/skills/swarm
+   git -C "$UP" show <commit> -- pstack cursor-team-kit
    ```
 
-4. Find the matching local file in [Where each file came from](#where-each-file-came-from).
-   Compare the change with the local file, and port the parts that still fit.
+4. Present each change in the commit to the user, one at a time. For each change, give:
+   - what upstream added or changed, and why, from the commit message
+   - the matching local file from [Where each file came from](#where-each-file-came-from), or that there is none
+   - how the change compares with the local version
+   - a recommendation to port, adapt, or skip, with the reason
 
-5. After you finish the sync, update [Base commit](#base-commit) with the commit you synced to.
+   The user decides each change.
+   Do not edit any file until every change in the commit has a decision.
+
+5. Make the accepted edits.
+   When a new upstream file is ported, add it to [Where each file came from](#where-each-file-came-from).
+
+6. Move [Base commit](#base-commit) to this commit.
+   Update the commit in both table rows and the full hash.
+   Read each plugin's version at this commit:
+
+   ```bash
+   git -C "$UP" show <commit>:pstack/.cursor-plugin/plugin.json
+   git -C "$UP" show <commit>:cursor-team-kit/.cursor-plugin/plugin.json
+   ```
+
+7. Make one local commit for this upstream commit.
+   - If anything was accepted, the commit holds the ported changes and the base update.
+     Use a subject like `Sync pstack 0.15.6 (23e4138): add the benchmark checklist`.
+   - If nothing was accepted, the commit holds only the base update.
+     Use a subject like `Sync pstack 0.15.7 (9511e60): nothing ported`.
+
+   In the body, list each skipped change and the reason, so a later sync does not reopen it.
+
+8. Go back to step 3 with the next commit.
+   Stop when none are left or when the user says to stop.
+
+9. At the end of the sync, check that [Base commit](#base-commit) names the last upstream commit you reviewed,
+   and that both versions match that commit's `plugin.json` files.
+   If anything is off, fix it in its own commit.
