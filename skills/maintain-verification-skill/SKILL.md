@@ -50,6 +50,6 @@ In maintenance mode, only edit the verification skill's own directory (its SKILL
 
 5. **Triage.** Wrong or missing user-POV description → doc drift. Working behavior the harness can't drive → harness gap. App behavior that's actually broken → product gap. Audit mode reports these findings with evidence and proposed corrections. Maintenance mode fixes proven doc and harness gaps within edit scope; a harness fix follows the same helpers rule as generation (scripts executable, invocation documented in the skill body). Report product gaps in both modes and keep them out of the verification-skill patch.
 
-6. **Ship or stop.** For changed: prepare one local patch of proven corrections and re-read every changed file. Open or update a PR only with explicit action approval. For clean, issues, or blocked: no PR, report the outcome and the coverage honestly. An audit stops at its findings; proposed corrections do not authorize applying them.
+6. **Ship or stop.** For changed: prepare one local patch of proven corrections and re-read every changed file. Opening a PR is an ask-first action (CLAUDE.md, Authorization and ownership). Update a PR the task already owns, and report it. For clean, issues, or blocked: no PR, report the outcome and the coverage honestly. An audit stops at its findings; proposed corrections do not authorize applying them.
 
 Keep concise run notes (features covered, unreachable prerequisites, confirmed drift, outcome) in a scratch location; don't commit them.

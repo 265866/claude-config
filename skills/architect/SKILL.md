@@ -39,7 +39,7 @@ The comparison returns one synthesized design package. Record the choice in the 
 
 ## Phase C: Agree (opt-in)
 
-Proceed to implementation when the user already authorized that design scope. Present materially different architectural approaches (as CLAUDE.md defines them) and obtain a choice before implementation; choose among other alternatives yourself and record why. A design-only request remains read-only.
+Proceed to implementation when the user already authorized that design scope. Choose among the alternatives yourself, including a materially different architecture (as CLAUDE.md defines it), and record why. Report a materially different choice and its reason prominently. Overriding a design the user chose is a product decision for the user. A design-only request remains read-only.
 
 Opt in to a checkpoint when the invoker explicitly asks: "/architect with checkpoint," "stop and show me before implementing," or similar. Then surface the synthesized design and pause for sign-off.
 

@@ -14,11 +14,11 @@
 
    Follow the comment rules in CLAUDE.md (Verification and communication) for every file you produce, including delegated diffs. Keep edits narrow and re-ground upstream-derived files against source. Apply shared-primitive improvements to every consumer and verify each. Commit in small verified units.
 5. Verify on the matching surface. "Inconclusive" or wrong-surface is not a pass. Flag it.
-6. Deliver small, ordered commits. Stack follow-ups. Prepare new commits from working-tree changes with the **commit-agent** agent. Rewrite existing commits (rebase, squash, reorder) only when the user asked for history editing.
+6. Deliver small, ordered commits. Stack follow-ups. Prepare new commits from working-tree changes with the **commit-agent** agent. Rewrite existing commits (rebase, squash, reorder) when it gives a clearer history, but rewrite only unpushed commits, or commits on a branch you created that nobody else has pushed to.
    Use the **principle-sequence-verifiable-units** skill: verify prerequisites before dependent work, allow independent units to run in parallel, check each unit before acceptance, and verify the combined artifact before calling it integrated. Deliver passing commits in dependency order.
 7. If the design is contested, `interrogate` before shipping.
 8. Run **Opening a PR** only when creation is explicitly requested or approved. Otherwise deliver the verified local result.
 
-Keep coupled edits under one owner until dependencies are settled. Use native dependent phases or independent batches when their coordination warrants it; direct tools or small delegation are sufficient otherwise. The coordinator owns the execution plan, and workers do not restart routing. Update the plan when evidence changes a dependency, and obtain approval before material delegation-boundary changes. Tasks displays coarse milestones rather than duplicating the worker graph.
+Keep coupled edits under one owner until dependencies are settled. Use native dependent phases or independent batches when their coordination warrants it; direct tools or small delegation are sufficient otherwise. The coordinator owns the execution plan, and workers do not restart routing. Update the plan when evidence changes a dependency or a delegation boundary, and report the change. Tasks displays coarse milestones rather than duplicating the worker graph.
 
-**Reply:** what you built, what you chose and why, relevant dependencies and ownership, remaining limitations with their blockers, and only the decisions that need the user (approval gates or product choices). Tables for design alternatives.
+**Reply:** what you built, what you chose and why, relevant dependencies and ownership, remaining limitations with their blockers, and only the decisions that need the user (ask-first actions or product choices). Tables for design alternatives.

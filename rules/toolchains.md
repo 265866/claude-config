@@ -1,6 +1,6 @@
 # Toolchains and verification
 
-Use the project's configured commands and established stack first. Do not add a dependency or tool to a project, its manifests, or its lockfile without approval unless it is one of the explicit exceptions below. Throwaway tooling used only to build, test, or inspect the work (for example a portable toolchain, a browser driver, or a harness library) needs no approval when it is installed into a fresh temporary directory outside the project and removed when the task no longer needs it; on a remote machine, use that machine's temporary directory. A package manager's normal download cache, and ephemeral runners such as `uvx` or `bunx`, count as throwaway. Report what you installed and removed. System-wide or user-profile installs, such as OS package-manager installs, global package or tool installs, global binaries, or shell profile changes, are not throwaway and need approval unless listed as an exception below. Do not change versions or lockfiles unless dependencies, package metadata, toolchain requirements, or the requested release require it.
+Use the project's configured commands and established stack first. Add a dependency or tool to a project, its manifests, or its lockfile when the task needs it, and report it. Install throwaway tooling used only to build, test, or inspect the work (for example a portable toolchain, a browser driver, or a harness library) into a fresh temporary directory outside the project and remove it when the task no longer needs it; on a remote machine, use that machine's temporary directory. A package manager's normal download cache, and ephemeral runners such as `uvx` or `bunx`, count as throwaway. Report what you installed and removed. System-wide or user-profile installs, such as OS package-manager installs, global package or tool installs, global binaries, or shell profile changes, are allowed when the task needs them; report each one by name with what it changed. Do not change versions or lockfiles unless dependencies, package metadata, toolchain requirements, or the requested release require it.
 
 ## JavaScript and TypeScript
 
@@ -10,7 +10,7 @@ When dependency inputs changed, update the lockfile with the package manager sel
 
 ## Python
 
-uv is the Python executor. Use uv run, uvx, uv add/remove or uv pip as appropriate; do not invoke Python directly or create manual virtual environments. Run uv sync --locked or uv lock --check, the configured formatter check, lint, configured type checker and relevant pytest suite. Do not add an absent check tool to the project without approval or invent a passing result.
+uv is the Python executor. Use uv run, uvx, uv add/remove or uv pip as appropriate; do not invoke Python directly or create manual virtual environments. Run uv sync --locked or uv lock --check, the configured formatter check, lint, configured type checker and relevant pytest suite. Add an absent check tool like any other dependency when the task needs that check. Never invent a passing result.
 
 ## Go
 
@@ -20,13 +20,13 @@ Before committing, run in order: `go build ./...`; `gofumpt -l -w .` followed by
 
 ## Rust
 
-Encode invariants in types, borrow when ownership is unnecessary, avoid needless allocation/copying, and return contextual Result errors for recoverable failures. Do not panic on user-controlled input or I/O. rustfmt and clippy are pre-authorized to add with rustup component add if missing.
+Encode invariants in types, borrow when ownership is unnecessary, avoid needless allocation/copying, and return contextual Result errors for recoverable failures. Do not panic on user-controlled input or I/O. Add rustfmt and clippy with rustup component add if missing.
 
 Use the repository's feature matrix, otherwise --all-features. Run cargo fmt --all -- --check; cargo check --all-targets --all-features; cargo clippy --all-targets --all-features -- -D warnings; cargo test --all-targets --all-features; and, when the crate has a library target, cargo test --doc --all-features, because --all-targets does not run doctests. A heavy workspace may use a contained crate test when that scope is justified. Update Cargo.lock only for dependency or feature metadata changes.
 
 ## Behavior and review
 
-Meaningful code changes need happy-path, edge and regression/boundary assertions. Prefer a failing regression test before a bug fix. Existing behavior tests can cover a purely mechanical change; state what ran. Do not add mocks, fakes, simulators, clock substitutes or network stand-ins without approval, including throwaway ones outside the project; the throwaway exemption covers real tooling, not substitutes for a real dependency. Integration-test a real dependency when it runs cheaply.
+Meaningful code changes need happy-path, edge and regression/boundary assertions. Prefer a failing regression test before a bug fix. Existing behavior tests can cover a purely mechanical change; state what ran. Test against the real dependency. Add a mock, fake, simulator, clock substitute or network stand-in only when the real one cannot run in the test, and report it with that reason. Integration-test a real dependency when it runs cheaply.
 
 Run the narrow behavior check first, then configured build/lint/format gates, then fresh-context review. Review coverage-first, including uncertain and low-severity findings with confidence. Fix real findings and re-check the affected area. Read-only investigations do not authorize code edits. A one-line change, formatting correction or narrow rename can be verified directly without a separate review.
 

@@ -24,7 +24,7 @@ Apply the **principle-type-system-discipline** principle skill first.
 | Boundary validation | Parse where data crosses in, into a named domain type. `Record<string, unknown>` (however spelled) stops at that parse. Trust types inside. See the **principle-boundary-discipline** principle skill. |
 | Schema-derived types | Reach for `Pick`/`Omit`/`Parameters`/`ReturnType`/`Awaited`/`typeof` before declaring a new interface. |
 | Object args | Pass objects, not positional, so argument order is self-documenting. Skip on hot paths (per-frame render, tokenizers, parsers). |
-| Real tests | Don't mock what you can run. Prefer the framework's real test primitives with leak/disposable checks, and verify UI in a running build. If a real dependency cannot run cheaply, report the constraint and obtain approval before adding a substitute. |
+| Real tests | Don't mock what you can run. Prefer the framework's real test primitives with leak/disposable checks, and verify UI in a running build. Add a substitute only when the real dependency cannot run in the test, and report that reason. |
 | Structured telemetry | Prefer structured logger diagnostics with enough context to debug from an id. No `console.log` in shipped code. |
 
 Examples: [references/patterns.md](${CLAUDE_SKILL_DIR}/references/patterns.md).

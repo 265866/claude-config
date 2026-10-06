@@ -108,4 +108,4 @@ When multiple app windows/tabs share a debug port:
 - Do not hard-code selectors, ports, or script paths from another repository. Discover the current repo's local app markers.
 - Bound every wait by an observable ready condition and a timeout. Supervise every background server or probe with an output/completion check.
 - Clean up only dev servers, debug sessions, and temp profiles this run created. Keep evidence at its named path and confirm it survives teardown.
-- External navigation or interaction must stay within the authorized task. Private SaaS/API operations and external mutations need explicit action approval.
+- External navigation or interaction must stay within the task. Report reversible private SaaS/API operations. The ask-first actions in CLAUDE.md (Authorization and ownership) need approval first.

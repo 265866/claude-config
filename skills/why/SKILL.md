@@ -58,7 +58,7 @@ Capture this as seed context (file paths, symbols, commits, PR numbers, linked t
 
 Start with the code anchor and the nearest available rationale: a substantive commit, PR discussion, comment explaining an external constraint, or the source supplied by the user. A narrow question can be answered directly when that evidence establishes the answer. Do not search every category merely because a connector exists.
 
-Use the session tool inventory to discover sources needed by the question. Local git history is available in a git workspace; use authenticated read-only `gh` only with existing access. Do not connect a private service. Private SaaS or API actions require the user's explicit authorization for that action.
+Use the session tool inventory to discover sources needed by the question. Local git history is available in a git workspace; use authenticated read-only `gh` with existing access, and clone a private repo to read it when that helps. Connect an already-available read-only tool when the question needs it, and report it. Read-only lookups, including existing or cached analyses, are allowed and reported. A why investigation is read-only. Starting a remote analysis (Sentry Seer, Datadog) creates something the team sees and may use quota. Offer it instead of starting it, unless the user's request asks for it. The ask-first actions in CLAUDE.md (Authorization and ownership) still need approval first.
 
 Select sources according to the missing evidence:
 

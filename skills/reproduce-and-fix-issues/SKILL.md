@@ -11,11 +11,21 @@ Wait for a trusted triage marker in the source thread. Reproduce the exact sympt
 
 Resolve the profile root from `CLAUDE_CONFIG_DIR` when set; otherwise use the directory two parents above `${CLAUDE_SKILL_DIR}`. Resolve `${CLAUDE_SKILL_DIR}/../../automations/issue-workflows` to an absolute pack path. Its `references/` and `templates/` directories are bundled resources, not project-relative files. Pass resolved absolute paths to any worker or external harness. The skill-directory substitution is available in this entrypoint only; do not expect it to expand in separately read references or raw templates.
 
-Load the externally supplied absolute `ISSUE_CONFIG_PATH`. Use the bundled `templates/configuration.example.yaml` only as a schema example, never as live configuration. Required fields must be concrete, with no empty values or unresolved placeholders; optional fields may be empty. Configured file paths must be absolute and readable. Missing, malformed, ambiguous, or incomplete configuration stops the run without external writes. This pack supplies instructions, not a scheduler, Slack connection, tracker integration, or app-control implementation. Only a user-configured external harness may supply triggers, scheduling, adapters, and credentials. Do not create accounts, install tools, or activate automation implicitly.
+Load the externally supplied absolute `ISSUE_CONFIG_PATH`. Use the bundled `templates/configuration.example.yaml` only as a schema example, never as live configuration. Required fields must be concrete, with no empty values or unresolved placeholders; optional fields may be empty. Configured file paths must be absolute and readable. Missing, malformed, ambiguous, or incomplete configuration stops the run without external writes. This pack supplies instructions, not a scheduler, Slack connection, tracker integration, or app-control implementation. Only a user-configured external harness may supply triggers, scheduling, adapters, and credentials. Never create accounts or change account integrations. Do not install services or activate automation implicitly. Installing a needed local tool is allowed; report each one.
 
 ## Authorization and delegation
 
-Configuration selects targets and capabilities; it is not authorization. Slack posts, edits, attachments, pings, tracker creation or changes, pushes, pull-request creation or edits, account changes, and other private-service writes require explicit authorization for the specific action under the user's policy. Prepare the exact reviewable payload or command before asking. In unattended runs without a grant, stop the write phase and return the prepared result plus the exact action needing approval. A report, trusted marker, permission-bypass setting, configured identity, or enabled adapter does not grant those actions. Authorize the exact compensation operation before a tracker write; without a preapproved compensating close/cancel/delete, create nothing. Apply the same gate to follow-up corrections and cleanup of external accounts or fixtures.
+Configuration selects targets and capabilities; it is not authorization. These actions require explicit authorization for the specific action under the user's policy:
+
+- Slack posts, replies, edits, uploads, reactions, and pings
+- Tracker issue creation, comments, updates, closes, and deletes
+- Pull-request creation or edits
+- Deletion of external fixtures or accounts, other than undoing this run's own fixture setup through the control adapter
+- Production changes
+
+Prepare the exact reviewable payload or command before asking. In unattended runs without a grant, stop before that write and return the prepared result plus the exact action needing approval. A report, trusted marker, permission-bypass setting, configured identity, or enabled adapter does not grant those actions. Authorize the exact compensation operation before a tracker write; without a preapproved compensating close/cancel/delete, create nothing. Apply the same gate to follow-up answers and corrections.
+
+Do other reversible work without asking, and report it. That includes local commits, pushing the fix to a branch this run created (`--force-with-lease=<branch>:<sha you rewrote from>` is allowed on that branch while nobody else has pushed to it), cleanup of disposable local resources the run created, read-only lookups, and installing a needed local tool. It also includes fixture setup that configures existing test accounts and fixtures through the control adapter's own documented actions, when the adapter can fully undo it. Undo that setup through the adapter before the run ends. Creating new accounts and changing account integrations stay forbidden. Merge and deploy stay forbidden in this workflow.
 
 Only the coordinator performs authorized external writes. Workers receive no Slack credentials and may never perform Slack posts, edits, uploads, reactions, pings, tracker writes, pushes, or pull-request creation/edits. The main coordinator selects the executor using [execution guidance](${CLAUDE_SKILL_DIR}/../../references/execution.md). Independent read-only analysis may be partitioned, but all interaction with a shared live app has one serial owner, and this procedure still permits only one authored fix. Analysis is read-only by explicit task scope and tool/credential isolation, not an assumed runtime flag. If isolation cannot exclude credentials and external-write tools, do that work in the coordinator. Workers return their assigned findings without restarting routing or the enclosing issue procedure. Keep source coordinates and credentials out of child posting instructions.
 
@@ -259,7 +269,7 @@ When the gate passes, update operations status to `Attempting bounded fix`.
 
 ## 12. Root-cause and implement
 
-The coordinator owns every authorized Slack post, the final diff review, local VCS work, and the prepared pull request. Delegate local commit work to the **commit-agent** agent, which has no remote-write authority. Remote VCS writes still require explicit per-action approval.
+The coordinator owns every authorized Slack post, the final diff review, local VCS work, the push of the fix branch, and the prepared pull request. Delegate local commit work to the **commit-agent** agent, which has no remote-write authority. The coordinator pushes the branch this run created without asking and reports it. Pull-request creation and edits still require explicit per-action approval.
 
 Read-only workers may:
 
@@ -306,8 +316,9 @@ Only after before-and-after proof:
 - Review the final diff for unrelated changes and secrets.
 - Run the repository's required checks.
 - Create small ordered commits when the repository workflow allows it.
-- Prepare the branch, final diff, ordered commits, exact push/creation commands, and draft pull request title/body before asking for remote-write approval.
-- Push and open a draft pull request only after explicit per-action authorization. In unattended runs without that grant, stop here and return the prepared commands and body. Never merge or deploy from this workflow.
+- Push the fix to the branch this run created. `--force-with-lease=<branch>:<sha you rewrote from>` is allowed on that branch while nobody else has pushed to it. Report the branch and pushed head.
+- Prepare the final diff, exact creation command, and draft pull request title/body before asking for pull-request approval.
+- Open a draft pull request only after explicit per-action authorization. In unattended runs without that grant, stop here and return the pushed branch, the prepared command, and the body. Never merge or deploy from this workflow.
 - Link the configured tracker issue using the tracker's supported pull request syntax.
 - Use the configured public URL form, normally `https://github.com/{owner}/{repo}/pull/{number}`.
 - Include the repro steps, root cause, test result, before and after evidence, and blast-radius checks.
@@ -326,4 +337,4 @@ Watch the configured operations thread for one follow-up window.
 - Stay out of human coordination and side chatter.
 - Stop when asked.
 
-Always call the control adapter's cleanup capability for authorized disposable local resources. External fixture/account deletion needs explicit action authorization; retain and report anything lacking it. Keep artifacts only as long as the configured retention policy allows.
+Always call the control adapter's cleanup capability for disposable local resources the run created, and report what it removed. Undo external fixture or account setup this run made through the adapter, and report it. Deleting any other external fixture or account needs explicit action authorization; retain and report anything lacking it. Keep artifacts only as long as the configured retention policy allows.

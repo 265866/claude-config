@@ -91,4 +91,4 @@ The baseline does not reproduce, the patched app cannot run, or the evidence doe
 
 ## Cleanup
 
-Stop both builds, remove authorized temporary local profiles and captures according to retention policy, and return the repository to its prior state without discarding user work. External account or fixture cleanup needs explicit action authorization; report anything retained for that reason.
+Stop both builds, remove temporary local profiles and captures the run created according to retention policy, and return the repository to its prior state without discarding user work. Undo external account or fixture setup this run made through the control adapter, and report it. Deleting any other external account or fixture needs explicit action authorization; report anything retained for that reason.

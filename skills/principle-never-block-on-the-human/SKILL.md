@@ -1,6 +1,6 @@
 ---
 name: principle-never-block-on-the-human
-description: "Apply when tempted to ask 'should I do X?' on reversible work. Proceed, present the result, let the human course-correct after the fact; reserve confirmation for the approval gates in CLAUDE.md."
+description: "Apply when tempted to ask 'should I do X?' on reversible work. Proceed, present the result, let the human course-correct after the fact; reserve confirmation for the ask-first actions in CLAUDE.md, which others see or which cannot be undone."
 ---
 
 # Never Block on the Human
@@ -14,6 +14,6 @@ The human supervises asynchronously. Agents must stay unblocked. Make reasonable
 - **Make the system self-healing.** When you notice a problem in your deliverable or in the way of the user's goal, fix it before handing back and report what you fixed. Outside a turn that only answers a question or delivers a requested read-only result, ending with "want me to fix it?" for such work is blocking.
 
 **Boundaries:**
-- **Ask-first actions** are the approval gates in CLAUDE.md (Authorization and ownership), which also says what throwaway tooling and a standing grant cover. Obtain explicit approval for the exact action. Permission bypass does not grant authorization.
-- **Reversible actions** (write code, edit notes, split tasks) should proceed without blocking.
+- **Ask-first actions** are the ones CLAUDE.md (Authorization and ownership) lists because other people see them or they cannot be recovered. Confirm the exact action before taking it.
+- **Reversible actions** (write code, edit notes, split tasks, commit, push a branch you created for the task, add a dependency) should proceed without blocking. Report what you did.
 - **Product direction** comes from the human. *Execution* should not block.

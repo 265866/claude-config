@@ -19,7 +19,7 @@ Ground first, then commit. Don't start the run until you can state:
 - Scope, quantified: rough units and effort, plus the blockers grounding surfaced.
 - The rigor level, biased high. One-way doors and high blast radius get more. Reversible low-stakes steps get less. Rigor is gates and artifacts, not "try harder".
 
-Briefly state the framing, tradeoffs, and finite budget before a long run. Proceed with authorized reversible work. Stop at an unresolved materially different architecture (as CLAUDE.md defines it) or action-authorization decision, rather than imposing a checkpoint merely because time passes.
+Briefly state the framing, tradeoffs, and finite budget before a long run. Proceed with reversible work in scope. Choose a materially different architecture (as CLAUDE.md defines it) when the evidence favors it, and report the reason prominently. Stop at an ask-first action or a product decision, such as overriding a design the user chose, rather than imposing a checkpoint merely because time passes.
 
 ## Phase B: Design the procedure and select execution
 

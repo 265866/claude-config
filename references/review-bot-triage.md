@@ -12,7 +12,7 @@ Classify each automated reviewer thread before acting. Apply these rules in orde
 4. `fix`: The issue is unproven, but the suggested fix is small and clearly reduces risk without changing product intent.
 5. `ask`: Anything else, such as a novel or ambiguous comment that a reproduction, a test, or the current code within reach cannot settle. Try those first; ask only when evidence cannot decide, and continue other work while asking.
 
-Pushing the fix, posting the reply, and resolving the thread are separate remote writes. Each needs explicit approval under the root authorization policy, as Babysit steps 5 and 9 describe. A local fix or disproof is a valid deliverable while that approval is pending.
+Pushing the fix to the PR's branch proceeds under Babysit steps 1 and 5. Posting the reply and resolving the thread are separate ask-first writes, as Babysit step 9 describes. A fix or disproof is a valid deliverable while that approval is pending.
 
 When evidence within reach cannot settle it, ask. Skipping a noisy code-quality comment is cheap; skipping a real data or security bug is not.
 

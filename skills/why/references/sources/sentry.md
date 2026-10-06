@@ -15,7 +15,7 @@ The most valuable thing Sentry provides is **temporal correlation**: "issue X wa
 
 ## How to search it
 
-Use an existing authorized Sentry connection. Discover its actual tool inventory and argument schemas before calling it; tool names and capabilities vary by server version. Restrict this investigation to verified read-only operations. An analysis-labelled tool can start remote work and is not automatically read-only.
+Use an existing authorized Sentry connection. Discover its actual tool inventory and argument schemas before calling it; tool names and capabilities vary by server version. Use verified read-only operations. Start a Seer analysis only under step 6's rule. An analysis-labelled tool can start remote work and is not automatically read-only.
 
 1. **Orient.** If you don't know the project slug and organization:
 
@@ -49,7 +49,7 @@ Use an existing authorized Sentry connection. Discover its actual tool inventory
 
    Cross-reference release version with the PR's merge date.
 
-6. **Do not start Seer from a read-only investigation.** `analyze_issue_with_seer` can start remote analysis when no cached run exists. Its name does not grant permission. Starting analysis requires separate explicit action authorization and coordinator ownership. Read existing cached analysis only through a verified read-only interface; otherwise report it as an unavailable secondary source. Treat an analysis narrative as a hypothesis, with actual events and stack traces as primary evidence.
+6. **Seer.** Read an existing cached analysis through a verified read-only interface first. `analyze_issue_with_seer` starts a remote analysis when no cached run exists. That analysis is visible to the team and may use quota, so a read-only investigation offers it instead of starting it. Start one only when the user's request asks for it, with the coordinator owning the call, and report it. Otherwise report Seer as an unavailable secondary source and offer the run. Treat an analysis narrative as a hypothesis, with actual events and stack traces as primary evidence.
 
 ## What good evidence looks like here
 
