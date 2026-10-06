@@ -17,13 +17,13 @@ Both plugins come from the same commit of `cursor/plugins`:
 
 | Plugin | Version | Commit |
 | --- | --- | --- |
-| pstack | 0.15.10 | [`4e5b1cf`](https://github.com/cursor/plugins/tree/4e5b1cf2ccb0ea3716f08c8ee0a5856b5ab93536/pstack) |
-| cursor-team-kit | 1.2.0 | [`4e5b1cf`](https://github.com/cursor/plugins/tree/4e5b1cf2ccb0ea3716f08c8ee0a5856b5ab93536/cursor-team-kit) |
+| pstack | 0.15.11 | [`00b52d9`](https://github.com/cursor/plugins/tree/00b52d954a99ff67802cad428ff19218659f76fd/pstack) |
+| cursor-team-kit | 1.2.0 | [`00b52d9`](https://github.com/cursor/plugins/tree/00b52d954a99ff67802cad428ff19218659f76fd/cursor-team-kit) |
 
 Full hash:
 
 ```text
-4e5b1cf2ccb0ea3716f08c8ee0a5856b5ab93536
+00b52d954a99ff67802cad428ff19218659f76fd
 ```
 
 ## Where each file came from
