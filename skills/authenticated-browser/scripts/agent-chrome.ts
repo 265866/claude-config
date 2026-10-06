@@ -21,7 +21,7 @@ const LOCK_PORT = Number(process.env.AGENT_CHROME_LOCK_PORT ?? 47913);
 const SCRIPT = import.meta.path;
 
 const os = platform();
-const profileDir = process.env.AGENT_CHROME_PROFILE ?? defaultProfileDir();
+const profileDir = process.env.AGENT_CHROME_PROFILE || defaultProfileDir();
 
 // An empty or relative base directory would put the profile under the current directory; the XDG spec says to ignore it.
 function absoluteEnv(name: string): string | undefined {
