@@ -206,3 +206,11 @@ For each change in a commit, decide together whether it fits this profile.
     - Stop when a round finds nothing to fix.
       This loop has no round limit, by the user's choice,
       so the round budget in `references/execution.md` does not apply to it.
+
+11. Squash the loop's fix commits into one commit once a round comes back clean.
+    Keep other work out of the loop, so its fix commits stay in a row on top of the sync.
+    Run `git reset --soft <the commit before the first fix commit>` and make one commit,
+    with a subject like `Fix contradictions found by the review loop after the pstack 0.15.6-0.15.15 sync`.
+    In the body, give the number of rounds and list what the fixes changed, grouped by area.
+    Check that `git diff <the old HEAD> HEAD` is empty before you drop the old HEAD.
+    The sync commits from steps 7 and 9 stay as they are.
