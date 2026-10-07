@@ -43,7 +43,8 @@ Anything not listed here is original to this profile.
 
 **Tools**
 
-- `tools/workflow/watch-pr/`, `tools/workflow/orch/`, `bootstrap.ts`, `package.json`, and `bun.lock`
+- `tools/workflow/watch-pr/`, `tools/workflow/orch/`, `tools/workflow/bootstrap.ts`, `tools/workflow/package.json`, and
+  `tools/workflow/bun.lock`
   ← `skills/poteto-mode/scripts/`
 - `tools/workflow/check-plan.ts` ← `skills/poteto-mode/scripts/check-plan.mjs`, ported to TypeScript
 - `tools/workflow/worktree-audit.ts` ← `skills/poteto-mode/scripts/worktree-audit.sh`, ported to TypeScript
@@ -93,7 +94,7 @@ They are worth reading if you want to understand where this setup comes from.
 - **[The pstack guide](https://github.com/cursor/plugins/tree/main/pstack/docs/guide)**
   walks through a first real task with pstack,
   from setup and prompting through verification and overnight runs.
-  Most of it carries over to this profile.
+  Parts of it carry over to this profile.
 - **[benny](https://github.com/cursor/plugins/tree/main/pstack/automations/benny)**
   is pstack's automation pack.
   It triages Slack issue reports, then reproduces and fixes confirmed bugs with real UI evidence.
@@ -181,9 +182,12 @@ For each change in a commit, decide together whether it fits this profile.
     - Start fresh, read-only reviewers on the sync's whole diff,
       from the commit before the first sync commit to `HEAD`.
       Split them by area:
-      - CLAUDE.md, `rules/`, `references/`, `agents/`, and README.md
+      - CLAUDE.md, `rules/`, `references/`, `agents/`, README.md, and UPSTREAM.md
       - `playbooks/`
       - `skills/`
+
+      Any other changed path, such as `tools/` or `automations/`,
+      goes to the closest area or gets its own reviewer.
 
       Each reviewer reads its area in full.
       It looks for new text that contradicts existing text, the same rule stated two ways,
@@ -197,6 +201,8 @@ For each change in a commit, decide together whether it fits this profile.
     - Fix every finding that holds up, in one commit per round.
       A fix that would change what the user decided goes to the user first.
     - Start a new round of fresh reviewers on the updated diff.
-      Give them the earlier findings and fixes,
+      Give them the earlier findings and the fix commits,
       so they confirm the fixes hold and don't reopen settled points.
     - Stop when a round finds nothing to fix.
+      This loop has no round limit, by the user's choice,
+      so the round budget in `references/execution.md` does not apply to it.

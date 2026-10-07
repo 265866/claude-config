@@ -20,4 +20,4 @@ When debugging, do not fix symptoms. Trace every problem to its root cause and f
 
 **Restart bugs: suspect state before code**
 
-When something "fails after restart," suspect stale persistent state first: config files, caches, lock files, serialized state. If clearing a state file restores behavior, prioritize state validation as the fix.
+When something "fails after restart," suspect stale persistent state first: config files, caches, lock files, serialized state. If clearing a state file restores behavior, prioritize state validation as the fix. Test that reversibly: point the app at a copy, or, when the request authorizes changes and the app is not running, move the file aside with a backup. Deleting a user's config or serialized state without a backup is ask-first. Test a suspect cache the same way, against a copy, so the stale state stays reproducible. Clearing a regenerable cache without asking, through the owning tool's clean command or folder removal as CLAUDE.md and playbooks/worktree-cleanup.md describe, applies only when the request authorizes changes; profile and session data are never caches.

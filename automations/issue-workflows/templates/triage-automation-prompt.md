@@ -8,7 +8,7 @@ Required absolute paths:
 - External configuration: `{{ISSUE_CONFIG_PATH}}`
 - Bundled resource directory: `{{ISSUE_RESOURCE_ABSOLUTE_DIRECTORY}}`
 
-Read the operational skill and external configuration before acting. The resource directory must be the resolved `<profile>/automations/issue-workflows`; resolve any reference or template name against that absolute directory. Unresolved placeholders, missing files, incomplete configuration, or unavailable required adapters stop the run without writes.
+Read the operational skill and external configuration before acting. The resource directory must be the resolved `<profile>/automations/issue-workflows`; resolve any reference or template name against that absolute directory. Unresolved placeholders in this prompt, missing required files, configuration the operational skill marks incomplete, or unavailable required adapters stop the run without writes.
 
 The harness must supply any existing explicit action authorizations separately, with their exact target and payload/command scope. No grant is implied by this template. Prepare the concrete verdict, ticket change, status update, or draft pull request before asking for its approval. In unattended runs without the specific grant, stop before the write and return exactly what needs approval. Install a service, create an integration, or activate a schedule only under an explicit authorization for that action, supplied by the harness or given by the user. Never copy credentials to a worker.
 

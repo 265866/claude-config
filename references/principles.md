@@ -11,7 +11,7 @@ Use this catalog for substantial engineering or design work. Read only the leaf 
 - **Minimize Reader Load** ([principle-minimize-reader-load](../skills/principle-minimize-reader-load/SKILL.md)). Reviewing or shaping code that's hard to trace. Count layers and hidden state, collapse one-caller wrappers, shrink mutable scope.
 - **Outcome-Oriented Execution** ([principle-outcome-oriented-execution](../skills/principle-outcome-oriented-execution/SKILL.md)). Planned rewrites and migrations with explicit phase boundaries. Converge on the target architecture. Don't preserve throwaway compatibility states.
 - **Experience First** ([principle-experience-first](../skills/principle-experience-first/SKILL.md)). Product, UX, or feature-scope tradeoffs. Choose user delight over implementation convenience.
-- **Exhaust the Design Space** ([principle-exhaust-the-design-space](../skills/principle-exhaust-the-design-space/SKILL.md)). A novel interaction or architectural decision with no precedent. Build 2-3 competing prototypes and compare before committing.
+- **Exhaust the Design Space** ([principle-exhaust-the-design-space](../skills/principle-exhaust-the-design-space/SKILL.md)). A novel interaction or architectural decision with no precedent. Build 2-3 competing prototypes when the request authorizes implementation, or sketches in the plan otherwise, and compare before committing.
 - **Build the Lever** ([principle-build-the-lever](../skills/principle-build-the-lever/SKILL.md)). Repeated transformations or fragile verification that an existing command cannot cover. Use the smallest reusable tool that earns its maintenance cost.
 
 **Architecture**
@@ -29,7 +29,7 @@ Use this catalog for substantial engineering or design work. Read only the leaf 
 - **Fix Root Causes** ([principle-fix-root-causes](../skills/principle-fix-root-causes/SKILL.md)). Debugging. Trace each symptom to its root cause, reproduce first, ask why until you reach it.
 - **Sequence Work into Verifiable Units** ([principle-sequence-verifiable-units](../skills/principle-sequence-verifiable-units/SKILL.md)). Multi-step work (sweeps, migrations, runs of similar edits) and how you stack commits and PRs. Verify prerequisites before dependent work and each unit before acceptance. Independent units can run in parallel; check their combined result before integration.
 - **Test Behavior, Not Implementation** ([principle-test-behavior-not-implementation](../skills/principle-test-behavior-not-implementation/SKILL.md)). Writing, changing, or keeping a test. Exercise a real behavior or contract and assert an independently specified result or effect. Name the defect the assertion must catch; judge its actual coverage rather than its matcher name.
-- **Explain the Number** ([principle-explain-the-number](../skills/principle-explain-the-number/SKILL.md)). Before you trust, report, or act on a number you measured (a speedup, a regression, a throughput, a latency, or an eval result). Find what limits it, and rule out that it measured something other than the work you think.
+- **Explain the Number** ([principle-explain-the-number](../skills/principle-explain-the-number/SKILL.md)). Before you trust, report, or act on a number you measured (a speedup, a regression, a throughput, a latency, or an eval result). Rule out that it measured something other than the work you think, and for a performance number, find what limits it.
 
 **Delegation**
 

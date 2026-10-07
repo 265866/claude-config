@@ -12,13 +12,13 @@ Require one concrete artifact:
 - A merged pull request
 - A merged commit with matching code and intent
 
-A thread claim, tracker status, branch name, or cause hypothesis without a pull request or commit is not enough.
+A thread claim, tracker status, branch name, or cause hypothesis without a pull request or commit is not enough. If no artifact qualifies, leave verify mode: re-apply the parent skill's step 3 as if no artifact exists (a person's open pull request still counts as ownership), run any of steps 4 through 6 not yet run, then set operations status `Reproducing` and continue at step 7, or, when the switch came from step 14's pre-push re-check, set `Attempting bounded fix` and resume step 14 at the push, or otherwise, when step 9 already ran, set `Reproduced` and return to step 11.
 
 When several artifacts exist, choose the one linked from the source thread or tracker. Otherwise choose the closest match to the affected code and state why.
 
 ## Protect the working tree
 
-Use an isolated worktree or another clean checkout when the repository supports it. Do not overwrite user changes.
+Use an isolated worktree, or a clean clone in the OS temporary directory; never the user's checkout. Before each bring-up, check out that build's revision detached in the checkout (for an open PR, fetch the host's pull request head ref, `refs/pull/<number>/head` on GitHub, inside that checkout), confirm `git rev-parse HEAD` matches it and `git status` shows no tracked or untracked changes, then pass the checkout as the adapter's repository input. When either check fails, use a fresh isolated worktree or clean clone at that revision for the build, and never clean, reset, or stash the old one.
 
 Record:
 
@@ -27,13 +27,15 @@ Record:
 - Pull request or commit URL
 - Build and environment inputs shared by both runs
 
-Use regular `github.com` pull request links.
+Use the configured `repository.pull_request_url_format` public pull request link, not an API or app-internal URL. For a merged commit with no pull request, use its public commit page under `repository.url`.
 
 ## Measure the baseline
 
-For an open pull request, use its base branch as the baseline.
+Give the baseline half and the patched half each the configured repro budget. When either runs out, the outcome is Inconclusive.
 
-For a merged fix, use the revision immediately before the fix when that revision builds and represents the old behavior.
+For an open pull request, use the merge base of its head and its base branch as the baseline, so both builds share a base, and record both SHAs.
+
+For a merged fix, use the revision immediately before the fix when that revision builds and represents the old behavior; otherwise the outcome is Inconclusive, with the reason.
 
 Through the configured control adapter:
 
@@ -66,7 +68,7 @@ The baseline reproduces twice and the patched build resolves it twice.
 
 - Mark operations status `Existing fix verified`.
 - Link the artifact.
-- Prepare one concise source-thread reply, obtain explicit authorization, and post only after the source preflight.
+- Prepare one concise source-thread reply, obtain explicit authorization, and post only after the source preflight, if the run has not already posted its unprompted source reply.
 - Include the before and after result.
 - Open no pull request.
 
@@ -91,4 +93,4 @@ The baseline does not reproduce, the patched app cannot run, or the evidence doe
 
 ## Cleanup
 
-Stop both builds, remove temporary local profiles and captures the run created according to retention policy, and return the repository to its prior state without discarding user work. Undo external account or fixture setup this run made through the control adapter, and report it. Deleting any other external account or fixture needs explicit action authorization; report anything retained for that reason.
+Stop both builds, remove temporary local profiles and captures the run created according to retention policy, without discarding user work. Remove each worktree or clean checkout this reference created (`git worktree remove`, never `--force`, for a worktree), only when `git status --ignored` shows no tracked or untracked changes and only regenerable ignored files; its revisions exist on the remote, so worktree-cleanup's merged-branch condition does not apply. Otherwise keep it and report its path. The parent skill's step 15 governs the step 12 fix worktree. Undo external account or fixture setup and repro writes this run made through the control adapter, and report it. Deleting any other external account or fixture needs explicit action authorization; report anything retained for that reason.

@@ -61,7 +61,7 @@ function first(entries: NonEmpty<string>): string {
 Where a plain `T[]` arrives, narrow once with a guard and treat the result as readonly. The guard rejects a missing index zero. Mutating the source through another alias invalidates the narrowing.
 
 ```ts
-const isNonEmpty = <T>(arr: readonly T[]): arr is NonEmpty<T> => arr.length > 0 && 0 in arr;
+const isNonEmpty = <T,>(arr: readonly T[]): arr is NonEmpty<T> => arr.length > 0 && 0 in arr;
 ```
 
 Even length, as pairs:
@@ -147,12 +147,12 @@ function parseUser(input: unknown): User {
 
 Use `safeParse` when failure is an expected branch. Use the equivalent inference helper when the repository uses another schema library. Do not add a new schema dependency for one guard. This rule prefers the schema system the codebase already trusts.
 
-When the type comes first, check the schema against the type it proves with `satisfies`. The compiler then rejects a schema that proves less than the type. Remove `name` from the object below and it fails to compile. Prefer `satisfies` to a `z.ZodType<User>` annotation, which erases the object schema's methods, such as `.extend`.
+When another source owns the type, such as generated code or another package, derive the schema from that source if the repository already generates schemas from it. Otherwise, check a schema you write by hand against the type with `satisfies`. When no other source owns the type, derive the type from the schema as above. The outer `satisfies` checks field types one way. It rejects a schema that misses a required field, but it accepts an extra field or a missing optional one. The inner `satisfies Record<keyof User, z.ZodType>` on the shape closes that gap. It fails to compile when the shape misses any key of the type, optional or not, or adds a key the type lacks. Prefer `satisfies` to a `z.ZodType<User>` annotation, which erases the object schema's methods, such as `.extend`.
 
 ```ts
-type User = { id: string; name: string };
+import type { User } from "./generated/user.js"; // { id: string; name: string }
 
-const UserSchema = z.object({ id: z.string(), name: z.string() }) satisfies z.ZodType<User>;
+const UserSchema = z.object({ id: z.string(), name: z.string() } satisfies Record<keyof User, z.ZodType>) satisfies z.ZodType<User>;
 ```
 
 ## No `as` casts
@@ -193,7 +193,7 @@ When refactoring an `as` out of existing code, identify why TypeScript can't inf
 
 - Missing discriminant: add one, switch to a discriminated union.
 - Overly wide source type (e.g. `Record<string, unknown>`): narrow it.
-- Untyped boundary: parse with the schema that owns the shape. Add a schema only where none exists.
+- Untyped boundary: parse with the schema that owns the shape. Where no schema exists, add one in the repository's existing schema library. Without a schema library, validate every field as above.
 - Genuinely inexpressible: use a branded type or `satisfies`.
 
 ## Narrowing hierarchy

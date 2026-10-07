@@ -1,5 +1,7 @@
 # Inactive schema example. Replace every required placeholder in an external file.
 # Supply its absolute path as ISSUE_CONFIG_PATH. This file activates nothing.
+# Only reproduce-and-fix-issues reads `control`, `repository.pull_request_action`,
+# `repository.pull_request_url_format`, and `status_text`; a triage-only deployment may leave them as placeholders.
 schema_version: 1
 
 automations:
@@ -18,7 +20,9 @@ slack:
   read_action: "configured-slack-read-action"
   thread_post_action: "configured-slack-thread-post-action"
   file_download_action: "configured-slack-file-download-action"
+  operations_root_post_action: "" # Optional; required only for the operations root status post.
   operations_edit_action: "" # Optional; required only for status edits.
+  file_upload_action: "" # Optional; required only for evidence uploads.
   allow_source_root_posts: false
   allow_worker_slack_writes: false
 
@@ -26,7 +30,7 @@ repository:
   url: "https://github.com/example-org/example-repo"
   default_branch: "main"
   pull_request_action: "configured-draft-pull-request-action"
-  pull_request_url_format: "https://github.com/{owner}/{repo}/pull/{number}"
+  pull_request_url_format: "https://github.com/{owner}/{repo}/pull/{number}" # runtime format tokens, not placeholders
   draft_only: true
 
 tracker:
@@ -55,6 +59,7 @@ control:
   environment: "safe-test-environment-placeholder"
   artifact_directory: "REPLACE_WITH_ABSOLUTE_TEMPORARY_ARTIFACT_DIRECTORY"
   artifact_retention_hours: 24
+  dedicated_fixtures: [] # Optional; existing test accounts and fixtures reserved for this workflow. Empty means fixture setup and repro writes on existing accounts need explicit approval. A disposable environment does not make its accounts dedicated.
 
 verdict_markers:
   bug: "[triage:bug]"

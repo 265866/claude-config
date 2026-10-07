@@ -28,7 +28,7 @@ Anchor the investigation in the relevant code and supplied context before select
 - The relevant file path(s) and line range(s)
 - The key symbols (function names, class names, constants)
 - An initial commit list. The last few commits touching the target.
-- PR numbers from merge commits (pattern `(#1234)` in the subject line)
+- PR numbers: a trailing `(#1234)` in a commit subject (squash merges, and merge commits titled from the PR), or `Merge pull request #1234 from …` in the subject of the merge commit that brought a commit in
 
 Build this inline.
 
@@ -39,8 +39,17 @@ git blame -L <start>,<end> <file>
 # Start with bounded file history and expand if rationale remains missing
 git log --follow -20 -p -- <file>
 
-# Last N commits touching the file, PR numbers visible
+# Last N commits touching the file, with trailing (#1234) PR numbers visible
 git log --oneline -20 -- <file>
+
+# The PR behind a commit: on GitHub, for any merge method
+gh api repos/<owner>/<repo>/commits/<commit>/pulls --jq '.[].number'
+
+# Elsewhere, the merge that brought <commit> into HEAD's mainline: the oldest
+# first-parent merge that contains it, when that merge's first parent does not.
+# For a <commit> in HEAD, no output means it landed on the mainline directly
+# (squash, rebase, or push).
+for m in $(git rev-list --merges --first-parent --reverse <commit>..HEAD); do git merge-base --is-ancestor <commit> "$m" || continue; git merge-base --is-ancestor <commit> "$m^1" || git log -1 --oneline "$m"; break; done
 
 # Extract PR numbers from a commit message
 git log -1 --format=%B <commit>
@@ -86,7 +95,7 @@ The synthesizer gets:
 1. The findings, null results, declared source scope, and relevant coverage gaps
 2. The code anchor from Step 2 (file paths, symbols, commit hashes, PR numbers, ticket IDs)
 3. The user's original question
-4. The epistemics framework from `references/epistemics.md`
+4. The absolute path of the epistemics framework, `${CLAUDE_SKILL_DIR}/references/epistemics.md`
 5. The synthesizer prompt template from `references/synthesizer-prompt.md`
 
 ## Step 5. Present

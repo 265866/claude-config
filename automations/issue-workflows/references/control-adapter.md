@@ -12,11 +12,12 @@ If the skill, feature map, or a required capability is absent, ambiguous, or inc
 
 ### Bring up
 
-Start the requested app revision in the requested test environment.
+Start the app from the supplied checkout in the requested test environment.
 
 Input:
 
-- Repository and revision
+- Repository: the local checkout path the coordinator supplies (an isolated worktree or clean clone). Build its working tree as it is, and never check out, reset, clean, or remove it.
+- Revision: the checkout's HEAD SHA, and whether its working tree carries uncommitted changes, for reporting
 - Build or start mode
 - Workspace, account, fixture, and feature-state requirements
 - Artifact directory
@@ -115,8 +116,9 @@ Stop processes and sessions created by the adapter.
 Remove disposable:
 
 - Browser or app profiles
-- Temporary workspaces
-- Test accounts or fixtures when the adapter created them
+- Temporary workspaces the adapter created, never the repository checkout it was given
+- Test accounts or fixtures the adapter created in this run under an approval that covers their deletion
+- Configuration and repro writes this run applied to existing test accounts or fixtures
 - Debug ports and tunnels
 - Captures past their retention window
 
@@ -136,7 +138,7 @@ The adapter must:
 - Keep secrets out of logs and artifacts.
 - Keep captures outside the repository.
 - Support a fresh or reset state between the two repro attempts.
-- Avoid production changes unless the user explicitly configured a safe test action.
+- Make no production changes. A production change needs explicit per-action authorization under the parent skill; configuration does not grant it.
 
 ## Environment translation
 
@@ -154,7 +156,7 @@ Hardware prompts, operating-system permission dialogs, device-only APIs, and una
 
 ## Runtime capability preflight
 
-Before accepting a repro attempt, perform this bounded capability check in the configured disposable test environment. Fixture setup that configures existing test accounts and fixtures through the adapter's own documented actions is allowed when the adapter can fully undo it. Undo it in the cleanup step and report it. Obtain approval first for any other external fixture or account mutation, including creating accounts and changing account integrations. This is a runtime preflight, not an installation or activation workflow:
+Before accepting a repro attempt, perform this bounded capability check in the configured disposable test environment. Fixture setup that configures existing test accounts and fixtures through the adapter's own documented actions is allowed when the adapter can fully undo it and those accounts and fixtures are listed in `control.dedicated_fixtures`. Configuring a test account or fixture other people use needs explicit approval. A repro action or reset that writes to an existing test account or fixture needs that account or fixture listed in `control.dedicated_fixtures` and an adapter that can fully undo the write, or explicit approval. Undo that setup and those writes in the cleanup step and report it. Obtain approval first for any other external fixture or account mutation, including creating accounts and changing account integrations. This is a runtime preflight, not an installation or activation workflow:
 
 1. Bring up the app.
 2. Confirm the stable app marker.

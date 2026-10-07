@@ -52,6 +52,7 @@ Read `references/reviewer-prompt.md` and fill in the template with:
 3. The review rubric from `references/rubric.md`
 4. The code-quality lens from `references/code-quality-review.md`
 5. That reviewer's primary focus from the table above
+6. The exact revision or base...head range under review, or `working tree on <HEAD sha>` for uncommitted work
 
 Apart from the focus, every reviewer gets the same filled template, so every reviewer applies the full rubric and the code-quality lens.
 

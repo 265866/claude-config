@@ -31,7 +31,7 @@ Pass each template with the transcript path or digest substituted where marked. 
 
 ### 3. Synthesize
 
-Assign one independent synthesis stage the resolved `references/synthesizer.md`, every reviewer's full output, and explicit gaps. It inspects and reports only, including citation checks permitted by existing access. The run ends with the proposed Accepted/Rejected/Backlog report before any approval-dependent edit stage.
+Assign one independent synthesis stage the resolved `references/synthesizer.md`, the transcript path or digest, every reviewer's full output, and explicit gaps. It inspects and reports only, including citation checks permitted by existing access. The run ends with the proposed Accepted/Rejected/Backlog report before any approval-dependent edit stage.
 
 ### 4. Structural enforcement check
 
@@ -39,7 +39,7 @@ Sanity-check the synthesizer's Accepted list. For any item that would be enforce
 
 ### 5. Apply
 
-Before applying any Accepted edit, present the synthesizer's full Accepted/Rejected/Backlog output to the user and wait for explicit approval. The user picks which subset to apply and may redirect routings. Skill changes affect future sessions using that profile or project. Do not auto-apply.
+Before applying any Accepted edit, present the Accepted/Rejected/Backlog report as adjusted in step 4, marking each item step 4 moved to Backlog, to the user and wait for explicit approval. The user picks which subset to apply and may redirect routings. Skill changes affect future sessions using that profile or project. Do not auto-apply.
 
 Include backlog items in the report. Filing tickets or messages requires explicit approval for that external action; do not file them automatically.
 

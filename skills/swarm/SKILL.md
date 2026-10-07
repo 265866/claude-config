@@ -5,7 +5,7 @@ description: "Coordinate independently scoped workers and return a report accoun
 
 # Swarm
 
-Cover independent slices, compare attempts at the same brief, or mix both. The coordinator accounts for every required result and returns one report.
+Cover independent slices, compare attempts at the same task, or mix both. The coordinator accounts for every required result and returns one report.
 
 The main coordinator selects the executor using [execution guidance](${CLAUDE_SKILL_DIR}/../../references/execution.md). This skill owns coverage and selection contracts, not scheduling. A delegated worker completes its assigned slice and returns evidence or a blocker; it does not restart routing or launch another swarm.
 
@@ -19,8 +19,8 @@ The main coordinator selects the executor using [execution guidance](${CLAUDE_SK
 ## Phase A: Frame
 
 1. State the done predicate and the artifact or report the swarm must return.
-2. Choose the shape. Partition into slices, race N workers on identical briefs, or mix both. For a race or mixed shape, declare `first pass`, `rank all`, or `best-of` before spawning.
-3. Set N from the user or derive it from the meaningful slices or approaches. N is total workers, not the available local concurrency. A narrow investigation can stay direct; do not manufacture slices to justify orchestration.
+2. Choose the shape. Partition into slices, race N workers on briefs that are identical except for each arm's named approach, or mix both. For a race or mixed shape, declare `first pass`, `rank all`, or `best-of` before spawning.
+3. Set N from the user or derive it from the meaningful slices or approaches. N counts the initial workers, one per slice or race arm, not the available local concurrency. Respawns are not part of N. They count against the execution guide's worker/round budget. A narrow investigation can stay direct; do not manufacture slices to justify orchestration.
 4. Workers inherit the profile model. For a candidate race, name each arm's design or investigation approach up front. Do not describe independent same-model runs as a model race.
 5. Give each worker its own writable output when it writes. When workers verify or measure commits, each brief names the exact SHAs. A measurement brief also names the method (sample count, what one sample is, order). The worker records both in its result.
 
@@ -30,11 +30,11 @@ Execute the independent assignments using the selected executor. Each brief name
 
 Every brief stands alone. Include the goal, scope, exact slice or race arm, how to verify, and what to report. Reports use the execution guide's statuses, `PASS`, `ISSUES`, `BLOCKED`, or `INCONCLUSIVE`, with evidence. A worker that can prove a defect reports `ISSUES` and lists every issue it can prove, not only the first.
 
-If a worker drops out, follow the bounded recovery policy and keep that required result visible as a gap. Useful partial findings may be reported, but incomplete coverage cannot pass.
+If a worker drops out, retry it only after you inspect its partial artifacts and find a recoverable cause, per the [execution guide](${CLAUDE_SKILL_DIR}/../../references/execution.md). Respawn a slice or race arm at most once across Phases B and C, as a fresh worker with its original brief plus every later directive sent to all workers or to that slice or arm, or, for a slice only, given only to you when it applies to that slice, per the execution guide's consolidated brief, and otherwise keep that required result visible as a gap. Useful partial findings may be reported, but incomplete coverage cannot pass.
 
 ## Phase C: Aggregate
 
-Read the terminal results. Drop a result that does not record the SHAs and method its brief names, and respawn that worker once. After a second miss, record a gap. A gap does not count as a pass. For coverage, every required slice needs a result. For a race, apply the selection rule declared up front. Use first pass, rank all, or best-of. Do not paste raw worker dumps.
+Read the terminal results. Drop a result that does not record the SHAs and method its brief names, and, when inspection shows a recoverable cause, respawn that worker once as Phase B describes, with a note that its result must record those fields. If inspection finds no recoverable cause, or that slice or arm was already respawned, record a gap instead. A gap does not count as a pass. For coverage, every required slice needs a result. For a race, apply the selection rule declared up front. Use first pass, rank all, or best-of. Do not paste raw worker dumps.
 
 Keep a compact result table, one-line evidenced issues, and explicit gaps or dropouts.
 

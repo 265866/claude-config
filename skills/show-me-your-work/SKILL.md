@@ -44,7 +44,7 @@ A run is one agent conversation, including its later turns and any summary of it
 
 ## Where it lives
 
-By default the log is a working artifact, not committed. Keep it at `decisions.tsv` in the work dir, or `.audit/<task-slug>.tsv` when several efforts run at once, and leave it out of git.
+By default the log is a working artifact, not committed. Keep it at `decisions.tsv` in the work dir, or `.audit/<task-slug>.tsv` when several efforts run at once, and leave it out of git: when it sits inside a repository's working tree, add its path relative to the worktree root, with a leading `/`, to the file `git rev-parse --git-path info/exclude` names (one file shared by every worktree of the repository), so no commit, including a commit-agent run or a pause checkpoint, picks it up. When the condition below calls for committing it, keep that line and have the commit-agent stage the log with `git add -f -- <path>`.
 
 Commit it only when the work is ambitious enough that a reviewer needs the trail to trust the result.
 
@@ -65,7 +65,7 @@ Correct the log, not the story. The audit never edits or removes a row, even an 
 
 ## Independent review of the trail
 
-Before handing back, assign a fresh-context read-only reviewer through the selected executor, with resolved evidence paths and the same task/run boundary. Self-review is not a substitute. The reviewer reads the audit trail and relevant current-run transcript segments or captured tool evidence, then flags what the user should pay attention to. Keep unrelated history outside the assignment. This is a scan for unsupported or risky work, not a redo of the implementation. A missing review remains open rather than "No flags."
+Before handing back, assign a fresh-context read-only reviewer through the selected executor, with resolved evidence paths and the same task/run boundary. Self-review is not a substitute. The reviewer reads the audit trail and the current run's tool calls and results, the artifact this audit checks, without the implementer's reasoning text, then flags what the user should pay attention to. Keep unrelated history outside the assignment. This is a scan for unsupported or risky work, not a redo of the implementation. A missing review remains open rather than "No flags."
 
 - Decisions logged with weak or absent evidence.
 - Verification steps skipped or claimed without proof in the transcript.

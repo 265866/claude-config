@@ -30,7 +30,8 @@ and unit of sale, including what one case or box contains. WebSearch the raw UPC
 usually lands the product page directly.
 
 Report the match with its source URL and wait for the user to confirm before pricing. A wrong
-variant poisons every number after it.
+variant poisons every number after it. Only the user can check the item in hand against the match, so this
+confirmation is missing access with no available substitute, a blocker under CLAUDE.md.
 
 ## 2. Anchor on retail
 
@@ -65,7 +66,8 @@ Ask each worker for one row per comp: price, condition, quantity, date sold or p
 Ten rows per source is plenty.
 
 Handle a `blocked` or `partial` worker as the **authenticated-browser** skill directs, and rerun
-that source only after its blocker is cleared. When a source still comes back empty, stop and tell
+that source only as that skill allows: its one revised-brief retry, a `needs_approval` run it
+permits, or after the user clears the blocker. When a source still comes back empty, stop and tell
 the user. Never fill the gap with an invented comp.
 
 ## 4. Set the ask
@@ -90,6 +92,7 @@ the breaks rather than reaching for a default ladder.
 1. **First break is where the spend gets real.** Divide about $300 of total spend by the single-unit
    ask, then round to a number a buyer recognizes: 2, 3, 5, 10, 25, 50, 100. A $30 case lands near
    10. A $300 machine lands under 2, so clamp to 2, the smallest break that means anything.
+   When the break reaches the pile, drop it; the only tier is then `All`, under the single-unit ask.
 2. **Each later break roughly triples the one before it.** Add one such break normally, a second
    only for a pile in the hundreds when the steps would otherwise jump too far, and never one that
    reaches the pile.
@@ -100,6 +103,7 @@ How deep the floor cuts tracks pile depth, not unit price:
 
 - A handful, 2 to 5 units: 5% to 10% under the single-unit ask. There is little pile to move.
 - Dozens or hundreds: 25% to 35% under. Start the single ask high and let volume do the work.
+- Between a handful and dozens, interpolate between those two bands.
 
 Known cost per unit caps how far the floor falls: the floor never lands at or below cost. Cost
 constrains the floor and never lifts the ask. A buyer will not pay more because the pile cost more,
@@ -110,8 +114,8 @@ The two shapes this produces:
 - 390 cases at $30 each: `10+ cases = $28 ea`, `30+ = $26 ea`, `All = $22 ea`.
 - 3 machines at $300 each: `2 = $285 ea`, `All 3 = $270 ea`.
 
-A pile in the hundreds can carry a fourth break when the steps would otherwise jump too far. Three
-tiers is the normal shape; two is right for a handful.
+A pile in the hundreds can carry a fourth tier when the steps would otherwise jump too far. Three
+tiers is the normal shape. A handful gets two, or only `All` when the first break reaches the pile.
 
 Price every tier per unit and label it `ea`, so the buyer never does arithmetic.
 
@@ -128,7 +132,8 @@ wait for the user before writing anything. Polished copy for an underwater pile 
 invites posting it.
 
 - A bulk tier underwater means the ladder reaches too deep. Raise the floor off cost and let the
-  middle tiers compress, or drop the bottom tier and sell in smaller lots.
+  middle tiers compress, or drop the deepest numeric break and give `All` that
+  break's price, and sell in smaller lots.
 - The single-unit ask underwater means the market price sits below what the pile cost. No ladder
   fixes that. Holding, selling slowly at a loss, or eating it are all the user's call.
 

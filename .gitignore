@@ -18,6 +18,7 @@
 !/rules/
 !/skills/
 !/tools/
+!/workflows/
 
 /skills/synced/
 node_modules/

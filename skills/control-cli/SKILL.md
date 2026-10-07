@@ -38,12 +38,23 @@ Use a repeatable local harness to exercise an interactive CLI instead of poking 
 
 ```bash
 SESSION="cli-harness-$(date +%s)"
+trap 'tmux capture-pane -pt "$SESSION" 2>/dev/null; tmux kill-session -t "$SESSION" 2>/dev/null' EXIT
+wait_for() {
+  for _ in $(seq 1 100); do
+    tmux capture-pane -pJt "$SESSION" 2>/dev/null | grep -qF -- "$1" && return 0
+    tmux has-session -t "$SESSION" 2>/dev/null || return 1
+    sleep 0.1
+  done
+  return 1
+}
 tmux new-session -d -s "$SESSION" -- <command-under-test>
+wait_for '<ready prompt>' || { echo "CLI never became ready" >&2; exit 1; }
 tmux capture-pane -pt "$SESSION"
 tmux send-keys -t "$SESSION" "help" Enter
-tmux capture-pane -pt "$SESSION"
-tmux kill-session -t "$SESSION"
+wait_for '<help marker>' || { echo "help output never appeared" >&2; exit 1; }
 ```
+
+The exit trap captures the final screen and kills the session on success or failure. Markers match as literal text against the visible screen, with wrapped lines joined and trailing spaces kept (`-J`), so pick ones that cannot match startup output or the echoed input. `-J` joins only lines the terminal wrapped; a CLI that breaks its own lines at the pane width, as most TUIs do, still splits them, so keep markers for those within one screen line. Run the whole harness in one script or Bash call, and append any extra cleanup to this trap rather than setting a new `EXIT` trap.
 
 For Node CLIs:
 
@@ -141,6 +152,8 @@ with ExitStack() as fds:
 If the CLI needs richer terminal control, use `pty.fork()` or an existing PTY library.
 
 ## Profiling Recipes
+
+Profiles explain where time goes. Take a reported before or after number from untraced runs, and vet it with the **benchmark-checklist** skill.
 
 - Startup regression: capture baseline and treatment startup timings under the same machine, env, and command.
 - Slow operation: start a CPU profile, perform the operation, stop the profile, and compare top self-time functions.

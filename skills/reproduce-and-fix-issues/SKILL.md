@@ -11,7 +11,7 @@ Wait for a trusted triage marker in the source thread. Reproduce the exact sympt
 
 Resolve the profile root from `CLAUDE_CONFIG_DIR` when set; otherwise use the directory two parents above `${CLAUDE_SKILL_DIR}`. Resolve `${CLAUDE_SKILL_DIR}/../../automations/issue-workflows` to an absolute pack path. Its `references/` and `templates/` directories are bundled resources, not project-relative files. Pass resolved absolute paths to any worker or external harness. The skill-directory substitution is available in this entrypoint only; do not expect it to expand in separately read references or raw templates.
 
-Load the externally supplied absolute `ISSUE_CONFIG_PATH`. Use the bundled `templates/configuration.example.yaml` only as a schema example, never as live configuration. Required fields must be concrete, with no empty values or unresolved placeholders; optional fields may be empty. Configured file paths must be absolute and readable. Missing, malformed, ambiguous, or incomplete configuration stops the run without external writes. This pack supplies instructions, not a scheduler, Slack connection, tracker integration, or app-control implementation. Only a user-configured external harness may supply triggers, scheduling, adapters, and credentials. Do not create accounts, install services, or activate automation implicitly. Installing a needed local tool is allowed; report each one.
+Load the externally supplied absolute `ISSUE_CONFIG_PATH`. Use the bundled `templates/configuration.example.yaml` only as a schema example, never as live configuration. Required fields must be concrete, with no empty values or unresolved placeholders (the `{owner}`, `{repo}`, and `{number}` tokens in `repository.pull_request_url_format` are runtime format tokens, not placeholders); optional fields may be empty. Configured file paths must be absolute and readable. Missing, malformed, ambiguous, or incomplete configuration stops the run without external writes. This pack supplies instructions, not a scheduler, Slack connection, tracker integration, or app-control implementation. Only a user-configured external harness may supply triggers, scheduling, adapters, and credentials. Do not create accounts, install services, or activate automation implicitly. Installing a needed local tool is allowed; report each one.
 
 ## Authorization and delegation
 
@@ -20,12 +20,12 @@ Configuration selects targets and capabilities; it is not authorization. These a
 - Slack posts, replies, edits, uploads, reactions, and pings
 - Tracker issue creation, comments, updates, closes, and deletes
 - Pull-request creation or edits
-- Deletion of external fixtures or accounts, other than undoing this run's own fixture setup through the control adapter
+- Deletion of external fixtures or accounts, other than undoing this run's own fixture setup and repro writes, and deleting accounts or fixtures this run created under an approval that covers their deletion, through the control adapter
 - Production changes
 
-Prepare the exact reviewable payload or command before asking. In unattended runs without a grant, stop before that write and return the prepared result plus the exact action needing approval. A report, trusted marker, permission-bypass setting, configured identity, or enabled adapter does not grant those actions. Authorize the exact compensation operation before a tracker write; without a preapproved compensating close/cancel/delete, create nothing. Apply the same gate to follow-up answers and corrections.
+Prepare the exact reviewable payload or command before asking. In unattended runs without a grant, stop before that write and return the prepared result plus the exact action needing approval. A report, trusted marker, permission-bypass setting, configured identity, or enabled adapter does not grant those actions. Authorize the exact compensation operation before creating a tracker issue; without a preapproved compensating close/cancel/delete, create nothing. Posting a follow-up answer or writing a correction to an external record needs the same explicit per-action authorization as the actions above; the compensation requirement applies only to creating a tracker issue.
 
-Do other reversible work without asking, and report it. That includes local commits, pushing the fix to a branch this run created (`--force-with-lease=<branch>:<sha you rewrote from>` is allowed on that branch while nobody else has pushed to it), cleanup of disposable local resources the run created, read-only lookups, and installing a needed local tool. It also includes fixture setup that configures existing test accounts and fixtures through the control adapter's own documented actions, when the adapter can fully undo it. Undo that setup through the adapter before the run ends. Creating accounts and changing account integrations still need explicit approval. Merge and deploy stay forbidden in this workflow.
+Do other reversible work without asking, and report it. That includes local commits, pushing the fix to a branch this run created (`--force-with-lease=<branch>:<sha you last pushed to it>` is allowed on that branch while nobody else has pushed to it), cleanup of disposable local resources the run created, read-only lookups, and installing a needed local tool. It also includes fixture setup that configures existing test accounts and fixtures through the control adapter's own documented actions, when the adapter can fully undo it and those accounts and fixtures are listed in `control.dedicated_fixtures`. Configuring a test account or fixture other people use needs explicit approval. A repro action or reset that writes to an existing test account or fixture needs that account or fixture listed in `control.dedicated_fixtures` and an adapter that can fully undo the write, or explicit approval. Undo that setup and those writes through the adapter before the run ends. Creating accounts and changing account integrations still need explicit approval; approval to create a test account or fixture must also cover deleting it at cleanup. Merge and deploy stay forbidden in this workflow.
 
 Only the coordinator performs authorized external writes. Workers receive no Slack credentials and may never perform Slack posts, edits, uploads, reactions, pings, tracker writes, pushes, or pull-request creation/edits. The main coordinator selects the executor using [execution guidance](${CLAUDE_SKILL_DIR}/../../references/execution.md). Independent read-only analysis may be partitioned, but all interaction with a shared live app has one serial owner, and this procedure still permits only one authored fix. Analysis is read-only by explicit task scope and tool/credential isolation, not an assumed runtime flag. If isolation cannot exclude credentials and external-write tools, do that work in the coordinator. Workers return their assigned findings without restarting routing or the enclosing issue procedure. Keep source coordinates and credentials out of child posting instructions.
 
@@ -35,6 +35,7 @@ If the required actions, control adapter, or completed feature map is missing, f
 
 ## Hard safety rules
 
+- Every stop once step 5 has begun, including a step 3 stop re-applied from verify mode, still runs step 15's cleanup paragraph.
 - Freeze the source channel and root thread coordinates before doing any work.
 - Never post a root message in the source channel.
 - Preflight the source parent before every source-thread post.
@@ -48,8 +49,8 @@ If the required actions, control adapter, or completed feature map is missing, f
 - The exact discriminating symptom must appear twice through real UI interaction.
 - State inspection may confirm an observation. It must not inject or force the symptom.
 - No confirmed repro means no authored fix.
-- Existing pull requests or commits switch the run to verify mode. Do not author over them.
-- Use `github.com` pull request links.
+- An open pull request or merged commit that plausibly fixes the report switches the run to verify mode. Do not author over them.
+- Use the configured `repository.pull_request_url_format` public pull request link, not an API or app-internal URL.
 - Keep captures, recordings, logs, and tokens out of source control.
 - Use `principle-guard-the-context-window` for delegated analysis.
 - Apply `principle-sequence-verifiable-units`, `principle-fix-root-causes`, and `principle-prove-it-works` through repro, fix, and verification.
@@ -107,7 +108,7 @@ Re-read the thread immediately before starting work.
 
 ### Someone is explicitly fixing it
 
-Stop when a person clearly claims the fix, gives a concrete implementation plan, or asks another agent to implement, patch, fix, or open a pull request.
+When no qualifying fix artifact exists, stop when a person clearly claims the fix, gives a concrete implementation plan, or asks another agent to implement, patch, fix, or open a pull request.
 
 Do not treat these as fix ownership:
 
@@ -120,15 +121,15 @@ Judge the requested action, not the presence of a bot.
 
 ### A fix artifact already exists
 
-If an open pull request or merged commit plausibly fixes this report, read the bundled absolute `references/verify-existing-fix.md` and switch to verify mode.
+If an open pull request or merged commit plausibly fixes this report, read the bundled absolute `references/verify-existing-fix.md` and switch to verify mode: run any of steps 4 through 6 not yet run, set `Verifying existing fix`, skip steps 7 through 9 and 11 through 14, follow step 10, then step 15.
 
 An artifact may come from the thread, tracker issue, repository history, or pull request search. A claim without a commit or pull request is not a fix artifact.
 
-If a person owns the work but has not produced an artifact, stop. Do not race them.
+If a person owns the work but has not produced an artifact, stop. Do not race them. If an operations thread already exists, mark its status `Blocked` and state who owns the fix. Every later stop for a person's claim does the same.
 
 ## 4. Open an optional operations thread
 
-If `slack.operations_channel_id` is configured and that exact status post is explicitly authorized, the coordinator may create one root status message there. This is the only allowed root post in the repro workflow.
+If `slack.operations_channel_id` is configured and that exact status post is explicitly authorized, the coordinator may create one root status message there with `slack.operations_root_post_action`, carrying `Reproducing`, or `Verifying existing fix` in verify mode. This is the only allowed root post in the repro workflow.
 
 Store its coordinates as `OPERATIONS_CHANNEL_ID` and `OPERATIONS_THREAD_TS`. Never confuse them with the source coordinates.
 
@@ -146,13 +147,13 @@ Use the plain-text status strings configured under `status_text`. Keep status te
 - Draft pull request opened
 - Fix did not land
 
-Use only the user-configured Slack adapter actions. Credentials stay within the configured coordinator adapter; do not read or expose raw tokens to a worker. An unavailable status-edit action is a capability block, not permission to install a connector or invent a posting tool. Each post, upload, or edit must pass the explicit action-authorization gate.
+Use only the user-configured Slack adapter actions. Credentials stay within the configured coordinator adapter; do not read or expose raw tokens to a worker. An unavailable status-edit action blocks only that edit, which is skipped as the next paragraph says; it is not permission to install a connector or invent a posting tool. Each post, upload, or edit must pass the explicit action-authorization gate.
 
-If no operations channel is configured, keep detailed status in the automation run output. Do not substitute a source-channel root message.
+If no operations channel is configured, or any operations-thread post, reply, upload, or status edit is not authorized or not available, skip that operations write, keep detailed status in the automation run output, and continue the run. Do not substitute a source-channel root message.
 
 ## 5. Load and check the control adapter
 
-Read the bundled absolute `references/control-adapter.md` and the completed map at the absolute `control.feature_map_path`, then invoke the skill named by `control.skill_name`. Run the reference's runtime capability preflight before any attempt.
+Read the bundled absolute `references/control-adapter.md` and the completed map at the absolute `control.feature_map_path`, then invoke the skill named by `control.skill_name`. Run the reference's runtime capability preflight before any attempt, bringing the app up from an isolated worktree, or a clean clone in the OS temporary directory, at the freshly fetched `repository.default_branch` head, passed as the adapter's repository input, never over user changes. That checkout is the run's baseline checkout, and step 7 reuses it.
 
 Find the feature-map section that matches the reported user path. Read it before driving the app. If no section covers the feature, mark the run blocked instead of inventing a path or selector.
 
@@ -189,7 +190,7 @@ Use `how` skill to trace the action through the repository. Use `why` for regres
 
 ## 7. Reproduce
 
-Bring up the target app through the control adapter.
+Bring up the target app through the control adapter at the freshly fetched `repository.default_branch` head, from step 5's baseline checkout moved to that SHA when `git status` shows no tracked or untracked changes (otherwise from a fresh isolated worktree or clean clone at that SHA, never cleaning, resetting, or stashing the old one), passed as the adapter's repository input, never over user changes, and record that SHA as the baseline revision.
 
 Confirm the correct app, workspace, account, data set, and feature state before acting. Use stable app markers. Do not rely on window order or a familiar title alone.
 
@@ -222,11 +223,11 @@ When safe delegation is available, have an isolated read-only media reviewer ans
 
 If no isolated reviewer is available, the coordinator must inspect the actual recording and screenshot and record the same evidence judgment. If the answer is no or uncertain, the repro is not confirmed. Capture better evidence or use `Could not reproduce`.
 
-Post detailed evidence only in the operations thread when configured. Keep the source update concise.
+Post detailed evidence only in the operations thread when it exists. Keep the source update concise.
 
 ## 9. Report the repro outcome
 
-Update the operations status first.
+Update the operations status first to `Reproduced`, `Could not reproduce`, or `Blocked`.
 
 For `Could not reproduce` or `Blocked`, post nothing in the source thread. The operations thread or run output carries the result.
 
@@ -238,13 +239,13 @@ For a confirmed repro, prepare the source reply, obtain explicit authorization, 
 - Link the tracker issue when one exists.
 - Do not ping an owner by default.
 
-Attach evidence only when the configured Slack action keeps it inside the same source thread and the organization's retention policy allows it.
+Attach evidence only through `slack.file_upload_action` and only when it keeps the file inside the same source thread and the organization's retention policy allows it.
 
 Wait for the configured rejection window. If a person shows that the setup or interpretation was wrong, correct the repro once. Do not start the fix phase until the window closes without a valid rejection.
 
 ## 10. Verify an existing fix
 
-When a fix artifact exists, follow the bundled absolute `references/verify-existing-fix.md`.
+When a qualifying fix artifact exists (verify mode), follow the bundled absolute `references/verify-existing-fix.md`; otherwise skip this step.
 
 Verification must show the symptom on the baseline and its absence on the patched build. Both paths use the real UI twice.
 
@@ -256,8 +257,9 @@ Attempt a fix only when all of these hold:
 
 - The outcome is a plain confirmed repro.
 - Media review confirmed the broken final state.
-- No existing fix artifact appeared.
-- No person claimed the fix during the rejection window.
+- `repository.draft_only` is true.
+- No qualifying fix artifact exists. If one appeared after step 3, switch to verify mode as step 3 says (steps 4 through 6 have already run) instead of stopping.
+- No person claimed the fix during the rejection window without producing a qualifying artifact.
 - Runtime evidence identifies the root cause.
 - The likely change fits the configured fix budget and repository scope.
 - This run has made no previous authored fix attempt; `budgets.fix_attempts` must equal 1.
@@ -269,7 +271,9 @@ When the gate passes, update operations status to `Attempting bounded fix`.
 
 ## 12. Root-cause and implement
 
-The coordinator owns every authorized Slack post, the final diff review, local VCS work, the push of the fix branch, and the prepared pull request. Delegate local commit work to the **commit-agent** agent, which has no remote-write authority. The coordinator pushes the branch this run created without asking and reports it. Pull-request creation and edits still require explicit per-action approval.
+Create the fix branch from the baseline revision step 7 recorded, in a new isolated worktree separate from step 7's baseline checkout, never over user changes, so the before and after proof compares the same base.
+
+The coordinator owns every authorized Slack post, the final diff review, local VCS work, the push of the fix branch, and the prepared pull request. Delegate local commit work to the **commit-agent** agent only when the harness enforces the same tool and credential isolation as other workers (no Slack credentials and no Slack, tracker, push, or pull-request write tools); otherwise the coordinator prepares the commits. The coordinator pushes the branch this run created without asking and reports it. Pull-request creation and edits still require explicit per-action approval.
 
 Read-only workers may:
 
@@ -296,7 +300,7 @@ Make one bounded root-cause fix attempt with the smallest justified change. Stop
 
 Keep the original baseline evidence.
 
-On the patched build:
+Bring up the patched build through the control adapter with the step 12 worktree as its repository input. On the patched build:
 
 1. Run the same real UI path.
 2. Run it a second time from a reset state, for two runs in total.
@@ -309,19 +313,22 @@ A compile, unit test, code review, or plausible diff is not after evidence.
 
 Run focused tests, then run smoke checks for behavior the change could affect. Cover nearby states, inputs, permissions, platforms, and failure paths. Stop without a pull request if a regression remains.
 
+Whenever step 12, 13, or 14 stops without a pull request for a reason other than a person's claim or a switch to verify mode, mark operations status `Fix did not land` and state why; for step 14's unattended stop, say the pushed branch awaits pull-request approval.
+
 ## 14. Open a draft pull request
 
 Only after before-and-after proof:
 
 - Review the final diff for unrelated changes and secrets.
-- Run the repository's required checks.
+- Run the repository's required checks. Stop without a pull request if one fails or the diff review finds unrelated changes or secrets.
 - Create small ordered commits when the repository workflow allows it.
-- Push the fix to the branch this run created. `--force-with-lease=<branch>:<sha you rewrote from>` is allowed on that branch while nobody else has pushed to it. Report the branch and pushed head.
-- Prepare the final diff, exact creation command, and draft pull request title/body before asking for pull-request approval.
+- Before the push, re-read the source thread and re-check for fix artifacts. If an artifact appeared, qualify it under `references/verify-existing-fix.md` (Qualify the artifact) before switching; if it qualifies, switch to verify mode as step 3 says; otherwise re-apply step 3's ownership gate (a person's open pull request counts as ownership), and continue to the push only when no person owns the fix. If a person claimed the fix, stop as step 3 says. In both stop cases, do not push.
+- Push the proven commits on the recorded baseline without rebasing (a rebase means repeating step 13), and note in the pull request body when the default branch has moved. Push them to the branch this run created. `--force-with-lease=<branch>:<sha you last pushed to it>` is allowed on that branch while nobody else has pushed to it. Report the branch and pushed head.
+- Prepare the final diff, the creation through the configured `repository.pull_request_action` (always as a draft; stop with `Fix did not land` if `repository.draft_only` is not true), and the draft pull request title/body before asking for pull-request approval.
 - Open a draft pull request only after explicit per-action authorization. In unattended runs without that grant, stop here and return the pushed branch, the prepared command, and the body. Never merge or deploy from this workflow.
 - Link the configured tracker issue using the tracker's supported pull request syntax.
 - Use the configured public URL form, normally `https://github.com/{owner}/{repo}/pull/{number}`.
-- Include the repro steps, root cause, test result, before and after evidence, and blast-radius checks.
+- Include the repro steps, root cause, test result, before and after evidence, and blast-radius checks. Describe the before and after evidence in words and link the operations-thread evidence when one exists. Never link local artifact paths; publishing captures elsewhere needs its own approval.
 - Run the pull request text and all Slack updates through `edit-prose` skill.
 
 If pull request creation fails, do not claim success. Keep the commit or branch state in the run output and mark operations status `Fix did not land`.
@@ -330,11 +337,11 @@ On success, prepare the operations update and, after explicit authorization for 
 
 ## 15. Follow-ups and cleanup
 
-Watch the configured operations thread for one follow-up window.
+Watch the operations thread for one follow-up window when it exists; otherwise note in the run output that no follow-up channel was watched.
 
 - Answer a direct question from evidence already gathered.
-- Apply one concrete correction and rerun the repro once when it invalidates the setup.
+- Apply one concrete correction and rerun the repro once when it invalidates the setup (in verify mode, the baseline and patched runs in `references/verify-existing-fix.md`).
 - Stay out of human coordination and side chatter.
 - Stop when asked.
 
-Always call the control adapter's cleanup capability for disposable local resources the run created, and report what it removed. Undo external fixture or account setup this run made through the adapter, and report it. Deleting any other external fixture or account needs explicit action authorization; retain and report anything lacking it. Keep artifacts only as long as the configured retention policy allows.
+Always call the control adapter's cleanup capability for disposable local resources the adapter created, and report what it removed. When the adapter or its cleanup capability is unavailable or fails, stop directly every process this run started, including those the adapter started (use the process details its bring-up returned), and report what remains. In verify mode, also run the Cleanup section of `references/verify-existing-fix.md` if it has not run since the last baseline or patched run. After the run's processes are stopped, remove the step 12 worktree with `git worktree remove`, never `--force`, only when its branch is pushed, `git status --ignored` shows no tracked or untracked changes and only regenerable ignored files, and removal succeeds; otherwise keep it and report its path, branch, and state. This run-created worktree is exempt from worktree-cleanup's merged-branch condition because the pushed branch keeps every commit. Then remove each baseline worktree or clone from steps 5 and 7 under the same conditions as that section's worktree, keeping a clone while `git worktree list` shows another worktree of it or any of its local branches has commits not on the remote; otherwise keep it and report it. Undo external fixture or account setup and repro writes this run made through the adapter, and report it. Deleting any other external fixture or account needs explicit action authorization; retain and report anything lacking it. Keep artifacts only as long as the configured retention policy allows.

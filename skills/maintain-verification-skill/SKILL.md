@@ -17,12 +17,12 @@ Pick one, and say which. When more than one fits, `blocked` takes precedence ove
 
 - **clean.** Every feature got source and live coverage, with no doc, harness, map, or product gaps found. No branch or PR is needed.
 - **issues.** Coverage completed and proven gaps remain, with no local patch. Report them without edits in audit mode. Maintenance that finds only product gaps also uses this outcome.
-- **changed.** Authorized maintenance completed coverage and produced one reviewable local patch of proven doc, harness, or map corrections. Report any product gaps separately.
+- **changed.** Authorized maintenance completed coverage and produced one reviewable local patch of proven doc, harness, or map corrections, or a separate verified product fix under Edit scope. Report any product gaps separately.
 - **blocked.** Coverage could not finish, or an authorized maintenance correction could not be prepared or verified within edit scope. Say exactly what blocked it.
 
 ## Edit scope
 
-In maintenance mode, only edit the verification skill's own directory (its SKILL.md, features/, and any harness scripts it owns). Audit mode makes no corrections. Never edit product code during either mode: a behavior the map describes that the app no longer does is either doc drift or a product regression. Correct proven doc drift only in maintenance mode; report product regressions instead of papering over them in docs.
+In maintenance mode, the verification-skill patch edits only the skill's own directory (its SKILL.md, features/, and any harness scripts it owns). Audit mode makes no corrections. Audit mode never edits product code. Maintenance mode keeps product code out of the verification-skill patch: a behavior the map describes that the app no longer does is either doc drift or a product regression. Correct proven doc drift only in maintenance mode; report product regressions instead of papering over them in docs. In maintenance mode, a product defect that keeps the app from launching or keeps the live pass from reaching other features gets fixed as its own verified change, as create-verification-skill step 1 describes, and you stop only when that fix needs an ask-first action or a product decision.
 
 ## Pass
 
@@ -50,6 +50,6 @@ In maintenance mode, only edit the verification skill's own directory (its SKILL
 
 5. **Triage.** Wrong or missing user-POV description → doc drift. Working behavior the harness can't drive → harness gap. App behavior that's actually broken → product gap. Audit mode reports these findings with evidence and proposed corrections. Maintenance mode fixes proven doc and harness gaps within edit scope; a harness fix follows the same helpers rule as generation (scripts executable, invocation documented in the skill body). Report product gaps in both modes and keep them out of the verification-skill patch.
 
-6. **Ship or stop.** For changed: prepare one local patch of proven corrections and re-read every changed file. Opening a PR is an ask-first action (CLAUDE.md, Authorization and ownership). Update a PR the task already owns, and report it. For clean, issues, or blocked: no PR, report the outcome and the coverage honestly. An audit stops at its findings; proposed corrections do not authorize applying them.
+6. **Ship or stop.** For changed: prepare one local patch of proven corrections, if any, keep a product fix as its own change, and re-read every changed file. Opening a PR is an ask-first action (CLAUDE.md, Authorization and ownership). Update a PR the task already owns, and report it. For clean, issues, or blocked: no PR, report the outcome and the coverage honestly. An audit stops at its findings; proposed corrections do not authorize applying them.
 
 Keep concise run notes (features covered, unreachable prerequisites, confirmed drift, outcome) in a scratch location; don't commit them.

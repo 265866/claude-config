@@ -19,15 +19,15 @@ Ground first, then commit. Don't start the run until you can state:
 - Scope, quantified: rough units and effort, plus the blockers grounding surfaced.
 - The rigor level, biased high. One-way doors and high blast radius get more. Reversible low-stakes steps get less. Rigor is gates and artifacts, not "try harder".
 
-Briefly state the framing, tradeoffs, and finite budget before a long run. Proceed with reversible work in scope. Choose a materially different architecture (as CLAUDE.md defines it) when the evidence favors it, and report the reason prominently. Stop at an ask-first action or a product decision, such as overriding a design the user chose, rather than imposing a checkpoint merely because time passes.
+Briefly state the framing, tradeoffs, and finite budget before a long run. Proceed with reversible work in scope. Choose a materially different architecture (as CLAUDE.md defines it) when the evidence favors it, and report the reason prominently. Hold the work that depends on an ask-first action or a product decision, such as overriding a design the user chose; independent work continues. Do not impose a checkpoint merely because time passes.
 
 ## Phase B: Design the procedure and select execution
 
 Decompose into atomic, independently landable units. Sequence riskiest-unknown-first. Scaffold and verification come before features (the **principle-foundational-thinking** principle skill).
 
 - Build the verification harness before the work, with the baseline captured from the pre-change state, so the check reads as "old value vs new value".
-- For unresolved consequential design decisions, use the **architect** skill and compare viable alternatives when warranted. Skip comparison for mechanical work whose shape is already concrete. A second comparison over a settled design is over-engineering (the **principle-laziness-protocol** principle skill).
-- Decide what fans out. Parallelize only across seams, and give each worker its own worktree or branch (the **principle-separate-before-serializing-shared-state** principle skill). Don't over-fan.
+- For unresolved consequential design decisions, use the **architect** skill and compare viable alternatives when warranted. Skip comparison for mechanical work whose shape is already concrete, and do not repeat a comparison over a settled design, which is over-engineering (the **principle-laziness-protocol** principle skill), unless the user explicitly asked for one; then run it through **architect**.
+- Decide what fans out. Parallelize only across seams, and give each writing worker its own worktree on its own branch, or disjoint file ownership, while read-only workers need neither (the **principle-separate-before-serializing-shared-state** principle skill). Don't over-fan.
 - Write the designed phase list down. That list is what the human reviews.
 
 Choose execution from the procedure's coordination burden. Substantial independent batches, dependent phases, or bounded work/check/repair cycles favor native Workflow; deterministic transformations stay helpers. Track coarse milestones in Tasks rather than copying the executor's worker state. Execute under the Phase C loop discipline and weave the Phase D log through decisions as they land. Delegated workers complete their assigned stages without rebuilding this procedure.

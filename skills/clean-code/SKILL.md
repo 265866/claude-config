@@ -20,4 +20,4 @@ Review the scoped diff against the actual base branch. Remove unnecessary code a
 - Preserve behavior in the simplification itself. Fix a bug you find as its own verified change when it is in the task's scope (CLAUDE.md, Authorization and ownership); in a review-only request, report it. Do not remove a defensive check without verifying its boundary and callers.
 - Prefer minimal, focused edits over broad rewrites.
 - Run the relevant real behavior checks, edge or regression case, and configured type, build, format, and lint gates. Report unavailable checks honestly.
-- Keep the final summary concise (1-3 sentences).
+- Keep the final summary concise (1-3 sentences). List every finding and every unavailable check separately; the cap does not apply to them.

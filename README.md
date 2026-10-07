@@ -120,4 +120,4 @@ This profile is a heavily modified port of
 with a few skills from [cursor-team-kit](https://github.com/cursor/plugins/tree/main/cursor-team-kit).
 Both are MIT licensed.
 
-[UPSTREAM.md](UPSTREAM.md) lists the base commit, where each file came from, and how to check for upstream changes.
+[UPSTREAM.md](UPSTREAM.md) lists the base commit, where each file came from, and how to sync with upstream.

@@ -24,6 +24,8 @@ Give this focus extra depth, but still review through the whole rubric below.
 
 ## Code Under Review
 
+Revision: {REVISION}
+
 {DIFF_OR_FILES}
 
 ## Review Rubric

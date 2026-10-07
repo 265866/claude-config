@@ -15,7 +15,7 @@ routes:
       error_signatures:
         - "billing-error-placeholder"
     destination:
-      slack_channel: "billing-channel-placeholder"
+      slack_channel: "BILLING_CHANNEL_ID_PLACEHOLDER"
       tracker_team: "billing-team-placeholder"
     owners:
       - "billing-owner-placeholder"
@@ -30,14 +30,16 @@ routes:
       error_signatures:
         - "desktop-error-placeholder"
     destination:
-      slack_channel: "desktop-channel-placeholder"
+      slack_channel: "DESKTOP_CHANNEL_ID_PLACEHOLDER"
       tracker_team: "desktop-team-placeholder"
     owners:
       - "desktop-owner-placeholder"
     allow_feature_owner_ping: false
 
 fallback:
-  destination: ""
+  destination:
+    slack_channel: ""
+    tracker_team: ""
   owners: []
   allow_feature_owner_ping: false
 
@@ -53,9 +55,10 @@ ping_policy:
 
 ## Rules
 
-- Leave `fallback.destination` empty unless one team accepts all unmatched reports.
+- Leave `fallback.destination.slack_channel` and `fallback.destination.tracker_team` empty unless one team accepts all unmatched reports.
 - Use stable product areas, code paths, and error signatures.
 - Do not include private data in a public copy.
+- `destination.slack_channel` is a Slack channel ID, so triage can compare it with the source channel ID. Keep real IDs out of any copy that will be published.
 - Do not paste raw user or channel IDs into an example that will be published.
 - Keep feature-owner pings off until the target team agrees to them.
 - A reroute tells the reporter where to go. The automation never cross-posts.

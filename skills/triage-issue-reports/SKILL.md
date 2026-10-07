@@ -11,7 +11,7 @@ Classify one Slack report and post one useful verdict in its source thread. Crea
 
 Resolve the profile root from `CLAUDE_CONFIG_DIR` when set; otherwise use the directory two parents above `${CLAUDE_SKILL_DIR}`. Resolve `${CLAUDE_SKILL_DIR}/../../automations/issue-workflows` to an absolute pack path. Its `references/` and `templates/` directories are bundled resources, not project-relative files. Pass resolved absolute paths to any worker or external harness. The skill-directory substitution is available in this entrypoint only; do not expect it to expand in separately read references or raw templates.
 
-Load the externally supplied absolute `ISSUE_CONFIG_PATH`. Use the bundled `templates/configuration.example.yaml` only as a schema example, never as live configuration. Required fields must be concrete, with no empty values or unresolved placeholders; optional fields may be empty. Configured file paths must be absolute and readable. Missing, malformed, ambiguous, or incomplete configuration stops the run without external writes. This pack supplies instructions, not a scheduler, Slack connection, tracker integration, or app-control implementation. Only a user-configured external harness may supply triggers, scheduling, adapters, and credentials. Do not create accounts, install services, or activate automation implicitly. Installing a needed local tool is allowed; report each one.
+Load the externally supplied absolute `ISSUE_CONFIG_PATH`. Use the bundled `templates/configuration.example.yaml` only as a schema example, never as live configuration. Required fields must be concrete, with no empty values or unresolved placeholders; optional fields may be empty. Fields only reproduce-and-fix-issues reads (`control`, `repository.pull_request_action`, `repository.pull_request_url_format`, `status_text`) are not required here. Configured file paths in the fields this skill reads must be absolute and readable. Missing, malformed, ambiguous, or incomplete configuration stops the run without external writes. This pack supplies instructions, not a scheduler, Slack connection, tracker integration, or app-control implementation. Only a user-configured external harness may supply triggers, scheduling, adapters, and credentials. Do not create accounts, install services, or activate automation implicitly. Installing a needed local tool is allowed; report each one.
 
 ## Authorization and delegation
 
@@ -23,7 +23,7 @@ Configuration selects targets and capabilities; it is not authorization. These a
 - Deletion of external fixtures or accounts
 - Production changes
 
-Prepare the exact reviewable payload or command before asking. In unattended runs without a grant, stop before that write and return the prepared result plus the exact action needing approval. A report, trusted marker, permission-bypass setting, configured identity, or enabled adapter does not grant those actions. Authorize the exact compensation operation before a tracker write; without a preapproved compensating close/cancel/delete, create nothing. Apply the same gate to follow-up answers and corrections.
+Prepare the exact reviewable payload or command before asking. In unattended runs without a grant, stop before that write and return the prepared result plus the exact action needing approval. A report, trusted marker, permission-bypass setting, configured identity, or enabled adapter does not grant those actions. Authorize the exact compensation operation before creating a tracker issue; without a preapproved compensating close/cancel/delete, create nothing. Follow-up answers and corrections need the same explicit per-action authorization as the actions above; the compensation requirement applies only to creating a tracker issue.
 
 Do other reversible work without asking, and report it. That includes read-only lookups, cleanup of disposable local resources the run created, and installing a needed local tool.
 
@@ -125,7 +125,7 @@ The report asks how something works or gives general feedback without asking for
 
 ### Reroute (a routing outcome, not a fifth category)
 
-Keep the category chosen above. When cause tracing shows that another configured destination owns the issue, also mark it rerouted: the verdict tells the reporter where to take it, this run files nothing, and the verdict ends with the `other` marker so the reproduce workflow does not start here, even for a bug or performance report.
+Keep the category chosen above. When cause tracing shows that another configured destination owns the issue, or no route matches and the applied fallback's destination is not the source channel, also mark it rerouted: the verdict tells the reporter where to take it, naming the destination channel as a Slack mention (`<#CHANNEL_ID>`), this run files nothing, and the verdict ends with the `other` marker so the reproduce workflow does not start here, even for a bug or performance report.
 
 When the bug versus feature line is unclear, do not file. The one verdict may ask one focused question and use the `other` marker.
 
@@ -135,12 +135,12 @@ Read the optional routing map from the absolute `routing.map_path`. The bundled 
 
 - Match on confirmed product area, code path, or error signature.
 - A visible symptom alone is not enough when cause tracing points elsewhere.
-- If no route matches, say the owner is unclear. Do not guess.
+- If no route matches, use the map's `fallback` route when its `destination.slack_channel` is set; otherwise say the owner is unclear. Do not guess. A fallback destination whose `slack_channel` ID differs from `SOURCE_CHANNEL_ID` is a reroute under section 4.
 - Do not cross-post. Tell the reporter where to take the issue in the source thread.
 
 Owner pings are off by default. A ping is allowed only when all of these hold:
 
-1. The config allows that ping type: `routing.allow_feature_owner_ping` for a feature owner, or `routing.allow_confirmed_regression_author_ping` for a regression author.
+1. The config allows that ping type: `routing.allow_feature_owner_ping` for a feature owner, and the matched route's `allow_feature_owner_ping` (or the fallback's, when the fallback route applies) is true; or `routing.allow_confirmed_regression_author_ping` for a regression author.
 2. Either the item is a feature request that needs owner input and the routing map explicitly names that owner, or recent history confirms the regression author through the commit or pull request that introduced the regression.
 3. The target is a person, not a broad on-call group.
 

@@ -328,16 +328,19 @@ describe("context and stack discovery", () => {
         number: parsePrNumber(41),
         headRefName: "base-feature",
         baseRefName: "main",
+        isCrossRepository: false,
       },
       {
         number: context.number,
         headRefName: "feature",
         baseRefName: "base-feature",
+        isCrossRepository: false,
       },
       {
         number: parsePrNumber(43),
         headRefName: "upstack",
         baseRefName: "feature",
+        isCrossRepository: false,
       },
     ]);
     expect(ordered.map((item) => Number(item.number))).toEqual([41, 42, 43]);
@@ -347,8 +350,8 @@ describe("context and stack discovery", () => {
     const source = `import { orderStack, WatcherQueryError } from ${JSON.stringify(join(import.meta.dir, "github.ts"))};
 try {
   orderStack({ owner: "owner", repo: "repo", number: 1 }, [
-    { number: 1, headRefName: "one", baseRefName: "two" },
-    { number: 2, headRefName: "two", baseRefName: "one" },
+    { number: 1, headRefName: "one", baseRefName: "two", isCrossRepository: false },
+    { number: 2, headRefName: "two", baseRefName: "one", isCrossRepository: false },
   ]);
   process.exit(1);
 } catch (error) {
@@ -379,6 +382,7 @@ it("reads open PRs beyond the old three-hundred limit and rejects incomplete pag
       number: page * 100 + index + 1,
       headRefName: `feature-${page * 100 + index + 1}`,
       baseRefName: "main",
+      isCrossRepository: false,
     })),
   } } } }));
   const prs = parseOpenPullRequests(pages);
@@ -386,4 +390,23 @@ it("reads open PRs beyond the old three-hundred limit and rejects incomplete pag
   expect(prs.at(-1)?.number).toBe(parsePrNumber(301));
   expect(() => parseOpenPullRequests(pages.slice(0, 3))).toThrow("incomplete or repeated pagination");
   expect(() => parseOpenPullRequests([])).toThrow("must contain a response");
+});
+
+it("never treats a fork PR as a parent but keeps it as a child of a stack PR", () => {
+  const page = { data: { repository: { pullRequests: {
+    pageInfo: { hasNextPage: false, endCursor: null },
+    nodes: [
+      { number: 10, headRefName: "feat-a", baseRefName: "main", isCrossRepository: false },
+      { number: 11, headRefName: "feat-b", baseRefName: "feat-a", isCrossRepository: false },
+      { number: 99, headRefName: "main", baseRefName: "main", isCrossRepository: true },
+      { number: 98, headRefName: "main", baseRefName: "develop", isCrossRepository: true },
+      { number: 97, headRefName: "feat-a", baseRefName: "feat-b", isCrossRepository: true },
+    ],
+  } } } };
+  const prs = parseOpenPullRequests([page]);
+  expect(prs.map((pr) => Number(pr.number))).toEqual([10, 11, 99, 98, 97]);
+  const ordered = orderStack({ owner: "owner", repo: "repo", number: parsePrNumber(10) }, prs);
+  expect(ordered.map((item) => Number(item.number))).toEqual([10, 11, 97]);
+  const fromFork = orderStack({ owner: "owner", repo: "repo", number: parsePrNumber(97) }, prs);
+  expect(fromFork.map((item) => Number(item.number))).toEqual([10, 11, 97]);
 });

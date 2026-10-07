@@ -22,7 +22,7 @@ export const OPEN_PULL_REQUESTS_QUERY =
     repository(owner: $owner, name: $repo) {
       pullRequests(states: [OPEN], first: 100, after: $endCursor) {
         pageInfo { hasNextPage endCursor }
-        nodes { number headRefName baseRefName }
+        nodes { number headRefName baseRefName isCrossRepository }
       }
     }
   }`;
@@ -446,10 +446,13 @@ function connectionNodes(value: unknown, path: readonly string[]): readonly unkn
 export function parseOpenPullRequests(value: unknown): readonly T.OpenPullRequest[] {
   return connectionNodes(value, ["data", "repository", "pullRequests"]).map((item, index) => {
     const object = record(item, `open PRs[${index}]`);
+    if (typeof object.isCrossRepository !== "boolean")
+      missing(`open PRs[${index}].isCrossRepository`, object.isCrossRepository);
     return {
       number: parsePrNumber(object.number, `open PRs[${index}].number`),
       headRefName: string(object.headRefName, `open PRs[${index}].headRefName`),
       baseRefName: string(object.baseRefName, `open PRs[${index}].baseRefName`),
+      isCrossRepository: object.isCrossRepository,
     };
   });
 }
@@ -666,7 +669,11 @@ export function orderStack(
   open: readonly T.OpenPullRequest[]
 ): T.NonEmpty<T.PrContext> {
   const byNumber = new Map(open.map((pr) => [pr.number, pr]));
-  const byHead = new Map(open.map((pr) => [pr.headRefName, pr]));
+  // A fork PR's head branch lives in another repository, so it can share a name such as
+  // "main" with a branch here. Match parents by name among same-repository PRs only.
+  const byHead = new Map(
+    open.filter((pr) => !pr.isCrossRepository).map((pr) => [pr.headRefName, pr])
+  );
   const children = new Map<string, T.OpenPullRequest[]>();
   for (const pr of open)
     children.set(pr.baseRefName, [...(children.get(pr.baseRefName) ?? []), pr]);
@@ -693,6 +700,7 @@ export function orderStack(
   ]);
   const up: T.OpenPullRequest[] = [];
   const visit = (parent: T.OpenPullRequest): void => {
+    if (parent.isCrossRepository) return;
     for (const child of children.get(parent.headRefName) ?? []) {
       if (seen.has(child.number)) continue;
       seen.add(child.number);

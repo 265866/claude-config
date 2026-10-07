@@ -1,11 +1,11 @@
 ---
 name: resolving-merge-conflicts
-description: Resolves each conflicting hunk from the original intent of both sides, runs the project's checks, and finishes the merge or rebase, stopping to ask only when a hunk needs a product decision. Use when you need to resolve an in-progress git merge/rebase conflict.
+description: Resolves each conflicting hunk from the original intent of both sides, runs the project's checks, and finishes the merge or rebase, stopping to ask only when a hunk needs a product decision or the user withdrew authorization for the operation or for work it depends on. Use when you need to resolve an in-progress git merge/rebase conflict.
 ---
 
 # Resolving merge conflicts
 
-1. **See the current state** of the merge/rebase. Check git history, and the conflicting files.
+1. **See the current state** of the merge/rebase. Check git history, and the conflicting files. Check the [resume marks](${CLAUDE_SKILL_DIR}/../../playbooks/pause-safely.md#resume-marks). If they hold this operation as withdrawn or blocked by withdrawal, directly or through its change, its branch, or a withdrawn PR below its branch in the stack, leave it untouched and ask the user before resolving it. Run the owning playbook's review on files they mark unreviewed before step 5.
 
 2. **Find the primary sources** for each conflict. Understand deeply why each change was made, and what the original intent was. Read the commit messages, PRs, and linked issues or tickets through access you already have. Connect an already-available read-only tool when it helps, and report it.
 

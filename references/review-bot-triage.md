@@ -6,13 +6,13 @@ Use this reference when the Babysit playbook (`../playbooks/babysit.md`) handles
 
 Classify each automated reviewer thread before acting. Apply these rules in order; the first one that matches decides:
 
-1. `fix`: The current code or a reproduction proves a real issue, in any category. Fix it locally in the lowest owning PR and prepare a reply that cites the commit SHA.
+1. `fix`: The current code or a reproduction proves a real issue, in any category. Fix it locally in the PR that Babysit step 8 names (the lowest owning PR, or in `threads-only` the PR that holds the thread when that PR owns the code). When you fix it, prepare a reply that cites the commit SHA; otherwise report it, as that step says.
 2. `ask`: The finding is in a high-risk category (listed under "Never auto-dismiss" below) and is not proven. Never dismiss it yourself. Ask the user, and attach any concrete disproof or matching skip pattern as evidence for their decision.
 3. `dismiss`: The current code or a reproduction concretely disproves the concern, or a documented skip pattern below matches with all of its conditions met. Prepare a reply with a short reason and the evidence.
 4. `fix`: The issue is unproven, but the suggested fix is small and clearly reduces risk without changing product intent.
 5. `ask`: Anything else, such as a novel or ambiguous comment that a reproduction, a test, or the current code within reach cannot settle. Try those first; ask only when evidence cannot decide, and continue other work while asking.
 
-Pushing the fix to the PR's branch proceeds under Babysit steps 1 and 5. Posting the reply and resolving the thread are separate ask-first writes, as Babysit step 9 describes. A fix or disproof is a valid deliverable while that approval is pending.
+Pushing the fix to the PR's branch proceeds under Babysit steps 1 and 5. Posting the reply and resolving the thread are separate ask-first writes, as Babysit step 9 describes. A fix or disproof is a valid deliverable while that approval is pending. In a read-only request, including Babysit `check`, report the classification and offer the fix without editing.
 
 When evidence within reach cannot settle it, ask. Skipping a noisy code-quality comment is cheap; skipping a real data or security bug is not.
 

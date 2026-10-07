@@ -79,13 +79,13 @@ Replace `<app-root-selector>` with a stable marker from the current repo, such a
 3. Perform exactly one structural action: click, type, keypress, drag, scroll, navigate, or resize.
 4. Capture a fresh snapshot/screenshot.
 5. Verify the expected state change.
-6. Save artifacts for before/after comparisons when the user asked for proof.
+6. Save before/after artifacts when visual correctness matters, when the fix needs failing-before evidence, or when the user asked for proof. Capture the before state before you change anything. In a privacy-sensitive workspace, ask before storing them (see Guardrails).
 
 ## CDP Capabilities
 
 Use raw CDP only when higher-level browser APIs are insufficient:
 
-- Performance: CPU profiles, traces, paint flashing, FPS meter, layout shift inspection.
+- Performance: CPU profiles, traces, paint flashing, FPS meter, layout shift inspection. Profiles explain where time goes. Take a reported number from untraced runs, and vet it with the **benchmark-checklist** skill.
 - Memory: heap snapshots and forced GC for leak investigations.
 - Network: request blocking, throttling, cache disablement, request/response logs.
 - Rendering: viewport changes, color scheme emulation, reduced motion, accessibility checks.

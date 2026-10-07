@@ -20,7 +20,7 @@ When in doubt, take the simple path.
 
 ## Step 2a. Explore (complex questions only)
 
-Decompose the question into a few distinct exploration angles. Record the required slices, then execute them using the selected executor. Each explorer gets the resolved `references/explorer-prompt.md`, its angle, available evidence, and a read-only scope. Results must account for each required slice. Then go to Step 3.
+Decompose the question into a few distinct exploration angles. Record the required slices, then execute them using the selected executor. Each explorer gets the resolved `references/explorer-prompt.md`, the question, its angle, available evidence, and a read-only scope. Results must account for each required slice. Then go to Step 3.
 
 ## Step 2b. Direct Explain (simple questions)
 
@@ -28,7 +28,7 @@ Trace the relevant code directly and explain it using `references/explainer-prom
 
 ## Step 3. Synthesize (complex questions only)
 
-After the exploration stage resolves, synthesize using `references/explainer-prompt.md` with every result and explicit gap. Use the selected executor when synthesis is a separate stage. Resolve contradictions by checking code; do not hide missing slices or restart the full investigation.
+After the exploration stage resolves, synthesize using `references/explainer-prompt.md` with the question, the read-only scope, every result, and explicit gap. Use the selected executor when synthesis is a separate stage. Resolve contradictions by checking code; do not hide missing slices or restart the full investigation.
 
 ## Step 4. Present
 

@@ -1,6 +1,6 @@
 ---
 name: authenticated-browser
-description: Read or act on websites through the user's own signed-in accounts, using a separate Claude Code worker that drives the user's dedicated agent Chrome through Chrome DevTools MCP. Use when a task or a check needs a page behind the user's login or one that plain fetching cannot reach, such as account usage, billing, or subscription pages, web settings and SaaS consoles, OAuth consent for an app the task connects, or eBay and Facebook Marketplace comps. Prefer an official CLI or API that already authenticates. Use control-ui instead for local UI verification.
+description: Read or act on websites through the user's own signed-in accounts, using a separate Claude Code worker that drives the user's dedicated agent Chrome through Chrome DevTools MCP. Use when a task or a check needs a page behind the user's login or one that neither plain fetching nor a control-ui harness can reach, such as account usage, billing, or subscription pages, web settings and SaaS consoles, OAuth consent for an app the task connects, or eBay and Facebook Marketplace comps. Prefer an official CLI or API that already authenticates. Use control-ui instead for local UI verification.
 ---
 
 # Authenticated browser
@@ -9,13 +9,13 @@ The user keeps Google Chrome for agents only; their everyday browser is a differ
 
 ## When to use
 
-Use this skill when an answer or a proof sits on a web page that needs the user's sign-in or blocks plain fetching:
+Use this skill when an answer or a proof sits on a web page that needs the user's sign-in or that neither plain fetching nor a control-ui harness can reach:
 
 - Usage, quota, plan, billing, or subscription status on a provider's account page, such as whether a usage window started or a subscription ended.
 - Settings, dashboards, and consoles of hosted services, registries, and stores the user is signed in to.
 - An account chooser, "Continue as", or OAuth consent screen that connects an app the task needs to an account already signed in to the agent Chrome.
 - Marketplace data such as eBay sold comps or Facebook Marketplace listings.
-- A page that refuses plain fetching or renders only with JavaScript, and that a control-ui harness with a temporary profile also cannot reach. Use control-ui for any page that needs no sign-in.
+- A page that refuses plain fetching or renders only with JavaScript, and that a control-ui harness with a temporary profile also cannot reach. Use control-ui for any other page that needs no sign-in.
 
 An official CLI or API that already authenticates, such as `gh`, comes first when it answers the question. Use control-ui for an app on this machine or a dev server. A host app's browser-preview tool is for local pages, so whether it is on or off does not change this choice. Before reporting a result as not checked or handing a check to the user, consider whether a signed-in page can prove it.
 

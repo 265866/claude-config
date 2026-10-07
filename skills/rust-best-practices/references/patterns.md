@@ -514,4 +514,28 @@ Doctests are compiled examples: code blocks in doc comments build and run under 
 /// ```
 #[derive(Debug, PartialEq, Eq)]
 pub enum Level { Debug, Info, Warn, Error }
+
+#[derive(Debug)]
+pub struct ParseLevelError(String);
+
+impl std::fmt::Display for ParseLevelError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "unknown log level: {}", self.0)
+    }
+}
+
+impl std::error::Error for ParseLevelError {}
+
+impl std::str::FromStr for Level {
+    type Err = ParseLevelError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "debug" => Ok(Self::Debug),
+            "info" => Ok(Self::Info),
+            "warn" => Ok(Self::Warn),
+            "error" => Ok(Self::Error),
+            _ => Err(ParseLevelError(s.to_owned())),
+        }
+    }
+}
 ```

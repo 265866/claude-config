@@ -368,7 +368,7 @@ type Config struct {
 func New(addr string, cfg Config) *Client
 ```
 
-Functional options earn their keep when most callers pass none, the list is long and growing, or an option can fail (the option returns `error`). Options take parameters (`WithFailFast(enable bool)`), not presence (`WithFailFastEnabled()`), so callers can compute them.
+Functional options earn their keep when most callers pass none and the list is long or growing, or when an option can fail (the option returns `error`). Options take parameters (`WithFailFast(enable bool)`), not presence (`WithFailFastEnabled()`), so callers can compute them.
 
 ## defer cleanup
 
@@ -500,7 +500,11 @@ func newTestServer(t *testing.T) *Server {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { srv.Close() })
+	t.Cleanup(func() {
+		if err := srv.Close(); err != nil {
+			t.Errorf("close test server: %v", err)
+		}
+	})
 	return srv
 }
 ```

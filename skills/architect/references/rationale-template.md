@@ -1,6 +1,6 @@
 # Rationale template
 
-The prose that ships alongside the type sketch. One page. Sentence-case headings, no boilerplate. Replace the italic notes with actual content.
+The prose that accompanies the type sketch. One page. Sentence-case headings, no boilerplate. Replace the italic notes with actual content.
 
 ## Problem
 
@@ -16,7 +16,7 @@ The prose that ships alongside the type sketch. One page. Sentence-case headings
 
 ## Synthesis decision
 
-*Filled in by the coordinator. When [arena](../../arena/SKILL.md) comparison was warranted, record which candidate became the base and why, what was adapted from each other candidate, and what was rejected and why. For a settled design, name the accepted constraints or existing decision that made comparison unnecessary.*
+*Filled in by the coordinator. When an [arena](../../arena/SKILL.md) comparison ran, because it was warranted or because the user explicitly asked for one, record which candidate became the base and why, what was adapted from each other candidate, and what was rejected and why. When it ran only at the user's request, also record the request and the constraints that made comparison look unnecessary. For a settled design with no comparison, name the accepted constraints or existing decision that made comparison unnecessary.*
 
 ## Tradeoffs accepted
 

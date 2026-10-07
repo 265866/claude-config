@@ -20,7 +20,7 @@ Scan for:
 
 ## Scope to skills and tools the session actually used
 
-Findings must point to skills, tools, or MCPs invoked in this transcript. Speculative routings to skills the parent never opened do not count. A `new skill: <kebab-name>` routing is the one exception, for a recurring pattern no existing skill covers. To check whether a skill was used, scan the transcript for:
+Findings must point to skills, tools, or MCPs invoked in this transcript. Speculative routings to skills the parent never opened do not count. Two routings are exceptions: `tune description: <skill path>` for a catalog skill that should have triggered but did not, and `new skill: <kebab-name>` for a recurring pattern no existing skill covers. To check whether a skill was used, scan the transcript for:
 
 - Native `Skill` invocations and results naming the skill, with its path resolved from the session's actual skill catalog. A skill loaded this way does not need a separate Read call to count as used.
 - `Read` tool calls against any `SKILL.md` file (project-local `.claude/skills/`, user skills under the active configuration directory, or explicitly connected plugin paths)
@@ -32,7 +32,7 @@ Two valid finding shapes:
 - The parent invoked the skill and you found a real gap in its body. Route to the skill's relevant section.
 - The skill was visible in the catalog but did not trigger when it would have helped. Tune the skill's description so future agents pick it up. Route as `tune description: <skill path>`.
 
-The "skill should have been invoked but wasn't" bullet above is the canonical missed-trigger case. Route those to `tune description`. If the existing skill was neither invoked nor a missed-trigger candidate, drop that routing; use a new-skill routing only under the exception above.
+The "skill should have been invoked but wasn't" bullet above is the canonical missed-trigger case. Route those to `tune description`. If the existing skill was neither invoked nor a missed-trigger candidate, drop that routing; use a new-skill routing only under the new-skill exception above.
 
 List each durable learning you find. For each:
 - Principle: one sentence naming the contrarian or second-order observation. Don't restate the obvious learning. Name the one beneath it.

@@ -8,6 +8,8 @@ paths: ["**/*.rs"]
 
 Apply the **principle-type-system-discipline** principle skill first.
 
+Respect `rust-version` in Cargo.toml before applying version-gated syntax: let-else needs Rust 1.65. On an older floor, use `match` or `if let` with an early return.
+
 | Rule | Summary |
 |------|---------|
 | Newtypes for domain values | Wrap primitives in a struct with a private field and a fallible constructor. Parse once at the boundary; downstream code trusts the type. |

@@ -8,11 +8,11 @@ paths: ["**/*.py"]
 
 Apply the **principle-type-system-discipline** principle skill first.
 
-Check `requires-python` in pyproject.toml before applying version-gated syntax: PEP 695 needs 3.12; `StrEnum`, `TaskGroup`, `asyncio.timeout`, `except*`, and `assert_never` need 3.11. On older floors use the pre-695 equivalents (`TypeVar`, `TypeAlias`).
+Check `requires-python` in pyproject.toml before applying version-gated syntax: PEP 695 needs 3.12; `StrEnum`, `TaskGroup`, `asyncio.timeout`, `except*`, and `assert_never` need 3.11. On older floors use the pre-695 equivalents (`TypeVar`, `TypeAlias`). `X | None` needs 3.10, and builtin generics such as `list[str]` need 3.9, wherever the expression is evaluated at runtime (runtime-evaluated annotations, type alias values, `cast` arguments). `match`, `@dataclass(slots=True)` and `kw_only=True`, `typing.TypeGuard`, and `typing.TypeAlias` need 3.10. Below 3.10, dispatch with `if`/`isinstance`, omit `slots=True` and `kw_only=True` (order defaulted fields last, because a non-default field after a defaulted one, including one inherited from a base, raises `TypeError`; give such subclass fields defaults), and import `TypeGuard` and `TypeAlias` from `typing_extensions` when the project already depends on it; otherwise use an implicit alias and a plain `bool` return.
 
 | Rule | Summary |
 |------|---------|
-| Modern annotations | `X \| None`, `list[str]`, `def f[T](...)`, `type Alias = ...`. No `Optional`, `Union`, `List`, or module-level `TypeVar` in new code. |
+| Modern annotations | `X \| None`, `list[str]`, `def f[T](...)`, `type Alias = ...`. No `Optional`, `Union`, or `List` in new code, except `Optional` and `Union` below 3.10, and `List` and `Dict` below 3.9, wherever the expression is evaluated at runtime; no module-level `TypeVar` on a 3.12+ floor. |
 | Tagged unions | Model variants as a union of frozen dataclasses dispatched with `match` plus `assert_never`. No optional-field bags, no `kind` string checked with `if`. |
 | Domain primitives | `NewType` for ids and units so they can't be mixed up; `Enum`/`StrEnum` for closed sets of values. Validate once at creation. |
 | Dataclasses over dicts | `@dataclass(frozen=True, slots=True)` for data that crosses a function boundary. No dict-passing, no hand-written `__init__`/`__eq__`/`__repr__`. Use attrs for validators or converters when the project already depends on it. Add it only when its validators or converters earn a new dependency, and report it. |

@@ -44,6 +44,10 @@ Work like a careful, cautious, precise investigator. Don't produce a narrative. 
 
 {SOURCE_PLAYBOOK_SECTION}
 
+## Your Limits
+
+{SOURCE_TIME_QUERY_LIMITS}
+
 ## Investigation Instructions
 
 Gather **evidence**. Don't answer the question directly. The synthesizer weighs the evidence and forms conclusions. Follow this loop:

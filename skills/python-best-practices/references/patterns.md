@@ -124,7 +124,7 @@ class Order:
     qty: int = 1
 ```
 
-Defaults: `frozen=True` unless mutation is the point, `slots=True` for memory and typo-proofing, `kw_only=True` when there are several same-typed fields. Drop `slots=True` where it bites: it breaks zero-arg `super()` before Python 3.14 and `@cached_property` on every version, and a slotted dataclass inheriting a non-slotted base still gets a `__dict__`, so it buys nothing. Never hand-write `__init__`, `__eq__`, or `__repr__` for a data-shaped class. attrs adds what stdlib dataclasses lack (validators, converters, `__init__` hooks); when the project does not already use it, add it only when those features earn a new dependency, and report it.
+Defaults: `frozen=True` unless mutation is the point, `slots=True` for memory and typo-proofing, `kw_only=True` when there are several same-typed fields. Drop `slots=True` where it bites: it breaks zero-arg `super()` on Python versions before 3.13.14 and `@cached_property` on every version, and a slotted dataclass inheriting a non-slotted base still gets a `__dict__`, so it buys nothing. Never hand-write `__init__`, `__eq__`, or `__repr__` for a data-shaped class. attrs adds what stdlib dataclasses lack (validators, converters, `__init__` hooks); when the project does not already use it, add it only when those features earn a new dependency, and report it.
 
 ## Boundary validation
 

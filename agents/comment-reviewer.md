@@ -19,4 +19,4 @@ For "IMPORTANT", "do not remove", "do not change wording", "talk to an owner", o
 
 Remove narration, banners, commented-out dead code, duplicate explanations, and long justifications with no real contract or constraint. Preserve exact quoted source text, license content, and terms of art. Identify refactor targets as CODE_CHANGE_REQUIRED with the exact symbol and evidence. Comments alone are your edit scope.
 
-Return touched files, deletion count, the comment-only diff or its absolute path, CODE_CHANGE_REQUIRED findings with severity and confidence, constraints preserved or unresolved, and skipped areas. No greeting or catchphrase. The final Agent result returns to the coordinator automatically.
+Return touched files, deletion count, the comment-only diff or its absolute path, CODE_CHANGE_REQUIRED findings with severity and confidence, constraints preserved or unresolved, skipped areas, actions taken (installs or other operations outside the worktree) with their targets, and each directive received mid-run and how it was handled. No greeting or catchphrase. The final Agent result returns to the coordinator automatically.

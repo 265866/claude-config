@@ -51,7 +51,7 @@ Source: diataxis.fr.
 
 ## Write sentences to the reader (Google developer style)
 
-- Talk to the reader as "you", in the present tense. "Will" only for things that genuinely happen later.
+- Talk to the reader as "you" (a tutorial uses "we", as above), in the present tense. "Will" only for things that genuinely happen later.
 - Say who does what: "the compiler checks", not "is checked". Passive is fine only when the actor is unknown or beside the point.
 - Write instructions as commands: "Click Submit." State facts plainly. Never "should be done".
 - Put the condition before the instruction: "To delete the document, click Delete." The reader skips what does not apply.
@@ -59,7 +59,7 @@ Source: diataxis.fr.
 - Sound like a knowledgeable friend. No buzzwords, no figurative language, no "please" in instructions, and never "simply", "easy", or "quickly" in a procedure. If it were simple, the reader would not be here.
 - Don't pre-announce ("we will soon support...") and don't start consecutive sentences with the same phrase.
 - Link with words that say where the link goes: the page title or a short description. Never "click here". Prefer a sentence of context on the page over a link off it.
-- Headings carry the point, not just the topic ("Pick the mode first", not "Modes"). Sentence case. A task heading is a bare verb phrase ("Create an instance"). A concept heading is a noun phrase. One h1 per page, no skipped levels.
+- Headings carry the point, not just the topic ("Pick the mode first", not "Modes"). Sentence case. A task heading below the page title is a bare verb phrase ("Create an instance"). A concept heading is a noun phrase. One h1 per page, no skipped levels.
 - Numbered lists for sequences, bullets for everything else. Introduce a list with a complete sentence. Keep items parallel.
 - Code goes in code font. UI elements go in bold. Use serial commas. Drop "etc." and say up front that a list is partial.
 
@@ -98,7 +98,7 @@ These are the profile's clarity rules. Related reading: Kohl, The Global English
 ## Voice and repo specifics
 
 - Apply the **edit-prose** skill to every doc this skill touches. That skill owns the slop-pattern catalog: AI vocabulary, filler, hedging, formatting tells.
-- PR descriptions and commit messages are writing too. Every layer except Diátaxis applies to them, with two exceptions. A commit subject follows the commit-agent's subject format (imperative and terse, articles optional). A PR title and body take their structure from the [Opening a PR](../../playbooks/opening-a-pr.md) playbook, and the sentence-level layers still apply. Commit bodies follow every layer. Do not paste swarm logs, SHA lists, or metric tables into either. Link them.
+- PR descriptions and commit messages are writing too. Every layer except Diátaxis applies to them, with these exceptions. A commit subject follows the commit-agent's subject format (imperative and terse, articles optional), except a squash-merge subject that takes the PR title. A PR title and body take their structure from the [Opening a PR](${CLAUDE_SKILL_DIR}/../../playbooks/opening-a-pr.md) playbook. The sentence-level layers still apply to the body, except that it may use first person and past tense for what happened and what you checked. A title may drop articles, as an exception to the STE article rule above and edit-prose rule 33. Commit bodies follow every layer, except a squash-merge body taken from GitHub's default text, which keeps that text apart from the closing-keyword edits in Shipping step 6. Do not paste swarm logs, SHA lists, or metric tables into either. Link them.
 - Product UI strings are not documentation. Use your product's copy guidelines for those.
 - Indent code snippets the way the language and repository require (YAML, for example, forbids tabs). Write real paths and real symbols. Make every count or tree claim true at the commit that lands it, and include the command that regenerates it.
 

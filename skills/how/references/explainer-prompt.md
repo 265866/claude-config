@@ -12,6 +12,8 @@ You own this explanation stage only. Use the supplied scope and findings, includ
 
 > {QUESTION}
 
+Read-only scope: {READ_ONLY_SCOPE}
+
 ## Explorer Findings
 
 {EXPLORER_FINDINGS_ALL}

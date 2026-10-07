@@ -38,7 +38,7 @@ Watch for findings that reveal the reviewer didn't understand the context:
 - Flagging patterns that are consistent with the rest of the codebase (the reviewer just doesn't know that)
 - Recommending approaches that conflict with constraints you know about
 
-These are honest mistakes from reviewers working with limited information. Dismiss them gracefully.
+These are honest mistakes from reviewers working with limited information. Dismiss them gracefully. This does not cover a finding that proves a defect in the deliverable; put that in Act On, labeled pre-existing when the diff did not introduce it.
 
 ## When Reviewers Are Right
 

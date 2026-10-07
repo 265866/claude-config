@@ -18,6 +18,12 @@ You own this exploration stage only. Use the coordinator's supplied scope, groun
 
 {EXPLORATION_ANGLE}
 
+## Scope and Evidence
+
+Read-only scope: {READ_ONLY_SCOPE}
+
+Available evidence: {AVAILABLE_EVIDENCE}
+
 ## Exploration Instructions
 
 Start by finding the relevant code. Use Glob to find directories and files, Grep to find key symbols, Read to understand the actual implementation. Don't guess from names. Read the code.

@@ -18,6 +18,16 @@ You own this synthesis stage only. Use the declared source scope, supplied evide
 
 **Key symbols:** {SYMBOLS}
 
+**Initial commits:** {COMMIT_LIST}
+
+**PR numbers:** {PR_NUMBERS}
+
+**Ticket IDs:** {TICKET_IDS}
+
+## Declared Source Scope
+
+{DECLARED_SOURCE_SCOPE}
+
 ## Investigator Findings
 
 {ALL_INVESTIGATOR_FINDINGS}
@@ -28,7 +38,7 @@ You own this synthesis stage only. Use the declared source scope, supplied evide
 
 ## Epistemics Framework
 
-You MUST follow the framework in `references/epistemics.md`. Read it in full before writing the output. The key rules:
+You MUST follow the epistemics framework at `{EPISTEMICS_ABSOLUTE_PATH}`. Read it in full before writing the output. The key rules:
 
 1. Every claim sits in one of these tiers: **Direct**, **Supported**, **Inferred**, **Speculative**, **Unknown**. The tier determines what section the claim goes in and how it's phrased.
 2. Every Direct/Supported claim must have a citation (PR #, ticket ID, doc URL, chat permalink, commit hash, or file:line).
@@ -71,7 +81,7 @@ Use `[Direct]` for single-source, explicit evidence. Use `[Supported]` when mult
 
 ### What We Can Reasonably Infer
 
-**Reasonable readings of the context that no source explicitly supports** (the Inferred tier in epistemics.md; converging indirect evidence belongs under `[Supported]` above). Make the inference chain visible: "Given A and B, it's likely that C." Use hedged language ("appears to", "likely", "suggests", "is consistent with"). Format:
+**Reasonable readings of the context that no source explicitly supports** (the Inferred tier in the epistemics framework; converging indirect evidence belongs under `[Supported]` above). Make the inference chain visible: "Given A and B, it's likely that C." Use hedged language ("appears to", "likely", "suggests", "is consistent with"). Format:
 
 - **[Inferred]** {Hedged claim}. Reasoning: {the specific evidence and the inference step}.
 

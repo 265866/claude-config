@@ -1,6 +1,6 @@
 # Design red flags
 
-Screen every candidate before synthesis. A red flag is a reason to revise or reject the shape.
+Screen every candidate before synthesis. A red flag is a reason to revise or reject the shape. A flag in existing code outside the task's scope is reported, not fixed. In a design the user chose, report the flag instead of overriding the design.
 
 ## Shallow module
 
@@ -42,17 +42,17 @@ Give each piece of state one owner. Other modules read it or ask the owner to ch
 
 The design supports more than one way to do the same task. An agent copies whichever way it finds first, so every way keeps gaining callers.
 
-Keep one way. Move callers off the others and delete them in the same change.
+Keep one way. Migrate callers and delete the others in the same wave, per [principle-migrate-callers-then-delete-legacy-apis](../../principle-migrate-callers-then-delete-legacy-apis/SKILL.md), unless external users depend on them. Report existing duplicates outside the task's scope instead of fixing them.
 
 ## Importable internals
 
 A caller can import a module's internals. An agent takes the shortest path that compiles, so it imports them directly and they become part of the interface.
 
-Make internals unreachable from outside the module, so an import from outside fails the build. Use the language's own boundary where it has one:
+This flag applies when a candidate creates a module boundary that other code will import. Make internals unreachable from outside the module, so an import from outside fails the build. Use the language's own boundary where it has one:
 
 - Go: put internals under an `internal/` directory.
 - Rust: keep them private to the module. Use `pub(crate)` only when the boundary is the whole crate.
-- TypeScript: list the public entry points in the package's `exports` field. TypeScript enforces it only for imports by package name, with `moduleResolution` set to `node16`, `nodenext`, or `bundler`. Inside one package, add a lint rule such as `no-restricted-imports` that runs in CI.
+- TypeScript: list the public entry points in the package's `exports` field. TypeScript enforces it only for imports by package name, with `moduleResolution` set to `node16`, `nodenext`, or `bundler`. Inside one package, add a lint rule such as `no-restricted-imports` that runs in CI. Adding `exports` to a published package that had none changes its public interface, so treat it as a breaking change.
 - Python: the language cannot enforce this. Prefix internals with `_` and add an import-linter contract that runs in CI.
 
 ## Hand-synced list
