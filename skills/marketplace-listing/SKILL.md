@@ -86,12 +86,12 @@ room to fall rather than for a fast clear.
 ### Bulk tiers
 
 Tiers appear only when quantity is above one. Unit price and pile depth decide the breaks together,
-and they pull opposite ways: a $30 case and a $300 machine want completely different numbers. Derive
+and they pull opposite ways: a \$30 case and a \$300 machine want completely different numbers. Derive
 the breaks rather than reaching for a default ladder.
 
-1. **First break is where the spend gets real.** Divide about $300 of total spend by the single-unit
-   ask, then round to a number a buyer recognizes: 2, 3, 5, 10, 25, 50, 100. A $30 case lands near
-   10. A $300 machine lands under 2, so clamp to 2, the smallest break that means anything.
+1. **First break is where the spend gets real.** Divide about \$300 of total spend by the single-unit
+   ask, then round to a number a buyer recognizes: 2, 3, 5, 10, 25, 50, 100. A \$30 case lands near
+   10. A \$300 machine lands under 2, so clamp to 2, the smallest break that means anything.
    When the break reaches the pile, drop it; the only tier is then `All`, under the single-unit ask.
 2. **Each later break roughly triples the one before it.** Add one such break normally, a second
    only for a pile in the hundreds when the steps would otherwise jump too far, and never one that
@@ -111,8 +111,8 @@ so a bad buy surfaces as a shallower ladder or a halt, never as a marked-up list
 
 The two shapes this produces:
 
-- 390 cases at $30 each: `10+ cases = $28 ea`, `30+ = $26 ea`, `All = $22 ea`.
-- 3 machines at $300 each: `2 = $285 ea`, `All 3 = $270 ea`.
+- 390 cases at \$30 each: `10+ cases = \$28 ea`, `30+ = \$26 ea`, `All = \$22 ea`.
+- 3 machines at \$300 each: `2 = \$285 ea`, `All 3 = \$270 ea`.
 
 A pile in the hundreds can carry a fourth tier when the steps would otherwise jump too far. Three
 tiers is the normal shape. A handful gets two, or only `All` when the first break reaches the pile.
@@ -249,16 +249,16 @@ TrafficMaster Bridge Coast Oak 7 in. W x 48 in. L Click-Lock Waterproof Luxury V
 
 Brand new, factory sealed in box
 
-$30 case — 15% off Home Depot (~$36 including tax)
+\$30 case — 15% off Home Depot (~\$36 including tax)
 
 390 cases available (~9300 sq ft)
 
 Open to offers, especially on bulk deals
 
 Bulk Discounts:
-• 10+ cases = $28 ea
-• 30+ = $26 ea
-• All = $22 ea
+• 10+ cases = \$28 ea
+• 30+ = \$26 ea
+• All = \$22 ea
 
 Pickup in San Rafael.
 Zelle or cash only. Sold as-is.
@@ -277,9 +277,9 @@ NEW Henry 887G Tropi-Cool Gray 100% Silicone Reflective Roof Coating 4.75 gal.
 
 All new, unopened, still sealed
 
-I have 3, selling $210 for 1 or $600 for 3
+I have 3, selling \$210 for 1 or \$600 for 3
 
-Retails for $349 on Home Depot, I'm selling as low as $200, that's $149 or 42% off
+Retails for \$349 on Home Depot, I'm selling as low as \$200, that's \$149 or 42% off
 
 Local pickup and cash or Zelle only, first come first serve, item comes as is and all sales are final
 ```
@@ -301,15 +301,15 @@ Henry 887G Tropi-Cool 100% Silicone Reflective Roof Coating in Gray, 4.75 gallon
 
 Brand new, unopened, factory sealed
 
-$210 each — 45% off Home Depot (~$381 including tax)
+\$210 each — 45% off Home Depot (~\$381 including tax)
 
 3 available
 
 Open to offers, especially on bulk deals
 
 Bulk Discounts:
-• 2 = $200 ea
-• All 3 = $190 ea
+• 2 = \$200 ea
+• All 3 = \$190 ea
 
 Pickup in San Rafael.
 Zelle or cash only. Sold as-is.

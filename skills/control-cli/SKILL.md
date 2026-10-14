@@ -41,7 +41,7 @@ SESSION="cli-harness-$(date +%s)"
 trap 'tmux capture-pane -pt "$SESSION" 2>/dev/null; tmux kill-session -t "$SESSION" 2>/dev/null' EXIT
 wait_for() {
   for _ in $(seq 1 100); do
-    tmux capture-pane -pJt "$SESSION" 2>/dev/null | grep -qF -- "$1" && return 0
+    tmux capture-pane -pJt "$SESSION" 2>/dev/null | grep -qF -- "\$1" && return 0
     tmux has-session -t "$SESSION" 2>/dev/null || return 1
     sleep 0.1
   done
