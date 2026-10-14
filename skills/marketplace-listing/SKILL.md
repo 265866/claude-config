@@ -40,6 +40,12 @@ price the listing quotes.
 
 - Prefer the retailer the item actually comes from: Home Depot, Lowe's, Amazon, the manufacturer's
   own store.
+- Read the live retail page. Home Depot, Lowe's, and Best Buy often block plain fetching; read a
+  blocked page through the **agent-chrome** skill rather than settling for a cached copy, an old
+  search snippet, or a price tracker's history. Ask the worker to report the store the page
+  shows and not to change the account's selected store. When that store is not near San Rafael,
+  have it read a nearby store's price from the page's store-availability list without selecting
+  that store, or report the store shown and tell the user.
 - Take the shelf price for a store near San Rafael, then add sales tax. San Rafael's combined
   rate is 9.25% (6% state, 0.25% Marin County, 1% city, and 2% district taxes, per
   salestaxhandbook.com as of 2026). Recheck it against the California CDTFA rate lookup when a
