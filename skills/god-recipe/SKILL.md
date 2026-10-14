@@ -66,8 +66,9 @@ already hold. Keep a near-duplicate only when it is your tested evidence for a g
 
 When WebSearch refuses a domain, run the extractor's `--links` mode on the site's own search page,
 such as `https://www.allrecipes.com/search?q=chocolate+chip+cookies`. It lists the site's links
-with their anchor text, which on Allrecipes includes rating counts. Never build a recipe URL
-yourself. A URL that appears in search results, a summary, or a site's links is fine to try,
+with their anchor text, which on Allrecipes includes rating counts. When `--links` is blocked,
+read the search page through the **agent-chrome** skill. Never build a recipe URL yourself. A
+URL that appears in search results, a summary, or a site's links is fine to try,
 because the extractor confirms it. A WebSearch summary only points you to pages. Use no quantity,
 technique, or claim that you saw only in a summary.
 
@@ -99,13 +100,21 @@ When the extractor fails, try these in order:
 
 1. `--text`, unless the failure was an HTTP error. It sends the same request, so it fails the same
    way.
-2. WebFetch, asking for the ingredient list. It paraphrases and rounds, so mark those quantities
-   as unverified. In strict mode, never let an unverified number decide a ratio.
-3. A secondary copy, only when the original is unreadable. Check the copy against whatever you can
+2. The **agent-chrome** skill, for a page that blocked the extractor, returned a bot check, or
+   showed no recipe without JavaScript. Batch a few blocked candidates from one site per brief.
+   Ask the worker to copy the ingredient list, yields, and method from the snapshot text, and to
+   flag any line it could not copy whole. Unflagged quantities count as verified; flagged ones
+   stay unverified.
+3. WebFetch, asking for the ingredient list, when agent-chrome could not read the page. It
+   paraphrases and rounds, so mark those quantities as unverified.
+4. A secondary copy, only when the original is unreadable. Check the copy against whatever you can
    see of the original, such as a search snippet or a second copy. Cite it as "<original> via
    <linked copy>".
 
-When every route fails, drop the source and do not link it.
+In strict mode, never let an unverified number decide a ratio, whichever route it came from.
+
+When every route fails, drop the source and do not link it. Name it once under Sources as
+unreadable.
 
 Mine the `--reviews` output and recipe notes for changes that cooks repeat ("cut the sugar by a
 third", "double the garlic"). Report how many reviews you read. A tweak that a meaningful share of
@@ -203,7 +212,8 @@ Loose mode: volume, with grams for the main ingredients.>
 
 ## Sources
 <Every recipe you compared, as markdown links, with rating and count when known.
-Mark any source whose quantities came through the WebFetch fallback or a secondary copy.>
+Mark any source with unverified quantities (flagged agent-chrome lines or the WebFetch fallback)
+or quantities from a secondary copy. Name sources you could not read, unlinked.>
 ```
 
 Sources rarely publish active time. Label any time you estimated as an estimate. Link only pages you

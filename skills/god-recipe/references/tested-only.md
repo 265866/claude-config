@@ -22,9 +22,11 @@ section.
 Most of these pages carry no schema.org data. Read them with the extractor's `--text` mode, which
 keeps the quantities verbatim and also reads extension PDFs.
 
-Ball's site blocks every reader. When a tested recipe is readable only through a secondary copy,
-check the copy against what you can see of the original, such as search snippets or a second
-copy, and cite it as "<original> via <linked copy>".
+This mode needs verbatim lines, so never use WebFetch quantities. Read a blocked tested page, such
+as Ball's, through the **agent-chrome** skill. A line the worker flags makes that recipe unusable
+until a rerun or a checked secondary copy confirms it. When a tested recipe is still readable only
+through a secondary copy, check the copy against what you can see of the original, such as
+search snippets or a second copy, and cite it as "<original> via <linked copy>".
 
 Every safety statement you deliver, whether an allowed change, a warning, or a processing time,
 must come from text you read on the source page. A search summary is never the source of a safety
