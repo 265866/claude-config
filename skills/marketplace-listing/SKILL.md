@@ -52,7 +52,7 @@ price the listing quotes.
 **Comps** set the ask. They never appear in the copy.
 
 Both sources sit behind a login, so both need the user's signed-in browser. Use the
-**authenticated-browser** skill and run one worker per source; start both, and they run one after
+**agent-chrome** skill and run one worker per source; start both, and they run one after
 the other. In each brief's task part, name the exact product and variant confirmed in step 1, so the
 worker skips parts, accessories, and other models:
 
@@ -65,7 +65,7 @@ worker skips parts, accessories, and other models:
 Ask each worker for one row per comp: price, condition, quantity, date sold or posted, and URL.
 Ten rows per source is plenty.
 
-Handle a `blocked` or `partial` worker as the **authenticated-browser** skill directs, and rerun
+Handle a `blocked` or `partial` worker as the **agent-chrome** skill directs, and rerun
 that source only as that skill allows: its one revised-brief retry, a `needs_approval` run it
 permits, or after the user clears the blocker. When a source still comes back empty, stop and tell
 the user. Never fill the gap with an invented comp.

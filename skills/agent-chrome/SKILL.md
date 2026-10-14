@@ -1,9 +1,9 @@
 ---
-name: authenticated-browser
+name: agent-chrome
 description: Read or act on websites through the user's own signed-in accounts, using a separate Claude Code worker that drives the user's dedicated agent Chrome through Chrome DevTools MCP. Use when a task or a check needs a page behind the user's login or one that neither plain fetching nor a control-ui harness can reach, such as account usage, billing, or subscription pages, web settings and SaaS consoles, OAuth consent for an app the task connects, or eBay and Facebook Marketplace comps. Prefer an official CLI or API that already authenticates. Use control-ui instead for local UI verification.
 ---
 
-# Authenticated browser
+# Agent Chrome
 
 The user keeps Google Chrome for agents only; their everyday browser is a different one. The agent Chrome uses its own profile folder, which holds the user's sign-ins: `%LOCALAPPDATA%\agent-chrome` on Windows, `~/Library/Application Support/agent-chrome` on macOS, and `$XDG_DATA_HOME/agent-chrome` (default `~/.local/share/agent-chrome`) on Linux. A separate Claude Code process, the worker, browses with Chrome DevTools MCP tools and nothing else. This session is the coordinator. It writes the brief, runs the worker through [agent-chrome.ts](${CLAUDE_SKILL_DIR}/scripts/agent-chrome.ts), and relays the report.
 

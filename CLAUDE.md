@@ -45,8 +45,8 @@ Native Workflow owns its within-run execution state. Native Tasks presents the m
 - Prose revision: edit-prose. Substantial documentation: technical-writing. Skill authoring: author-skill.
 - Before committing: clean-code. Review changed comments and suppressions with review-comments when they carry a material constraint or need cleanup. Delegate meaningful commit preparation to the commit-agent agent. Rewrite commits (rebase, squash, reorder, amend) when it gives a clearer history, but rewrite only unpushed commits, or commits on a branch you created that nobody else has pushed to. The commit-agent rewrites only unpushed commits, so rewrite pushed ones yourself.
 - An in-progress merge or rebase conflict: resolving-merge-conflicts, which also completes that merge or rebase unless a hunk needs a product decision. A merge or rebase whose authorization the user withdrew, or that the Resume marks section of playbooks/pause-safely.md holds as withdrawn or blocked by withdrawal, stays untouched until the user authorizes the withdrawn work again.
-- A web page behind the user's sign-in or one that neither plain fetching nor a control-ui harness with a temporary profile can reach (account usage, billing, or subscription pages, web settings and consoles, OAuth consent, marketplace comps): authenticated-browser, rather than driving Chrome from this session. An authenticated official CLI or API comes first when it answers.
-- UI or CLI changes: the matching control-ui or control-cli guidance. Reproduce bugs on the real surface and verify after the fix. When a host app's browser-preview tool is off, local pages still go to control-ui and signed-in sites, or sites neither plain fetching nor control-ui can reach, to authenticated-browser.
+- A web page behind the user's sign-in or one that neither plain fetching nor a control-ui harness with a temporary profile can reach (account usage, billing, or subscription pages, web settings and consoles, OAuth consent, marketplace comps): agent-chrome, rather than driving Chrome from this session. An authenticated official CLI or API comes first when it answers.
+- UI or CLI changes: the matching control-ui or control-cli guidance. Reproduce bugs on the real surface and verify after the fix. When a host app's browser-preview tool is off, local pages still go to control-ui and signed-in sites, or sites neither plain fetching nor control-ui can reach, to agent-chrome.
 - PR status or repair requests: Babysit, with the request's mode declared before polling. A status question does not authorize repair or landing.
 - PR status snapshot: run `bun "<profile>/tools/workflow/watch-pr/watch-pr.ts" --owner <owner> --repo <repo> --pr <number> --status-only` instead of ad hoc `gh` queries.
 - Worktree inventory or cleanup question: run `bun "<profile>/tools/workflow/worktree-audit.ts" "<repository>" --base <ref> --json` first. It is read-only.
@@ -68,9 +68,9 @@ Do whatever the task needs without asking when the action can be undone, and rep
 - Rerunning CI on a PR the task works on. Retargeting or editing the title and body of a PR the task owns, meaning one it opened or one the user authored and handed you. Disabling an auto-merge armed on such a PR after the user withdraws authorization for its work or for work it depends on, as the Withdrawn and Blocked by withdrawal resume marks in playbooks/pause-safely.md say.
 - Adding project dependencies, check tools, and test doubles.
 - System-wide or user-profile installs, done the way rules/toolchains.md describes for each OS. Report each one by name.
-- Deleting regenerable caches and worktrees as playbooks/worktree-cleanup.md describes. A cache goes through the owning tool's clean command, or folder removal when the tool has none, such as Xcode DerivedData. Browser profiles, including agent-chrome, are never caches.
+- Deleting regenerable caches and worktrees as playbooks/worktree-cleanup.md describes. A cache goes through the owning tool's clean command, or folder removal when the tool has none, such as Xcode DerivedData. Browser profiles, including the agent-chrome profile, are never caches.
 - Read-only lookups in private SaaS/API services, and reversible changes to resources the task itself created there, other than access or visibility settings.
-- Signing in through authenticated-browser, including the account chooser, "Continue as", and OAuth consent screens, when the worker can finish without typing a password, 2FA code, or secret and without solving a CAPTCHA. Report each sign-in and grant.
+- Signing in through agent-chrome, including the account chooser, "Continue as", and OAuth consent screens, when the worker can finish without typing a password, 2FA code, or secret and without solving a CAPTCHA. Report each sign-in and grant.
 - Design choices, including a materially different architecture.
 
 Ask first, with the exact command or artifact and its evidence ready, before any of these actions. They notify or affect other people, or they cannot be recovered. When an action is in neither list, ask if it would do either.
@@ -80,8 +80,8 @@ Ask first, with the exact command or artifact and its evidence ready, before any
 - Merging, landing, or arming auto-merge.
 - Pushing to a default or protected branch, to a shared branch that neither the task nor the user created, or to a branch someone else owns, such as a coworker's or a bot's PR the user handed you. This holds even where a playbook or skill lets you push to a branch the task created or the user handed over. Pushing a tag or deleting a remote branch.
 - Deploying or publishing a release.
-- Changing production systems, shared configuration, access or visibility settings, or records other people use, such as tracker issues. OAuth grants under the authenticated-browser item above are the exception.
-- Completing a sign-in or OAuth grant outside authenticated-browser.
+- Changing production systems, shared configuration, access or visibility settings, or records other people use, such as tracker issues. OAuth grants under the agent-chrome item above are the exception.
+- Completing a sign-in or OAuth grant outside agent-chrome.
 - Deleting data, uncommitted work, or anything without a backup.
 - Buying, bidding, or other spending.
 
@@ -99,7 +99,7 @@ Auto memory stays disabled. Do not add persistent agent memory or automatic memo
 
 ## Verification and communication
 
-Run the narrow behavior check first, then configured build, format, lint, type, and relevant integration checks per rules/toolchains.md. Nontrivial changes need fresh-context review. Keep failed, blocked, and unverified results visible. Before leaving a result unverified or handing a check to the user, use read-only evidence within reach, including the user's signed-in account pages through authenticated-browser. Passing checks for one revision do not verify a changed head.
+Run the narrow behavior check first, then configured build, format, lint, type, and relevant integration checks per rules/toolchains.md. Nontrivial changes need fresh-context review. Keep failed, blocked, and unverified results visible. Before leaving a result unverified or handing a check to the user, use read-only evidence within reach, including the user's signed-in account pages through agent-chrome. Passing checks for one revision do not verify a changed head.
 
 When a step doesn't need my input, keep going. Put status notes in the same message as the next action; don't end a turn on a summary that names a next step without taking it. Supervise long work with observable output and a bounded deadline. A timed loop does not authorize additional actions. Timers, runtime state, and recovery mechanics are documented in references/execution.md.
 

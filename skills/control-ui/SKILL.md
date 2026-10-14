@@ -1,11 +1,11 @@
 ---
 name: control-ui
-description: Build or adapt a local browser/CDP harness to drive and inspect a web, IDE, or Electron UI. Use for local UI verification, screenshots, accessibility snapshots, perf profiles, visual diffs, or reproducing UI bugs, including when a host app's browser-preview tool is off. Use authenticated-browser for sites that need the user's sign-in.
+description: Build or adapt a local browser/CDP harness to drive and inspect a web, IDE, or Electron UI. Use for local UI verification, screenshots, accessibility snapshots, perf profiles, visual diffs, or reproducing UI bugs, including when a host app's browser-preview tool is off. Use agent-chrome for sites that need the user's sign-in.
 ---
 
 # Control UI
 
-Use local browser automation to verify UI behavior with evidence. First reuse the repo's own Playwright, browser, or Electron harness if it exists; otherwise use an available MCP browser tool that runs its own browser, or a local harness around the app's dev server or Chromium debug port. Do not attach to the agent Chrome that authenticated-browser runs from its `agent-chrome` profile; it holds the user's sign-ins. Discover the actual tool inventory; no built-in browser API is assumed. When a host app's browser-preview tool is off or missing, do not retry it; fall back to the repo's harness or the Generic Web Harness below. Never point automation at the user's own browser profiles. A site that needs the user's own sign-in goes to authenticated-browser.
+Use local browser automation to verify UI behavior with evidence. First reuse the repo's own Playwright, browser, or Electron harness if it exists; otherwise use an available MCP browser tool that runs its own browser, or a local harness around the app's dev server or Chromium debug port. Do not attach to the agent Chrome that the agent-chrome skill runs from its `agent-chrome` profile; it holds the user's sign-ins. Discover the actual tool inventory; no built-in browser API is assumed. When a host app's browser-preview tool is off or missing, do not retry it; fall back to the repo's harness or the Generic Web Harness below. Never point automation at the user's own browser profiles. A site that needs the user's own sign-in goes to agent-chrome.
 
 ## What It Is Used For
 

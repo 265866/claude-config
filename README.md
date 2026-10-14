@@ -31,7 +31,7 @@ but `.gitignore` keeps them out of the repo.
 
 - [Google Chrome](https://www.google.com/chrome/), kept for agents only,
   for the skill that reads pages behind your sign-ins.
-  See [Signed-in browsing](#signed-in-browsing).
+  See [Agent Chrome](#agent-chrome).
   On Linux, also install `xdotool` so that Chrome stays minimized.
 - [tmux](https://github.com/tmux/tmux/wiki/Installing), for driving terminal apps
 
@@ -57,9 +57,9 @@ git checkout -f main
 > `git checkout -f` replaces your local `CLAUDE.md`, `settings.json`, and any other tracked file.
 > Untracked runtime files stay as they are.
 
-## Signed-in browsing
+## Agent Chrome
 
-The `authenticated-browser` skill reads pages behind your sign-ins through a Chrome that only agents use.
+The `agent-chrome` skill reads pages behind your sign-ins through a Chrome that only agents use.
 It needs Google Chrome 149 or later.
 It supports Windows, macOS, and Linux with Google's Chrome package, and other Unix-like systems are unsupported.
 The skill runs Chrome from its own profile folder, which keeps your sign-ins:
@@ -74,13 +74,13 @@ On Linux it is minimized only when [xdotool](https://github.com/jordansissel/xdo
 otherwise its window shows while a task runs.
 On Linux the skill expects Google's package, which installs Chrome at `/opt/google/chrome`.
 Its workers drive Chrome with [Chrome DevTools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp),
-which Bun downloads on first use at the version pinned in `skills/authenticated-browser/scripts/agent-chrome.ts`.
+which Bun downloads on first use at the version pinned in `skills/agent-chrome/scripts/agent-chrome.ts`.
 Nothing needs installing beyond Chrome and Bun.
 
 Sign in to the sites you want agents to read:
 
 ```bash
-bun ~/.claude/skills/authenticated-browser/scripts/agent-chrome.ts signin
+bun ~/.claude/skills/agent-chrome/scripts/agent-chrome.ts signin
 ```
 
 A normal Chrome window opens. Sign in to each account, keep "stay signed in" checked, and close the window.
