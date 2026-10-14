@@ -15,7 +15,7 @@ but `.gitignore` keeps them out of the repo.
 - [Claude Code](https://code.claude.com/docs/en/setup)
 - [git](https://git-scm.com/downloads)
 - [GitHub CLI](https://cli.github.com/), signed in with `gh auth login`
-- [Bun](https://bun.sh/), which runs the scripts in `tools/`
+- [Bun](https://bun.sh/), which runs the scripts in `tools/`, the hook in `hooks/`, and skill scripts
 
 **Per language**, when you work in that kind of project
 
@@ -60,7 +60,11 @@ git checkout -f main
 ## Agent Chrome
 
 The `agent-chrome` skill reads web pages that block plain fetching, and pages behind your sign-ins, through a Chrome that only agents use.
-It needs Google Chrome 149 or later.
+A hook in `settings.json` runs `hooks/blocked-fetch.ts` after WebFetch, and after Bash or PowerShell commands that run curl, wget, Invoke-WebRequest, or Invoke-RestMethod. When a public page refuses the request, it reminds the agent to read that page through the skill.
+Claude Code starts the hook with Bun directly, without a shell, so it does not matter whether Claude Code would run hooks through sh, Git Bash, or PowerShell.
+When `bun` is not on Claude Code's PATH, those calls show a hook error.
+Run `bun test hooks/` to check the hook against recorded block pages and known false positives.
+The skill needs Google Chrome 149 or later.
 It supports Windows, macOS, and Linux with Google's Chrome package, and other Unix-like systems are unsupported.
 The skill runs Chrome from its own profile folder, which keeps your sign-ins:
 

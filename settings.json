@@ -26,6 +26,7 @@
     "defaultMode": "bypassPermissions"
   },
   "model": "claude-opus-5-5",
+  "disableClaudeAiConnectors": true,
   "enableWorkflows": true,
   "maxEffortLevel": "xhigh",
   "modelSettings": {
@@ -36,11 +37,196 @@
   "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
   "autoMemoryEnabled": false,
-  "disableClaudeAiConnectors": true,
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
-  "autoCompactEnabled": true,
   "theme": "dark",
+  "autoCompactEnabled": true,
+  "switchModelsOnFlag": false,
   "agentPushNotifEnabled": true,
-  "switchModelsOnFlag": false
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun",
+            "args": [
+              "-e",
+              "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")"
+            ],
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(curl *)",
+            "command": "bun",
+            "args": [
+              "-e",
+              "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
+              "curl"
+            ],
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "if": "Bash(wget *)",
+            "command": "bun",
+            "args": [
+              "-e",
+              "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
+              "wget"
+            ],
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "PowerShell(curl *)",
+            "command": "bun",
+            "args": [
+              "-e",
+              "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
+              "curl"
+            ],
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "if": "PowerShell(wget *)",
+            "command": "bun",
+            "args": [
+              "-e",
+              "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
+              "wget"
+            ],
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "if": "PowerShell(Invoke-WebRequest *)",
+            "command": "bun",
+            "args": [
+              "-e",
+              "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
+              "iwr"
+            ],
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "if": "PowerShell(Invoke-RestMethod *)",
+            "command": "bun",
+            "args": [
+              "-e",
+              "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
+              "irm"
+            ],
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun",
+            "args": [
+              "-e",
+              "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")"
+            ],
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(curl *)",
+            "command": "bun",
+            "args": [
+              "-e",
+              "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
+              "curl"
+            ],
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "if": "Bash(wget *)",
+            "command": "bun",
+            "args": [
+              "-e",
+              "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
+              "wget"
+            ],
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "PowerShell(curl *)",
+            "command": "bun",
+            "args": [
+              "-e",
+              "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
+              "curl"
+            ],
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "if": "PowerShell(wget *)",
+            "command": "bun",
+            "args": [
+              "-e",
+              "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
+              "wget"
+            ],
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "if": "PowerShell(Invoke-WebRequest *)",
+            "command": "bun",
+            "args": [
+              "-e",
+              "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
+              "iwr"
+            ],
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "if": "PowerShell(Invoke-RestMethod *)",
+            "command": "bun",
+            "args": [
+              "-e",
+              "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
+              "irm"
+            ],
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
 }
