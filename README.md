@@ -30,7 +30,7 @@ but `.gitignore` keeps them out of the repo.
 **Optional**
 
 - [Google Chrome](https://www.google.com/chrome/), kept for agents only,
-  for the skill that reads pages behind your sign-ins.
+  for the agent-chrome skill, which reads pages that block plain fetching and pages behind your sign-ins.
   See [Agent Chrome](#agent-chrome).
   On Linux, also install `xdotool` so that Chrome stays minimized.
 - [tmux](https://github.com/tmux/tmux/wiki/Installing), for driving terminal apps
@@ -59,7 +59,7 @@ git checkout -f main
 
 ## Agent Chrome
 
-The `agent-chrome` skill reads pages behind your sign-ins through a Chrome that only agents use.
+The `agent-chrome` skill reads web pages that block plain fetching, and pages behind your sign-ins, through a Chrome that only agents use.
 It needs Google Chrome 149 or later.
 It supports Windows, macOS, and Linux with Google's Chrome package, and other Unix-like systems are unsupported.
 The skill runs Chrome from its own profile folder, which keeps your sign-ins:

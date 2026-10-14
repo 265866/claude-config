@@ -52,9 +52,10 @@ price the listing quotes.
 **Comps** set the ask. They never appear in the copy.
 
 Both sources sit behind a login, so both need the user's signed-in browser. Use the
-**agent-chrome** skill and run one worker per source; start both, and they run one after
-the other. In each brief's task part, name the exact product and variant confirmed in step 1, so the
-worker skips parts, accessories, and other models:
+**agent-chrome** skill and run one worker per source. Start the second after the first returns,
+because a run that waits too long for the browser comes back `busy`. In each brief's task part,
+name the exact product and variant confirmed in step 1, so the worker skips parts, accessories,
+and other models:
 
 - **eBay sold, last 90 days.** Search the product, then filter to Sold Items. What actually sold
   beats active asks, which only show what sellers hoped for. Signed-out eBay hits a login wall on
@@ -66,9 +67,10 @@ Ask each worker for one row per comp: price, condition, quantity, date sold or p
 Ten rows per source is plenty.
 
 Handle a `blocked` or `partial` worker as the **agent-chrome** skill directs, and rerun
-that source only as that skill allows: its one revised-brief retry, a `needs_approval` run it
-permits, or after the user clears the blocker. When a source still comes back empty, stop and tell
-the user. Never fill the gap with an invented comp.
+that source only as that skill allows: its one revised-brief retry per site, its smaller reruns
+after a `worker_timeout`, a `needs_approval` run it permits, or after the user clears the
+blocker. When a source still comes back empty, stop and tell the user. Never fill the gap with an
+invented comp.
 
 ## 4. Set the ask
 

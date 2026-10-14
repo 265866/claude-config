@@ -86,6 +86,9 @@ Caveats:
 
 Directives and actions:
 - <each directive received mid-run and how it was handled; any private clone or fetch with its target; `None` when there are none>
+
+Blocked URLs:
+- <each web page you could not read, such as a 403, 429, timeout, bot check, JavaScript-only page, or sign-in wall, so the caller can read it through agent-chrome; `None` when there are none>
 ````
 
 Keep the result concise. The caller needs the answer and evidence, not your full research trail.
