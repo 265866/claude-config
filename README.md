@@ -114,6 +114,8 @@ cd ~/.claude
 git pull
 ```
 
+Or tell Claude "sync profile". The sync-profile skill commits, pushes, and pulls on every machine it can reach over SSH, then shows which commit each one is on.
+
 > [!NOTE]
 > Claude Code rewrites `settings.json` when you change options such as the model or theme.
 > Expect small diffs in that file.
