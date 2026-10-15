@@ -111,14 +111,14 @@ Use native goal tracking only for an explicitly requested sustained outcome. Sel
 
 ## T3 Code
 
-T3 Code's tools come from its `t3-code` MCP server and exist only inside T3 Code. When they are not listed, try one direct call, loading deferred tools with ToolSearch first. When that fails, use the method the calling text gives for sessions outside T3.
+T3 Code's tools come from its `t3-code` MCP server. Use them only when this session runs in a T3 thread, which a call such as `t3_worktree_status` confirms. `t3_thread_configuration` returns this thread's ID. When they are not listed, load them with one ToolSearch call, then try one direct call. When that fails, or the session is not in a T3 thread, use the method that the playbook or rule that sent you here gives for sessions outside T3.
 
-- Only the main thread watches PRs, asks the user with AskUserQuestion, and owns thread schedules. A worker or a delegated T3 task returns those needs to it as blockers.
-- A PR wait uses `watch_pull_request`, as Babysit step 3 says. The watch wakes the thread when a check fails, required checks pass, someone else comments or reviews, or the branch conflicts. It does not wake on a merge, a close, or a merge-queue removal, so a wait for those keeps the existing watcher.
+- Only the main conversation calls `watch_pull_request`, asks the user with AskUserQuestion, and owns thread schedules. A worker or a delegated T3 task returns those needs to it in its result. Every `delegate_task` brief, on top of any skill's own list, tells the child that it is a delegated task.
+- Between babysit runs, a wait that qualifies for Babysit's T3 standby uses `watch_pull_request`. The watch wakes the thread when a check fails, required checks pass, someone else comments or reviews, or the branch conflicts. It does not wake on a merge, a close, or a merge-queue removal. A watch also ends when the thread settles or is archived. Unwatch with `unwatch_pull_request`. Merging a linked PR can settle the thread, so a standby re-arms its watches at the end of each run, and its deadline covers the gap.
 - Link each PR the thread opens with `link_pull_request`, as Opening a PR says.
-- Before handing work back, unwatch every PR this thread watches, so the thread leaves the Working section.
-- Watches and thread schedules outlive the session. Read `list_thread_pull_requests` and `list_scheduled_tasks` before adding one, and disable or delete your own when their purpose ends.
-- A delegated T3 task (`delegate_task`) notifies the parent when it finishes. Do not poll it. Stop one with `task_cancel`.
+- End a standby as Babysit's T3 standby says, so the thread leaves the Working list. A reply that ends a turn while standing by keeps the standby.
+- Watches and thread schedules belong to the thread, so they outlive the session. Read `list_scheduled_tasks` before adding a schedule. `list_thread_pull_requests` lists the thread's linked PRs, not its watches, so a resume note records which PRs were watched. Disable or delete your own schedules when their purpose ends.
+- A delegated T3 task (`delegate_task`) notifies the parent when it finishes. Do not poll it. Read `task_status` only when its result is needed mid-turn or its deadline has passed, and stop a stalled one with `task_cancel`.
 
 ## Evidence, project facts, and resume
 
