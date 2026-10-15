@@ -109,6 +109,17 @@ A watcher, Cron task, or scheduled wake serves an external-state wait or authori
 
 Use native goal tracking only for an explicitly requested sustained outcome. Self-paced loops, background Bash, and monitors are not restored on resume. Eligible fixed Cron tasks can be restored; expired recurring or past one-shot tasks are not. Confirm actual restored state rather than duplicating the schedule.
 
+## T3 Code
+
+T3 Code's tools come from its `t3-code` MCP server and exist only inside T3 Code. When they are not listed, try one direct call, loading deferred tools with ToolSearch first. When that fails, use the method the calling text gives for sessions outside T3.
+
+- Only the main thread watches PRs, asks the user with AskUserQuestion, and owns thread schedules. A worker or a delegated T3 task returns those needs to it as blockers.
+- A PR wait uses `watch_pull_request`, as Babysit step 3 says. The watch wakes the thread when a check fails, required checks pass, someone else comments or reviews, or the branch conflicts. It does not wake on a merge, a close, or a merge-queue removal, so a wait for those keeps the existing watcher.
+- Link each PR the thread opens with `link_pull_request`, as Opening a PR says.
+- Before handing work back, unwatch every PR this thread watches, so the thread leaves the Working section.
+- Watches and thread schedules outlive the session. Read `list_thread_pull_requests` and `list_scheduled_tasks` before adding one, and disable or delete your own when their purpose ends.
+- A delegated T3 task (`delegate_task`) notifies the parent when it finishes. Do not poll it. Stop one with `task_cancel`.
+
 ## Evidence, project facts, and resume
 
 Native Workflow can replay completed calls and resume interrupted work within the same Claude session. A fresh session is not the same replay context. Failed, interrupted, or changed calls can rerun and invalidate later work. Inspect the actual run state before choosing resume versus a new bounded run.
