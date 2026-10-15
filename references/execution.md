@@ -4,7 +4,7 @@ The main coordinator selects the procedure and execution method using CLAUDE.md.
 
 ## Frame the run
 
-Record the authorized outcome, input revision or source scope, required work units, dependency order, owned resources, verification boundary, and stopping point. Define a finite worker/round budget and an observable deadline when work can stall. Count investigation, implementation, review, retries, and synthesis in that budget.
+Record the authorized outcome, input revision or source scope, required work units, dependency order, owned resources, verification boundary, and stopping point. Define a finite worker/round budget and an observable deadline when work can stall. Count investigation, implementation, review, retries, and synthesis in that budget. The review-loop skill is the exception CLAUDE.md names. The loop runs without a round budget or deadline unless the user names a cap, wherever this reference asks for one.
 
 Prefer an existing deterministic command for a known transformation. Validate a newly authored transformation like any other code change. A long wait or a large file count alone does not require agent orchestration.
 

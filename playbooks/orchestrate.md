@@ -7,7 +7,7 @@ Own a standing program through briefs, cross-run project facts, verification rec
 - The coordinator frames scope, authors briefs, selects bounded execution runs, reconciles results, assigns integration work, and owns the user report. Code-writing units have a named owner. Routine local integration can be performed by the coordinator when it is in scope and cheap; do not hold completed work behind an unnecessary coordination layer.
 - Workers own bounded assignments and return evidence or a blocker. They do not restart routing, duplicate the worker graph, or become additional schedulers.
 - Use native independent batches, dependent phases, or bounded work/check cycles when their coordination warrants it; ordinary delegation fits a few small units. Give concurrent writers non-overlapping scopes or independent worktrees. Keep work that needs local state, configured browser access, or simulators on the available machine, with one live UI owner. Do not promise separate machines or remote dispatch.
-- Independent review means a fresh context with a distinct adversarial lens. All default agents inherit the configured model and effort; do not claim a different model family.
+- Independent review means a fresh context with a distinct adversarial lens. All default agents inherit the configured model and effort unless CLAUDE.md allows another choice. Do not claim a model family an agent did not run on.
 
 #### Store and runtime
 
@@ -84,7 +84,7 @@ For a Graphite-managed stack, use the optional frontier command only in the chec
 
 Reaches the user, batched into one report rather than per item: the ask-first actions in CLAUDE.md, product or preference calls no experiment settles, a standing order that contradicts observed reality, and a program-level dead end that survived a replan. Park each with `orch gate park <id> --question <question> --options <options> --default <recommended answer>` before asking, and route other work around it. Do not hand-edit `gates.md`; the helper parses it.
 
-Never reaches the user: retries within budget, CI flake triage, review-thread triage (an `ask` result from the review-bot triage reference, or a requested change Babysit sends to the user, escalates as above; a reply itself stays an ask-first action; reruns and pushes to the program's own branches proceed), format fixes, scope the brief already forbids (refuse it and continue), and "should I keep going".
+Never reaches the user: retries within budget, CI flake triage, review-thread triage (an `ask` result from the review-bot triage reference, or a requested change Babysit sends to the user, escalates as above; a reply itself stays an ask-first action unless an existing approval covers it; reruns and pushes to the program's own branches proceed), format fixes, scope the brief already forbids (refuse it and continue), and "should I keep going".
 
 A mid-run discovery that CLAUDE.md (Authorization and ownership) puts in scope, a proven defect in the program's deliverable or one that blocks or degrades its goal, becomes a unit. Anything else parks as a follow-up in `overview.md` rather than widening a current unit; at this fan-out a small scope leak multiplies into changes nobody asked for.
 

@@ -1,5 +1,6 @@
 import {
   ChecksUnavailable,
+  EmptyRollup,
   WatcherQueryError,
   resolveChecks,
 } from "./github.ts";
@@ -413,6 +414,7 @@ async function pollUntilTerminal<V>(args: {
   readonly step: (beforeRead: () => void) => Promise<StepResult<V>>;
   readonly rows: () => readonly T.PrSnapshot[];
   readonly onDeadline: () => T.TimeoutVerdict;
+  readonly isFinal?: (error: WatcherQueryError) => boolean;
 }): Promise<V | T.BlockerVerdict | T.TimeoutVerdict> {
   let failures = 0;
   let lastFailure: T.QueryFailure | null = null;
@@ -438,7 +440,7 @@ async function pollUntilTerminal<V>(args: {
       lastFailure = error.failure;
       failures += 1;
       if (expired()) return timeout();
-      if (!error.failure.retryable || failures >= args.options.maxQueryErrors)
+      if (!error.failure.retryable || args.isFinal?.(error) || failures >= args.options.maxQueryErrors)
         return statusQueryVerdict(args.stamp, failures, error.failure);
       const retryInSeconds = cappedSleep(queryBackoffSeconds(args.options.interval, failures));
       args.dependencies.emit(args.stamp({ kind: "RETRY", terminal: false,
@@ -546,6 +548,9 @@ export async function runSimple(args: {
     stamp,
     step,
     rows: () => [...observed.values()],
+    // A snapshot reports the empty rollup at once; the caller decides whether
+    // checks are still registering. Only a watch waits for them.
+    isFinal: (error) => args.statusOnly && error instanceof EmptyRollup,
     onDeadline: () => stamp({ kind: "TIMEOUT", terminal: true, exitCode: 5,
       rows: [...observed.values()], reason: { kind: "polling-deadline" } }),
   });

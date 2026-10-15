@@ -24,7 +24,7 @@ The deliverable is a synthesized verdict. The review itself applies no changes. 
 Identify what to review from context:
 
 - If the user points at specific files or a diff, use that
-- If on a feature branch, run `git diff main...HEAD` (or the appropriate base branch) for the full changeset
+- If on a feature branch, run `git fetch origin`, then `git diff origin/<base>...HEAD` for the full changeset, where `<base>` is the PR's base branch, or else the repository's default branch
 - If the user's message references recent work, gather the relevant files
 
 Package the diff (or file contents) plus any surrounding context files the reviewers need to understand the code.

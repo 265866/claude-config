@@ -8,7 +8,7 @@
    - **Blocking first steps.** Gates run before fan-out.
    - **Independent workstreams.** Disjoint files, services, or layers parallelize. Shared writes serialize.
    - **Shared mutable state.** Split independent targets where useful (the **principle-separate-before-serializing-shared-state** skill). Give shared branches, lockfiles, integrations, and live UI sessions one owner.
-4. Implement through the selected execution method. Give delegated units exact file ownership and success criteria, inheriting the configured model and effort. Name the data shape and organizing structure before writing logic, per **principle-model-the-domain**. Prefer a state machine over scattered booleans, a table/registry over branching, and a typed model over repeated shape assumptions.
+4. Implement through the selected execution method. Give delegated units exact file ownership and success criteria, inheriting the configured model and effort unless CLAUDE.md allows another choice. Name the data shape and organizing structure before writing logic, per **principle-model-the-domain**. Prefer a state machine over scattered booleans, a table/registry over branching, and a typed model over repeated shape assumptions.
 
    Use **arena** when independent alternatives can resolve a consequential uncertainty, rather than for every stylistic choice. Non-trivial implementation gets fresh-context review regardless of how it was executed. Workers own their assigned unit; the coordinator arranges other phases and independent review.
 

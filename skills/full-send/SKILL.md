@@ -45,7 +45,7 @@ Then fetch. For each PR that `gh pr view` shows merged at the head you pushed, c
 
 1. When this session runs in the main checkout and that checkout holds the branch, switch it to the default branch and fast-forward it.
 2. When this session runs in the task's own worktree and that worktree holds the branch, detach it at `origin/<default>` and leave the worktree for Colton.
-3. Remove the task's other worktrees that hold the branch, as [worktree cleanup](${CLAUDE_SKILL_DIR}/../../playbooks/worktree-cleanup.md) says.
+3. Remove the task's other worktrees that hold the branch, as steps 3 and 4 of [worktree cleanup](${CLAUDE_SKILL_DIR}/../../playbooks/worktree-cleanup.md) say.
 4. Delete the branch on the remote unless an open PR still targets it. Delete it locally with `git branch -D` only when its tip is that head, because a squash merge leaves it unmerged in local history.
 
 Leave the branches of PRs that did not land, and any checkout that holds other work, as they are. Name every branch and worktree you left in the report.

@@ -57,6 +57,14 @@ git checkout -f main
 > `git checkout -f` replaces your local `CLAUDE.md`, `settings.json`, and any other tracked file.
 > Untracked runtime files stay as they are.
 
+The `tools/workflow/orch` and `tools/workflow/watch-pr` tools install the workflow dependencies the first time either runs.
+To run the tests or typecheck before that, install them first:
+
+```bash
+cd ~/.claude/tools/workflow
+bun install --frozen-lockfile
+```
+
 ## Agent Chrome
 
 The `agent-chrome` skill reads web pages that block plain fetching, and pages behind your sign-ins, through a Chrome that only agents use.
@@ -64,7 +72,7 @@ A hook in `settings.json` runs `hooks/blocked-fetch.ts` after WebFetch, and afte
 Claude Code starts the hook with Bun directly, without a shell, so it does not matter whether Claude Code would run hooks through sh, Git Bash, or PowerShell.
 When `bun` is not on Claude Code's PATH, those calls show a hook error.
 On Windows, PATH needs the real `bun.exe`, as the bun.sh installer, winget, and scoop provide, since Claude Code cannot start a `bun.cmd` shim without a shell.
-Run `bun test hooks/` to check the hook against recorded block pages and known false positives.
+Run `bun test hooks/` from `~/.claude` to check the hook against recorded block pages and known false positives.
 The skill needs Google Chrome 149 or later.
 It supports Windows, macOS, and Linux with Google's Chrome package, and other Unix-like systems are unsupported.
 The skill runs Chrome from its own profile folder, which keeps your sign-ins:
@@ -98,20 +106,26 @@ When a task reports that a site needs a sign-in, run the same command again.
 
 ## Sync between machines
 
-After you change a skill or an instruction, push the change:
+After you change a skill or an instruction on `main`, check for changes you did not mean to keep:
 
 ```bash
 cd ~/.claude
-git add -A
-git commit -m "Describe the change"
-git push
+git status
 ```
 
-On the other machine, pull it:
+When it shows only changes you mean to keep, push them:
+
+```bash
+git add -A
+git commit -m "Describe the change"
+git push origin main
+```
+
+On the other machine, with `~/.claude` on `main`, pull it:
 
 ```bash
 cd ~/.claude
-git pull
+git pull --ff-only origin main
 ```
 
 Or tell Claude "sync profile". The sync-profile skill commits and pushes this machine's changes, pulls them on each other machine it can reach over SSH, then shows which commit each one is on.

@@ -1,6 +1,6 @@
 # Automated reviewer triage
 
-Use this reference when the Babysit playbook (`../playbooks/babysit.md`) handles automated reviewer or review-automation comments. The goal is not to ignore automated reviewers by default. The goal is to stop treating every comment as a required code change.
+Use this reference for every automated reviewer or review-automation finding, as CLAUDE.md says. An automated reviewer is a bot or review service that comments on a PR, not a reviewer this profile starts. The review-loop skill's own rules govern its reviewer's findings, apart from the Never auto-dismiss list it cites. The step numbers below are the Babysit playbook's (`../playbooks/babysit.md`). Outside Babysit, make `fix` changes in the change you are working on, and prepare replies without posting them unless an approval covers posting. The goal is not to ignore automated reviewers by default. The goal is to stop treating every comment as a required code change.
 
 ## Decision rubric
 
@@ -10,9 +10,9 @@ Classify each automated reviewer thread before acting. Apply these rules in orde
 2. `ask`: The finding is in a high-risk category (listed under "Never auto-dismiss" below) and is not proven. Never dismiss it yourself. Ask the user, and attach any concrete disproof or matching skip pattern as evidence for their decision.
 3. `dismiss`: The current code or a reproduction concretely disproves the concern, or a documented skip pattern below matches with all of its conditions met. Prepare a reply with a short reason and the evidence.
 4. `fix`: The issue is unproven, but the suggested fix is small and clearly reduces risk without changing product intent.
-5. `ask`: Anything else, such as a novel or ambiguous comment that a reproduction, a test, or the current code within reach cannot settle. Try those first; ask only when evidence cannot decide, and continue other work while asking.
+5. `ask`: Anything else, such as a novel or ambiguous comment that a reproduction, a test, or the current code within reach cannot settle. Try those first, and ask only when evidence cannot decide. Before asking, finish other work that does not depend on the answer, as CLAUDE.md says.
 
-Pushing the fix to the PR's branch proceeds under Babysit steps 1 and 5. Posting the reply and resolving the thread are separate ask-first writes, as Babysit step 9 describes. A fix or disproof is a valid deliverable while that approval is pending. In a read-only request, including Babysit `check`, report the classification and offer the fix without editing.
+Pushing the fix to the PR's branch proceeds under Babysit steps 1 and 5. Posting the reply and resolving the thread are separate ask-first writes unless an existing approval covers them, as Babysit step 9 describes. A fix or disproof is a valid deliverable while that approval is pending. In a read-only request, including Babysit `check`, report the classification and offer the fix without editing.
 
 When evidence within reach cannot settle it, ask. Skipping a noisy code-quality comment is cheap; skipping a real data or security bug is not.
 

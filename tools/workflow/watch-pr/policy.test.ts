@@ -779,6 +779,48 @@ describe("polling deadline", () => {
     expect(base.calls).toEqual(["pullRequest", "reviewThreads", "checkRollupPage:head:null"]);
   });
 
+  it("keeps retrying an empty rollup while watching, so checks that register late are read", async () => {
+    const reader = fakeReader({ rollupPages: [
+      { sourceOid: "head", state: null, checks: [], endCursor: null },
+      { sourceOid: "head", state: "SUCCESS", checks: [passingCheck()], endCursor: null },
+    ] });
+    const emitted: ProgressVerdict[] = [];
+    const sleeps: number[] = [];
+    const result = await runSimple({
+      dependencies: {
+        reader,
+        clock: { now: () => 0, observedAt: () => "now", async sleep(seconds) { sleeps.push(seconds); } },
+        emit: (verdict) => emitted.push(verdict),
+      },
+      contexts: [context(1)], mode: "single", statusOnly: false, options,
+    });
+    expect(emitted).toMatchObject([{ kind: "RETRY", failure: { kind: "checks-unavailable" }, consecutiveFailures: 1 }]);
+    expect(sleeps).toEqual([60]);
+    expect(result.kind).toBe("READY");
+  });
+
+  it("still retries other transient query failures in a status snapshot", async () => {
+    const base = fakeReader();
+    let queries = 0;
+    const reader = { ...base, async pullRequest(pr: PrContext) {
+      queries += 1;
+      if (queries === 1)
+        throw new WatcherQueryError({ kind: "command-exit", retryable: true, code: 1, detail: "rate limited" });
+      return base.pullRequest(pr);
+    } } satisfies GitHubReader;
+    const sleeps: number[] = [];
+    const result = await runSimple({
+      dependencies: {
+        reader,
+        clock: { now: () => 0, observedAt: () => "now", async sleep(seconds) { sleeps.push(seconds); } },
+        emit() {},
+      },
+      contexts: [context(1)], mode: "single", statusOnly: true, options,
+    });
+    expect(result).toMatchObject({ kind: "STATUS", exitCode: 0 });
+    expect(sleeps).toEqual([60]);
+  });
+
   it("keeps timeout zero disabled while using the normal polling cadence", async () => {
     const reader = fakeReader({ rollupPages: [
       { sourceOid: "head", state: "PENDING", checks: [pendingCheck()], endCursor: null },
