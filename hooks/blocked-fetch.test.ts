@@ -147,7 +147,29 @@ const cases: Case[] = [
   ["ps iwr docs page about errors silent", false, "iwr", ps("(iwr https://learn.microsoft.com/powershell/iwr).Content", "Invoke-WebRequest: Response status code does not indicate success: 403 (Forbidden). The operation has timed out.")],
   ["ps iwr localhost silent", false, "iwr", psf("iwr http://localhost:3000/", "Exit code 1\nInvoke-WebRequest: Response status code does not indicate success: 403 (Forbidden).")],
   ["ps curl and iwr: iwr defers", false, "iwr", psf("curl.exe -s https://a.com/; iwr https://www.lowes.com/", "Exit code 1\nInvoke-WebRequest: Response status code does not indicate success: 403 (Forbidden).")],
-  ["ps iwr and irm: irm defers", false, "irm", psf("iwr https://a.com/; irm https://www.lowes.com/", "Exit code 1\nInvoke-RestMethod: Response status code does not indicate success: 403 (Forbidden).")],
+  ["ps iwr search for curl", true, "iwr", psf("iwr 'https://www.google.com/search?q=curl+timeout'", "Exit code 1\nInvoke-WebRequest: Response status code does not indicate success: 429 (Too Many Requests).")],
+  ["ps irm search for iwr", true, "irm", psf("irm 'https://www.amazon.com/s?k=iwr&ref=x'", "Exit code 1\nInvoke-RestMethod: Response status code does not indicate success: 403 (Forbidden).")],
+  ["ps iwr local proxy", "https://www.lowes.com/", "iwr", psf("iwr -Proxy http://127.0.0.1:8888 https://www.lowes.com/", "Exit code 1\nInvoke-WebRequest: Response status code does not indicate success: 403 (Forbidden).")],
+  ["ps iwr -Head prefix", "https://www.lowes.com/", "iwr", psf("iwr -Head @{Referer='https://www.google.com/'} https://www.lowes.com/", "Exit code 1\nInvoke-WebRequest: Response status code does not indicate success: 403 (Forbidden).")],
+  ["ps iwr -ProxyUseDefaultCredentials switch", "https://www.lowes.com/", "iwr", psf("iwr -ProxyUseDefaultCredentials https://www.lowes.com/", "Exit code 1\nInvoke-WebRequest: Response status code does not indicate success: 403 (Forbidden).")],
+  ["ps env proxy", "https://www.lowes.com/", "iwr", psf("$env:HTTPS_PROXY='http://127.0.0.1:8888'; iwr https://www.lowes.com/", "Exit code 1\nInvoke-WebRequest: Response status code does not indicate success: 403 (Forbidden).")],
+  ["bash env proxy", "https://www.lowes.com/", "curl", shf("HTTPS_PROXY=http://127.0.0.1:8080 curl -fsS https://www.lowes.com/", "Exit code 22\ncurl: (22) The requested URL returned error: 403")],
+  ["curl socks proxy", "https://www.lowes.com/", "curl", shf("curl --socks5-hostname localhost:9050 -fsS https://www.lowes.com/", "Exit code 22\ncurl: (22) The requested URL returned error: 403")],
+  ["ps 5.1 curl alias -Proxy", "https://www.lowes.com/", "curl", psf("curl -Proxy http://127.0.0.1:8888 https://www.lowes.com/", "Exit code 1\ncurl : The remote server returned an error: (403) Forbidden.")],
+  ["ps 5.1 curl alias -DisableKeepAlive", "https://www.lowes.com/", "curl", psf("curl -DisableKeepAlive https://www.lowes.com/", "Exit code 1\ncurl : The remote server returned an error: (403) Forbidden.")],
+  ["ps url naming curl in a variable", "https://curl.se/docs/", "iwr", psf("$u = 'https://curl.se/docs/'; iwr $u", "Exit code 1\nInvoke-WebRequest: Response status code does not indicate success: 429 (Too Many Requests).")],
+  ["bash url naming curl in a variable", "https://curl.se/x", "wget", shf("u=https://curl.se/x; wget \"$u\"", "Exit code 8\nERROR 429: Too Many Requests.")],
+  ["ps (iwr url).Content", "https://www.lowes.com/", "iwr", psf("(iwr https://www.lowes.com/).Content", "Exit code 1\nInvoke-WebRequest: Response status code does not indicate success: 403 (Forbidden).")],
+  ["ps += and property assignment", true, "iwr", psf("$o.Content = iwr https://www.lowes.com/; $all += iwr https://www.lowes.com/", "Exit code 1\nInvoke-WebRequest: Response status code does not indicate success: 403 (Forbidden).")],
+  ["wget --referer=", "https://www.lowes.com/", "wget", shf("wget --referer=https://www.google.com/ https://www.lowes.com/", "Exit code 8\nERROR 403: Forbidden.")],
+  ["wiki url with parens", "https://en.wikipedia.org/wiki/Bun_(software)", "curl", sh("curl -s -o /dev/null -w '%{http_code}' https://en.wikipedia.org/wiki/Bun_(software)", "429")],
+  ["url with a closing paren only", "https://www.lowes.com/search?q=a)b", "iwr", psf("iwr 'https://www.lowes.com/search?q=a)b'", "Exit code 1\nInvoke-WebRequest: Response status code does not indicate success: 403 (Forbidden).")],
+  ["_proxy inside a url query", "https://www.lowes.com/x?use_proxy=1&y=2", "curl", shf("curl -fsS 'https://www.lowes.com/x?use_proxy=1&y=2'", "Exit code 22\ncurl: (22) The requested URL returned error: 403")],
+  ["curl --noproxy localhost", "https://www.lowes.com/", "curl", shf("curl --noproxy localhost -fsS https://www.lowes.com/", "Exit code 22\ncurl: (22) The requested URL returned error: 403")],
+  ["curl --json body url", "https://api.lowes.com/", "curl", shf("curl -fsS --json '{\"cb\":\"https://hooks.slack.com/x\"}' https://api.lowes.com/", "Exit code 22\ncurl: (22) The requested URL returned error: 403")],
+  ["curl -F body url", "https://www.lowes.com/", "curl", shf("curl -fsS -F 'u=https://www.google.com/' https://www.lowes.com/", "Exit code 22\ncurl: (22) The requested URL returned error: 403")],
+  ["curl local proxy", "https://www.lowes.com/", "curl",sh("curl -s -x http://localhost:8080 -o /dev/null -w '%{http_code}' https://www.lowes.com/", "403")],
+  ["ps iwr and irm: irm defers", false, "irm",psf("iwr https://a.com/; irm https://www.lowes.com/", "Exit code 1\nInvoke-RestMethod: Response status code does not indicate success: 403 (Forbidden).")],
 ];
 
 test.each(cases)("%s", async (_name, want, arg, input) => {
@@ -198,12 +220,13 @@ const blocked: Record<string, [unknown, unknown]> = {
   ],
 };
 
-async function runHandler(handler: Handler, input: unknown, env: Record<string, string | undefined>): Promise<string> {
+async function runHandler(handler: Handler, input: unknown, env: Record<string, string | undefined>, cwd?: string): Promise<string> {
   const proc = Bun.spawn([handler.command, ...(handler.args ?? [])], {
     stdin: new TextEncoder().encode(JSON.stringify(input)),
     stdout: "pipe",
     stderr: "pipe",
     env,
+    cwd,
   });
   const [out, err] = [await new Response(proc.stdout).text(), await new Response(proc.stderr).text()];
   expect(err).toBe("");
@@ -215,6 +238,10 @@ test("settings.json covers every shell tool and fetch program", () => {
   const rules = new Set(handlers.map(({ event, handler }) => `${event} ${handler.if ?? "WebFetch"}`));
   for (const event of ["PostToolUse", "PostToolUseFailure"])
     for (const rule of Object.keys(blocked)) expect(rules).toContain(`${event} ${rule}`);
+  // An `if` rule for another tool than its group's matcher never fires.
+  for (const { matcher, handler } of handlers) expect((handler.if ?? matcher).split("(")[0]).toBe(matcher);
+  // Every handler launches the hook the same way, so the fallback test below covers them all.
+  expect(new Set(handlers.map(({ handler }) => JSON.stringify([handler.command, ...handler.args!.slice(0, 3)]))).size).toBe(1);
 });
 
 test.each(handlers.map((h) => [`${h.event} ${h.handler.if ?? h.matcher}`, h] as const))("settings handler %s", async (_name, { event, handler }) => {
@@ -225,14 +252,18 @@ test.each(handlers.map((h) => [`${h.event} ${h.handler.if ?? h.matcher}`, h] as 
   expect(JSON.parse(out).hookSpecificOutput.additionalContext).toContain("agent-chrome");
 });
 
-test("settings handler finds the hook in ~/.claude when CLAUDE_CONFIG_DIR is unset", async () => {
+// Bun reads a .env in the working directory, which is the project Claude works in, unless told not to.
+test("settings handler finds the hook in ~/.claude when CLAUDE_CONFIG_DIR is unset, despite a project .env", async () => {
   const home = mkdtempSync(join(tmpdir(), "blocked-fetch-home-"));
   try {
     mkdirSync(join(home, ".claude", "hooks"), { recursive: true });
     copyFileSync(`${import.meta.dir}/blocked-fetch.ts`, join(home, ".claude", "hooks", "blocked-fetch.ts"));
+    const project = join(home, "project");
+    mkdirSync(project);
+    await Bun.write(join(project, ".env"), "CLAUDE_CONFIG_DIR=./nope\nHOME=./nope\nUSERPROFILE=./nope\n");
     const { CLAUDE_CONFIG_DIR: _, ...env } = process.env;
     const { handler } = handlers.find(({ handler }) => !handler.if)!;
-    const out = await runHandler(handler, blocked.WebFetch[0], { ...env, HOME: home, USERPROFILE: home });
+    const out = await runHandler(handler, blocked.WebFetch[0], { ...env, HOME: home, USERPROFILE: home }, project);
     expect(JSON.parse(out).hookSpecificOutput.additionalContext).toContain("agent-chrome");
   } finally {
     rmSync(home, { recursive: true, force: true });

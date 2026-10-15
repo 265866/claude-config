@@ -52,6 +52,7 @@
             "type": "command",
             "command": "bun",
             "args": [
+              "--no-env-file",
               "-e",
               "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")"
             ],
@@ -67,6 +68,7 @@
             "if": "Bash(curl *)",
             "command": "bun",
             "args": [
+              "--no-env-file",
               "-e",
               "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
               "curl"
@@ -78,6 +80,7 @@
             "if": "Bash(wget *)",
             "command": "bun",
             "args": [
+              "--no-env-file",
               "-e",
               "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
               "wget"
@@ -94,6 +97,7 @@
             "if": "PowerShell(curl *)",
             "command": "bun",
             "args": [
+              "--no-env-file",
               "-e",
               "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
               "curl"
@@ -105,6 +109,7 @@
             "if": "PowerShell(wget *)",
             "command": "bun",
             "args": [
+              "--no-env-file",
               "-e",
               "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
               "wget"
@@ -116,6 +121,7 @@
             "if": "PowerShell(Invoke-WebRequest *)",
             "command": "bun",
             "args": [
+              "--no-env-file",
               "-e",
               "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
               "iwr"
@@ -127,6 +133,7 @@
             "if": "PowerShell(Invoke-RestMethod *)",
             "command": "bun",
             "args": [
+              "--no-env-file",
               "-e",
               "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
               "irm"
@@ -144,6 +151,7 @@
             "type": "command",
             "command": "bun",
             "args": [
+              "--no-env-file",
               "-e",
               "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")"
             ],
@@ -159,6 +167,7 @@
             "if": "Bash(curl *)",
             "command": "bun",
             "args": [
+              "--no-env-file",
               "-e",
               "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
               "curl"
@@ -170,6 +179,7 @@
             "if": "Bash(wget *)",
             "command": "bun",
             "args": [
+              "--no-env-file",
               "-e",
               "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
               "wget"
@@ -186,6 +196,7 @@
             "if": "PowerShell(curl *)",
             "command": "bun",
             "args": [
+              "--no-env-file",
               "-e",
               "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
               "curl"
@@ -197,6 +208,7 @@
             "if": "PowerShell(wget *)",
             "command": "bun",
             "args": [
+              "--no-env-file",
               "-e",
               "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
               "wget"
@@ -208,6 +220,7 @@
             "if": "PowerShell(Invoke-WebRequest *)",
             "command": "bun",
             "args": [
+              "--no-env-file",
               "-e",
               "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
               "iwr"
@@ -219,6 +232,7 @@
             "if": "PowerShell(Invoke-RestMethod *)",
             "command": "bun",
             "args": [
+              "--no-env-file",
               "-e",
               "await import((process.env.CLAUDE_CONFIG_DIR || require(\"node:os\").homedir() + \"/.claude\") + \"/hooks/blocked-fetch.ts\")",
               "irm"

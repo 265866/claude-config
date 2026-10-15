@@ -3,7 +3,9 @@
 // reminds the agent to read the page through the agent-chrome skill instead of settling for
 // secondary sources. Agents skipped that step in most blocked sessions.
 // settings.json starts it with `bun -e` and no shell, so it runs the same under sh, Git Bash, and
-// PowerShell. Shell handlers pass the program their `if` rule matched, a key of PROGRAMS.
+// PowerShell, and with --no-env-file, so a project's .env cannot redirect CLAUDE_CONFIG_DIR or HOME.
+// Bun still reads a bunfig.toml in the project, and no flag turns that off on every platform.
+// Shell handlers pass the program their `if` rule matched, a key of PROGRAMS.
 
 type HookInput = {
   hook_event_name: string;
@@ -28,7 +30,8 @@ const JS_ONLY = /enable (JavaScript|JS)\b|JavaScript is (disabled|required)|requ
 const WGET_ERROR = /\bERROR (403|429): /;
 // Invoke-WebRequest and Invoke-RestMethod errors in PowerShell 7 and Windows PowerShell 5.1. When the
 // refusal has a body, PowerShell 7 prints the page's text instead of the status, so the common block
-// pages' wording is here too. Checked only in error output, since pages about these errors use it.
+// pages' wording is here too. Pages about these errors use the same words, so this checks only a
+// failed command's output or stderr, never the stdout of a command that succeeded.
 const CMDLET_ERROR =
   /Response status code does not indicate success: (403|429)\b[^\r\n]*|The remote server returned an error: \((403|429)\)[^\r\n]*|HttpClient\.Timeout of \d+ seconds elapsing|The operation has timed out|The SSL connection could not be established|Could not establish trust relationship|You don['’]t have permission to access|Access to this page has been denied|Please enable JS and disable any ad blocker|Press & Hold/;
 // Exit code alone: curl -s hides the message for a timeout (28) or certificate failure (60).
@@ -117,11 +120,12 @@ const PROGRAMS: Record<string, string> = {
 
 // Mirrors the wrappers the `if` permission filter strips, so the script sees what `if` matched.
 // PowerShell also runs a command after an assignment, as in `$page = iwr …`, and its paths may use
-// backslashes. Its command names ignore case.
-const commandPrefix = (separators: string, dirs: string) =>
-  String.raw`(^|[${separators}]|\$\()\s*((\w+=\S*|do|then|else|elif|if|while|until|!|time|nice|nohup|command|builtin|env|xargs|timeout\s+\S+|stdbuf\s+-\S+)\s+)*(\S*[${dirs}])?`;
-const BASH_PREFIX = commandPrefix(String.raw`;&|(\x60{\n`, "/");
-const POWERSHELL_PREFIX = commandPrefix(String.raw`;&|(\x60{\n=`, String.raw`/\\`);
+// backslashes. Its command names ignore case. A directory never contains "://", so a URL such as
+// 'https://curl.se/' in an assignment does not read as running curl.
+const commandPrefix = (starts: string, dirs: string) =>
+  String.raw`(${starts})\s*((\w+=\S*|do|then|else|elif|if|while|until|!|time|nice|nohup|command|builtin|env|xargs|timeout\s+\S+|stdbuf\s+-\S+)\s+)*(['"]?(?![^\s'"]*:\/\/)[^\s'"=]*[${dirs}])?`;
+const BASH_PREFIX = commandPrefix(String.raw`^|[;&|(\x60{\n]|\$\(`, "/");
+const POWERSHELL_PREFIX = commandPrefix(String.raw`^|[;&|(\x60{\n]|\$\(|\$[\w:.]+\s*\+?=`, String.raw`/\\`);
 
 function commandRuns(command: string, program: string, powershell: boolean): boolean {
   const prefix = powershell ? POWERSHELL_PREFIX : BASH_PREFIX;
@@ -158,7 +162,9 @@ function parseUrl(text: string): URL | undefined {
 
 function urlsIn(text: string): URL[] {
   return [...text.matchAll(/https?:\/\/[^\s"'`<>;|\\]+/g)].flatMap((m) => {
-    const raw = m[0].includes("(") ? m[0] : m[0].replace(/\)+$/, "");
+    // A URL with a parenthesis of its own keeps it; otherwise a trailing one closes an expression,
+    // as in (iwr <url>).Content.
+    const raw = m[0].includes("(") ? m[0] : m[0].replace(/\)+(\.[\w.]*)?$/, "");
     return parseUrl(raw) ?? [];
   });
 }
@@ -173,16 +179,24 @@ function commandHosts(command: string): string[] {
   return [...urlsIn(command).map((u) => u.hostname), ...bareHosts];
 }
 
-// The page the command fetched, skipping URLs that are option values such as a referer or proxy.
-function targetUrl(command: string, program: string): URL | undefined {
-  if (program === "iwr" || program === "irm") {
-    const cmdletValue = /(^|\s)-(Headers|Proxy|Body|UserAgent)(:|\s+)(@\{[^}]*\}|"[^"]*"|'[^']*'|\S+)/gi;
-    return urlsIn(command.replace(cmdletValue, " "))[0];
+// The command without option values such as a referer, proxy, or user agent, so neither the
+// fetched page nor the local-host check picks up a URL that only names one of those.
+function withoutOptionValues(command: string, program: string, powershell: boolean): string {
+  const value = String.raw`("[^"]*"|'[^']*'|\S+)`;
+  // Proxy settings in the environment, such as HTTPS_PROXY=… or $env:https_proxy = '…'.
+  let rest = command.replace(new RegExp(String.raw`(^|[\s;&|(]|\$env:)\w*_proxy\s*=\s*${value}`, "gi"), " ");
+  if (powershell) {
+    // Cmdlet parameters, which Windows PowerShell 5.1 also takes for curl and wget, its aliases of
+    // Invoke-WebRequest. PowerShell accepts any unambiguous prefix of a parameter name, such as -Head
+    // for -Headers. -ProxyUseDefaultCredentials takes no value.
+    rest = rest.replace(/(^|\s)-(He[a-z]*|Bo[a-z]*|UserA[a-z]*|Proxy(C[a-z]*)?)(:|\s+)(@\{[^}]*\}|"[^"]*"|'[^']*'|\S+)/gi, " ");
+    if (program === "iwr" || program === "irm") return rest;
   }
-  // wget's -x, -d, -nd, and -nH take no value.
-  const valueFlags = program === "wget" ? "eU" : "eHxAUd";
-  const optionValue = new RegExp(String.raw`(^|\s)(-[a-zA-Z]*[${valueFlags}]|--referer|--proxy|--header|--user-agent|--data(-\w+)?)\s+("[^"]*"|'[^']*'|\S+)`, "g");
-  return urlsIn(command.replace(optionValue, " "))[0];
+  // wget's -x, -d, -nd, and -nH take no value. A bundle of short flags is a few letters long, which
+  // keeps a PowerShell parameter such as -DisableKeepAlive from reading as one ending in -e.
+  const valueFlags = program === "wget" ? "eU" : "eHxAUdF";
+  const long = String.raw`--(referer|proxy|preproxy|noproxy|socks(4a?|5(-hostname)?)|header|user-agent|data(-\w+)?|json|form(-string)?)(=|\s+)`;
+  return rest.replace(new RegExp(String.raw`(^|\s)(-[a-zA-Z]{0,6}[${valueFlags}]\s+|${long})${value}`, "g"), " ");
 }
 
 function asText(value: unknown): string {
@@ -205,8 +219,9 @@ function detect(input: HookInput, program: string | undefined): { url?: URL; sig
     if (!commandRuns(command, program, powershell)) return undefined;
     const earlier = Object.keys(PROGRAMS).slice(0, Object.keys(PROGRAMS).indexOf(program));
     if (earlier.some((other) => commandRuns(command, other, powershell))) return undefined;
-    if (commandHosts(command).some(isLocal)) return undefined;
-    const url = targetUrl(command, program);
+    const fetched = withoutOptionValues(command, program, powershell);
+    if (commandHosts(fetched).some(isLocal)) return undefined;
+    const url = urlsIn(fetched)[0];
     if (!url) return undefined;
     const response = input.tool_response as { stdout?: unknown; stderr?: unknown } | undefined;
     const text = failure ? asText(input.error) : `${asText(response?.stdout)}\n${asText(response?.stderr)}`;
