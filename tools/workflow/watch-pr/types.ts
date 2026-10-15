@@ -26,6 +26,8 @@ export type MergeStateStatus =
   | "HAS_HOOKS"
   | "UNKNOWN"
   | "UNSTABLE";
+// Babysit's no-checks rule matches this exact detail on a status-query exit 7.
+export const EMPTY_ROLLUP_DETAIL = "could not read checks for the observed head: rollup was empty";
 export type RollupState =
   | "ERROR"
   | "EXPECTED"

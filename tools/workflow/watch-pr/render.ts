@@ -1,4 +1,5 @@
 import type * as T from "./types.ts";
+import { EMPTY_ROLLUP_DETAIL } from "./types.ts";
 export const renderJson = (verdict: T.WatcherVerdict): string =>
   `${JSON.stringify(verdict)}\n`;
 function ciCell(row: T.PrSnapshot): string {
@@ -78,7 +79,7 @@ function threadLine(thread: T.ReviewThread): string {
 type StatusQueryBlocker = {
   readonly kind: "status-query";
   readonly failures: number;
-  readonly failure: { readonly detail: string };
+  readonly failure: T.QueryFailure;
 };
 function renderBlocker(blocker: T.MergeBlocker | StatusQueryBlocker): string {
   switch (blocker.kind) {
@@ -135,7 +136,9 @@ function renderBlocker(blocker: T.MergeBlocker | StatusQueryBlocker): string {
         "BLOCKER: status-query",
         `failures=${blocker.failures}`,
         `detail=${blocker.failure.detail}`,
-        "action=verify current PR context, GitHub authentication, and API availability, then rearm",
+        blocker.failure.detail === EMPTY_ROLLUP_DETAIL
+          ? "action=read the head's checks with `gh pr checks` and `gh run list --commit <head>`; none on two reads one interval apart means the PR has no checks"
+          : "action=verify current PR context, GitHub authentication, and API availability, then rearm",
       ].join("\n");
     default: {
       const exhaustive: never = blocker;

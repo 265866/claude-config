@@ -185,6 +185,29 @@ describe("main", () => {
     }
   });
 
+  it("ends a status snapshot at the first empty rollup with exit 7 instead of backing off", async () => {
+    for (const modeArgs of [[], ["--stack"], ["--queued-stack", "--stack-prs", "1"]]) {
+      const reader = fakeReader({ rollupPages: [{ sourceOid: "head", state: null, checks: [], endCursor: null }] });
+      const harness = testRuntime(reader);
+      expect(await main([
+        "--owner", "owner", "--repo", "repo", "--pr", "1", "--status-only", ...modeArgs,
+      ], harness.runtime)).toBe(7);
+      expect(harness.stdout).toHaveLength(1);
+      expect(JSON.parse(harness.stdout[0])).toMatchObject({
+        kind: "BLOCKER", exitCode: 7, blocker: { kind: "status-query", failures: 1, failure: {
+          kind: "checks-unavailable",
+          detail: "could not read checks for the observed head: rollup was empty",
+        } },
+      });
+      expect(reader.calls.filter((call) => call.startsWith("checkRollupPage"))).toHaveLength(1);
+    }
+    const pretty = testRuntime(fakeReader({ rollupPages: [{ sourceOid: "head", state: null, checks: [], endCursor: null }] }));
+    expect(await main([
+      "--owner", "owner", "--repo", "repo", "--pr", "1", "--status-only", "--pretty",
+    ], pretty.runtime)).toBe(7);
+    expect(pretty.stdout.join("")).toContain("gh run list --commit <head>");
+  });
+
   it("carries the observed head in single and stack READY JSON", async () => {
     for (const stackArgs of [[], ["--stack"]]) {
       const harness = testRuntime(fakeReader({

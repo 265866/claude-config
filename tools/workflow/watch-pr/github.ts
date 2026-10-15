@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import type * as T from "./types.ts";
-import { nonEmpty, parsePrNumber } from "./types.ts";
+import { EMPTY_ROLLUP_DETAIL, nonEmpty, parsePrNumber } from "./types.ts";
 export const REVIEW_THREADS_QUERY =
   `query ReviewThreads($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
     repository(owner: $owner, name: $repo) {
@@ -67,6 +67,12 @@ export class ChecksUnavailable extends WatcherQueryError {
   constructor(detail: string) {
     super({ kind: "checks-unavailable", retryable: true, detail });
     this.name = "ChecksUnavailable";
+  }
+}
+export class EmptyRollup extends ChecksUnavailable {
+  constructor() {
+    super(EMPTY_ROLLUP_DETAIL);
+    this.name = "EmptyRollup";
   }
 }
 const firstLine = (value: string): string =>
@@ -637,7 +643,7 @@ export async function resolveChecks(
   } while (after !== null);
   const complete = nonEmpty(checks);
   if (complete === null || state === null || state === undefined)
-    throw new ChecksUnavailable("could not read checks for the observed head: rollup was empty");
+    throw new EmptyRollup();
   return { source: "graphql-rollup", sourceOid: headRefOid, state, checks: complete };
 }
 export async function resolveContext(args: {
