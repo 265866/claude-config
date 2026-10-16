@@ -75,7 +75,7 @@ jobs:
   fmt:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@<sha> # v6.1.0
+      - uses: actions/checkout@<sha> # v7.0.1
         with:
           persist-credentials: false
       - run: rustup toolchain install
@@ -88,7 +88,7 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@<sha> # v6.1.0
+      - uses: actions/checkout@<sha> # v7.0.1
         with:
           persist-credentials: false
       - run: rustup toolchain install
@@ -108,11 +108,11 @@ jobs:
           done
 
   commits:
-    # release-plz names its PRs `chore: release`, without a scope.
+    # release-plz's default PR titles, such as `chore: release v1.2.3`, often have no scope.
     if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release-plz-')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@<sha> # v6.1.0
+      - uses: actions/checkout@<sha> # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -120,7 +120,8 @@ jobs:
       - name: Check conventional commit subjects
         run: |
           pattern='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)\([a-z0-9][a-z0-9_/-]*\)!?: [^ ]'
-          bad=$(git log --no-merges --format=%s HEAD^1..HEAD | grep -Ev "$pattern" || true)
+          subjects=$(git log --no-merges --format=%s HEAD^1..HEAD)
+          bad=$(printf '%s\n' "$subjects" | grep -Ev "$pattern" || true)
           if [ -n "$bad" ]; then
             printf 'Commit subjects must be type(scope): subject\n%s\n' "$bad"
             exit 1
@@ -131,7 +132,7 @@ jobs:
 
 ## Conventional commits
 
-Every subject is `type(scope): subject`, with `!` before the colon for a breaking change. The scope is the crate or area the commit changes, such as `feat(parser): accept chunked bodies` or `fix(cli)!: exit non-zero on bind failure`. The `commits` job above enforces the shape on pull requests. It assumes merge or rebase merging; with squash merging, main receives the PR title instead, so check `github.event.pull_request.title` with the same pattern. release-plz reads these subjects to choose the version bump and group the changelog, and treats a non-conforming commit as a patch.
+Every subject is `type(scope): subject`, with `!` before the colon for a breaking change. The scope is the crate or area the commit changes, such as `feat(parser): accept chunked bodies` or `fix(cli)!: exit non-zero on bind failure`. The `commits` job above enforces the shape on pull requests. It assumes merge or rebase merging; with squash merging, main receives the PR title instead, so check `github.event.pull_request.title` with the same pattern and add `types: [opened, edited, synchronize, reopened]` so a title edit reruns it. Git's default `Revert "..."` subject fails the pattern; reword it as `revert(scope): ...`. release-plz reads these subjects to choose the version bump and group the changelog, and treats a non-conforming commit as a patch.
 
 ## Releases for published libraries
 
@@ -157,7 +158,7 @@ jobs:
       pull-requests: read
       id-token: write
     steps:
-      - uses: actions/checkout@<sha> # v6.1.0
+      - uses: actions/checkout@<sha> # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -178,7 +179,7 @@ jobs:
       group: release-plz-${{ github.ref }}
       cancel-in-progress: false
     steps:
-      - uses: actions/checkout@<sha> # v6.1.0
+      - uses: actions/checkout@<sha> # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -190,7 +191,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-`id-token: write` uses crates.io trusted publishing, configured per crate on crates.io. A crate's first publish must be a manual `cargo publish`. Without trusted publishing, drop `id-token: write` and pass `CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}` to both steps, using a token scoped to `publish-new` and `publish-update`. The repository setting "Allow GitHub Actions to create and approve pull requests" must be on for `release-pr`. A PR opened with `GITHUB_TOKEN` does not trigger CI, so when branch protection requires checks, pass a GitHub App token or fine-grained PAT as `GITHUB_TOKEN` to the `release-pr` step. Both jobs work without a `release-plz.toml`.
+`id-token: write` uses crates.io trusted publishing, configured per crate on crates.io. Trusted publishing works only for a crate that already exists, so the first manual `cargo publish` must happen before `release-plz.yml` lands; otherwise the `release` job fails on its first push. Without trusted publishing, drop `id-token: write` and pass `CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}` to the `release` step, using a token scoped to `publish-new` and `publish-update`. The repository setting "Allow GitHub Actions to create and approve pull requests" must be on for `release-pr`. A PR opened with `GITHUB_TOKEN` does not trigger CI, so when branch protection requires checks, pass a GitHub App token or fine-grained PAT as `GITHUB_TOKEN` to the `release-pr` step. Both jobs work without a `release-plz.toml`.
 
 ## One example crate per feature combination
 
