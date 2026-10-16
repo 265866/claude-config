@@ -1,7 +1,7 @@
 ---
 name: rust-best-practices
-description: Rust best practices. Use when reading or editing any .rs file.
-paths: ["**/*.rs"]
+description: Rust best practices for code and project setup. Use when reading or editing any .rs, Cargo.toml, or rust-toolchain.toml file, or when creating a Rust project or its CI and release automation.
+paths: ["**/*.rs", "**/Cargo.toml", "**/rust-toolchain.toml", "**/rust-toolchain"]
 ---
 
 # Rust best practices
@@ -34,3 +34,18 @@ Respect `rust-version` in Cargo.toml before applying version-gated syntax: let-e
 | Test placement | Unit tests in `#[cfg(test)] mod tests` beside the code (sees private items); integration tests in `tests/` against the public API; doctests keep public examples compiling. |
 
 Examples: [references/patterns.md](${CLAUDE_SKILL_DIR}/references/patterns.md).
+
+## Project setup
+
+Apply when creating a project or when asked to add one of these. A repository's established setup wins.
+
+| Rule | Summary |
+|------|---------|
+| Virtual workspace | Root `Cargo.toml` with explicit `resolver = "3"`, shared metadata in `[workspace.package]`, every dependency version in `[workspace.dependencies]`. |
+| Toolchain pin | `rust-toolchain.toml` pins `stable` with `rustfmt` and `clippy`; CI installs from it. |
+| CI gates | `fmt --check`, then `clippy --all-targets --all-features -D warnings`, `test --locked`, and doctests on each of Linux, macOS, and Windows, with every action pinned to a commit SHA. |
+| Conventional commits | `type(scope): subject`, scope naming the crate or area, checked in CI. |
+| Published libraries | release-plz with a Keep a Changelog `CHANGELOG.md`, plus one example crate per feature combination, each checked in its own cargo invocation. |
+| Profiles | `release` with `lto = true` and `codegen-units = 1`; `profiling` inherits `release` and adds `debug = true`. |
+
+Templates and the reasons behind them: [references/project-setup.md](${CLAUDE_SKILL_DIR}/references/project-setup.md).
