@@ -1,6 +1,6 @@
 ---
 name: review-loop
-description: Use when Colton says "review loop", or asks to keep reviewing a change until a reviewer approves it. A fresh reviewer, on a different model when one is available, checks the diff each round until a round finds no blocker or should, with a decision log so settled points stay settled and the scope stays put.
+description: Use when Colton says "review loop", or asks to keep reviewing a change until a reviewer approves it. A fresh reviewer checks the diff each round until a round finds no blocker or should, with a decision log so settled points stay settled and the scope stays put.
 ---
 
 # Review loop
@@ -41,11 +41,11 @@ Proven defects in code outside base..head go on an "outside the diff" list for t
 
 ## 2. Pick the reviewer
 
-- In T3 Code, call `orchestrator_capabilities` and pick a Claude model that did not write the change, preferring Fable or Opus, then Sonnet, then Haiku. If none is available, use the writer's model and say so in the report. Use a non-Claude model only when Colton asks for one. If Colton names a model, use it. If it is unavailable, report that and stop as Stuck before round 1. Never substitute a different model for one he named.
-- Start each round with `delegate_task`, using `role: "review"`, `mode: "async"`, and `target: {providerInstanceId, model}` for the chosen model. Leave isolation at its shared default. Give each round a new `clientRequestId`, and reuse one only to retry a call whose response was lost. The task prompt is the whole brief, because the child gets no history. Save each round's `taskId`. Do not continue a review by sending to its `childThreadId`.
+- The reviewer runs on the session's model and effort, even when that model wrote the change. If Colton names a model, use it: in T3 Code, find it with `orchestrator_capabilities`. If it is unavailable, report that and stop as Stuck before round 1. Never substitute a different model for one he named.
+- In T3 Code, start each round with `delegate_task`, using `role: "review"` and `mode: "async"`. Omit `target` so the child inherits this thread's model, or set `target: {providerInstanceId, model}` for a model Colton named. Leave isolation at its shared default. Give each round a new `clientRequestId`, and reuse one only to retry a call whose response was lost. The task prompt is the whole brief, because the child gets no history. Save each round's `taskId`. Do not continue a review by sending to its `childThreadId`.
 - After delegating, do independent work or end the turn. The completion notice wakes you. Do not poll. Call `task_status` only when you need the result mid-turn, or when you wake for something else and the review has run more than 30 minutes. A review with no result after 30 minutes counts as stalled, whether it is a T3 task still working or an Agent.
-- Outside T3, or when `delegate_task` is unavailable, use a fresh read-only general-purpose Agent. Pass a different model through its `model` field when the schema lists one, in the order above. Otherwise it runs on the session's model, and the report says so. When Colton named a model the Agent cannot run, report that and stop as Stuck.
-- Do not edit the scoped files while a review runs. An error, a stalled review, or a reply without a verdict is not approval. When it is still running, stop it (`task_cancel` in T3, `TaskStop` for an Agent) and confirm it stopped. No rerun, including the model switch below, runs past a cap Colton named. Reaching the cap makes the loop Stuck. Otherwise rerun the round, under a new `clientRequestId` in T3. When the rerun also fails, switch once to the next model in the order, or to the Agent fallback when none is left. When the switched reviewer also fails, or no switch is possible, stop as Stuck and report the failure. When Colton named the model, do not switch. Stop as Stuck after the failed rerun.
+- Outside T3, or when `delegate_task` is unavailable, use a fresh read-only general-purpose Agent. Leave its `model` field unset unless Colton named a model. When Colton named a model the Agent cannot run, report that and stop as Stuck.
+- Do not edit the scoped files while a review runs. An error, a stalled review, or a reply without a verdict is not approval. When it is still running, stop it (`task_cancel` in T3, `TaskStop` for an Agent) and confirm it stopped. No rerun, including the Agent fallback below, runs past a cap Colton named. Reaching the cap makes the loop Stuck. Otherwise rerun the round, under a new `clientRequestId` in T3. When a T3 rerun also fails, run the round once with the Agent fallback, unless Colton named a model the Agent cannot run. When that also fails, or no fallback is possible, stop as Stuck and report the failure.
 
 ## 3. Round brief
 
