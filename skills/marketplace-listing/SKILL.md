@@ -20,6 +20,9 @@ Three things shape the listing. Ask for whatever is missing before researching:
 folds in freight, pallet fees, and storage, since the skill needs the figure that decides the veto
 rather than an itemized buy. It never appears in the listing.
 
+When the user hands over item photos for the listing, prepare them with the **listing-photos**
+skill. The model number and UPC it reads from label close-ups feed step 1.
+
 Condition defaults to new and sealed, which is what usually moves through here. Ask when the item
 looks used.
 
