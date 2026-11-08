@@ -17,13 +17,13 @@ Both plugins come from the same commit of `cursor/plugins`:
 
 | Plugin | Version | Commit |
 | --- | --- | --- |
-| pstack | 0.15.15 | [`df58112`](https://github.com/cursor/plugins/tree/df581122cde17e6e27686b5a448bde23e4ad4318/pstack) |
-| cursor-team-kit | 1.2.0 | [`df58112`](https://github.com/cursor/plugins/tree/df581122cde17e6e27686b5a448bde23e4ad4318/cursor-team-kit) |
+| pstack | 0.15.36 | [`c742dd6`](https://github.com/cursor/plugins/tree/c742dd61706fbacc1b95f1a20b7b988cf096ce6c/pstack) |
+| cursor-team-kit | 1.2.0 | [`c742dd6`](https://github.com/cursor/plugins/tree/c742dd61706fbacc1b95f1a20b7b988cf096ce6c/cursor-team-kit) |
 
 Full hash:
 
 ```text
-df581122cde17e6e27686b5a448bde23e4ad4318
+c742dd61706fbacc1b95f1a20b7b988cf096ce6c
 ```
 
 ## Where each file came from
@@ -43,7 +43,7 @@ Anything not listed here is original to this profile.
 
 **Tools**
 
-- `tools/workflow/watch-pr/`, `tools/workflow/orch/`, `tools/workflow/bootstrap.ts`, `tools/workflow/package.json`, and
+- `tools/workflow/watch-pr/`, `tools/workflow/bootstrap.ts`, `tools/workflow/package.json`, and
   `tools/workflow/bun.lock`
   ← `skills/poteto-mode/scripts/`
 - `tools/workflow/check-plan.ts` ← `skills/poteto-mode/scripts/check-plan.mjs`, ported to TypeScript
@@ -74,8 +74,8 @@ Anything not listed here is original to this profile.
 These come from the skill of the same name under pstack's `skills/`:
 
 `architect`, `arena`, `benchmark-checklist`, `blast-radius`,
-`create-verification-skill`, `figure-it-out`, `how`, `interrogate`,
-`maintain-verification-skill`, `recall`, `reflect`, `show-me-your-work`,
+`create-formal-verification-skill`, `create-verification-skill`, `figure-it-out`, `how`, `interrogate`,
+`maintain-formal-verification-skill`, `maintain-verification-skill`, `recall`, `reflect`, `show-me-your-work`,
 `swarm`, `tdd`, `teach`,
 `technical-writing`, `typescript-best-practices`, `why`,
 and every `principle-*` skill.
@@ -170,6 +170,11 @@ For each change in a commit, decide together whether it fits this profile.
      Use a subject like `Sync pstack 0.15.7 (9511e60): nothing ported`.
 
    In the body, list each skipped change and the reason, so a later sync does not reopen it.
+
+   When the user chooses a grouped layout, make one commit per accepted feature instead,
+   with the upstream commits it ports in the subject, such as `Sync pstack (87c8103, cf9a111): fix the plan check`.
+   After them, one commit moves [Base commit](#base-commit) to the last upstream commit reviewed.
+   Its body lists every upstream commit with nothing ported, and every skipped change, each with its reason.
 
 8. Go back to step 3 with the next commit.
    Stop when none are left or when the user says to stop.
