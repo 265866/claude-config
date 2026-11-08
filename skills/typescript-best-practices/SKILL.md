@@ -13,7 +13,7 @@ Check the project's TypeScript version before applying version-gated syntax: `sa
 | Rule | Summary |
 |------|---------|
 | Discriminated unions | Model variants with one literal discriminant (`kind`, `type`, or `tag`, matching the codebase) so impossible states can't be represented. No optional-field bags. |
-| Branded types | Brand primitives with `& { readonly __brand: "X" }` so they can't be mixed up. Validate once at the boundary. |
+| Branded types | Brand primitives with `& { readonly __brand: "X" }` so they can't be mixed up. Validate once at the boundary. A brand comes from a verifying type guard (`input is AgentId`), never from `as`. |
 | Constructive modeling | Build the shape so the illegal value can't be constructed. `[T, ...T[]]` for non-empty, `[T, T][]` for even length, `start` plus `duration` for a range. Not a runtime guard, not a wish for refinement types. |
 | Simplest total type | Keep `T[]` while every operation on it stays total. Strengthen to `NonEmpty<T>` only where the loose type forces `!`, a cast, or a "should never happen" throw. |
 | `unknown` over `any` | External data is `unknown`. |

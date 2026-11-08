@@ -7,7 +7,10 @@ description: "Apply when you write, change, or keep a test. Exercise a real beha
 
 A behavioral test calls the code the way its users do and asserts the result or effect they observe against an independently specified expectation. Interaction, data, and type assertions can also verify real contracts; identify which contract each test protects.
 
-The check: name a concrete defect the test must catch, then inspect its input and assertion. When `undefined` violates the subject's contract, ask whether that wrong result would fail the test. For a void operation, check the required side effect instead. This is one diagnostic, not a universal test-quality rule. Keep the assertion library, runner, and fixtures intact when reasoning about a broken subject.
+Judge each test against two imagined edits. Keep the assertion library, runner, and fixtures intact in both.
+
+- **Break the behavior.** Make the code return a wrong value, skip an effect, or do the effect twice. The test must fail. If it still passes, it proves nothing.
+- **Change only the internals.** Keep every observable result the same and restructure the code underneath. The test must still pass. If it fails, it is pinned to the implementation, needs a rewrite on every refactor, and still catches no bug.
 
 **Why:** A passing test is useful only when its assertions can reject a relevant defect. Assertions that merely repeat the implementation can preserve its mistakes or obstruct harmless changes.
 
@@ -18,6 +21,8 @@ The check: name a concrete defect the test must catch, then inspect its input an
 - **Self-referential expectation.** `expect(f(a)).toBe(f(a))` can pass when both calls return the same wrong value, including `undefined`. A relation between distinct operations can be meaningful, but needs cases that expose shared mistakes.
 - **Implementation pin.** A literal public-default assertion can protect a contract. An internal constant or prompt-text pin needs a concrete requirement; otherwise prefer testing the behavior it controls.
 - **Fixture asserts fixture.** Confirm the test exercises the subject or a specified data/type contract, rather than only checking values the test itself constructed.
+
+The contract decides, not the shape of the assertion. When "an empty cart never charges" is the promise, an assertion that the payment client got no call is behavior. Pair it with a case where the charge happens, so that the test shows it can see a call. The payload that a mocked external service receives is behavior, because that service observes it. A call to an internal helper is implementation, because no user can see it. An empty list is the exact answer when no record matches, and a hollow check when the test only needs some result. An exact error message pins wording that no caller reads. The error type that callers branch on is the contract.
 
 **The fix:** use a concrete input and assert its expected output or observable effect, such as `expect(slugify("Hello, World!")).toBe("hello-world")`. Add the boundary or contrasting case the contract needs. Strengthen or remove tests that protect no meaningful requirement; do not delete a valid test solely because of its matcher.
 
