@@ -3,7 +3,7 @@
 
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { homedir, platform, tmpdir } from "node:os";
+import { homedir, hostname, platform, tmpdir } from "node:os";
 import { isAbsolute, join } from "node:path";
 
 const CHROME_DEVTOOLS_MCP = "chrome-devtools-mcp@1.10.1";
@@ -19,6 +19,16 @@ const START_SECONDS = 20;
 const CLOSE_SECONDS = 15;
 const LOCK_PORT = Number(process.env.AGENT_CHROME_LOCK_PORT ?? 47913);
 const SCRIPT = import.meta.path;
+
+// The signed-in agent Chrome lives on one machine. Elsewhere a fresh or stale profile would browse
+// without the user's sign-ins, so runs there go to that machine through T3 instead. See ../SKILL.md.
+const AGENT_CHROME_HOST = process.env.AGENT_CHROME_HOST || "colton-desktop";
+const onAgentChromeHost = hostname().toLowerCase() === AGENT_CHROME_HOST.toLowerCase();
+const handOff = {
+  status: "hand_off",
+  host: AGENT_CHROME_HOST,
+  detail: `The agent Chrome lives on ${AGENT_CHROME_HOST}, not ${hostname()}. Hand the run to ${AGENT_CHROME_HOST} through T3.`,
+};
 
 const os = platform();
 const profileDir = process.env.AGENT_CHROME_PROFILE || defaultProfileDir();
@@ -461,10 +471,11 @@ async function main(command: string | undefined, rest: string[]): Promise<void> 
       if (!options.brief) throw new Error("Pass the brief with --brief <file>.");
       const brief = readFileSync(options.brief, "utf8");
       if (!brief.trim()) throw new Error(`The brief file ${options.brief} is empty.`);
-      console.log(JSON.stringify(await runWorker(brief, options.timeout), null, 2));
+      console.log(JSON.stringify(onAgentChromeHost ? await runWorker(brief, options.timeout) : handOff, null, 2));
       return;
     }
     case "signin": {
+      if (!onAgentChromeHost) throw new Error(`${handOff.detail} Sign in there.`);
       if (!tryLock()) throw new Error("A worker is running. Run signin after it finishes.");
       const chrome = await endpoint();
       if (chrome) {
