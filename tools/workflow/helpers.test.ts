@@ -68,6 +68,12 @@ describe("program plan validation", () => {
     expect(validatePlan(longer)).toEqual([]);
   });
 
+  it("treats a backtick line whose info string contains a backtick as text, not a fence", () => {
+    const inline = plan.replace("Search the existing records and show matching names.",
+      "Search the existing records and show matching names.\n```ts `inline` text");
+    expect(validatePlan(inline)).toEqual([]);
+  });
+
   it("rejects phase rows separated from the required Markdown table", () => {
     const separated = plan.replace("| P2 |", "Explain the dependency here.\n\n| P2 |");
     expect(validatePlan(separated).map((problem) => problem.message)).toContain("Phases must use one contiguous Markdown table");
@@ -308,5 +314,28 @@ describe("native worktree audit", () => {
       .toMatchObject({ bucket: "hold-lock", locked: true });
     expect(git(feature, ["status", "--porcelain"])).toContain("tracked.txt");
     // Each git call spawns a process; on Windows the whole test can exceed Bun's 5-second default.
+  }, 30_000);
+
+  it("rejects a base ref that does not resolve instead of reporting every worktree unmerged", async () => {
+    const { repo, profile } = await worktreeFixture();
+    await expect(auditWorktrees(repo, { base: "origin/missing", profile })).rejects.toThrow("base ref not found: origin/missing");
+    await expect(auditWorktrees(repo, { profile })).rejects.toThrow("base ref not found");
+    const result = Bun.spawnSync([process.execPath, join(import.meta.dir, "worktree-audit.ts"), repo, "--base", "origin/missing"],
+      { timeout: 15_000 });
+    expect(result.exitCode).toBe(1);
+    expect(result.stderr.toString()).toContain("base ref not found: origin/missing");
+  }, 30_000);
+
+  it("defaults the base to origin/HEAD ahead of origin/main and names it on stderr", async () => {
+    const { repo } = await worktreeFixture();
+    git(repo, ["update-ref", "refs/remotes/origin/trunk", "HEAD"]);
+    git(repo, ["update-ref", "refs/remotes/origin/main", "HEAD"]);
+    git(repo, ["symbolic-ref", "refs/remotes/origin/HEAD", "refs/remotes/origin/trunk"]);
+    const command = [process.execPath, join(import.meta.dir, "worktree-audit.ts"), repo, "--json"];
+    const result = Bun.spawnSync(command, { timeout: 15_000, env: { ...process.env, CLAUDE_CONFIG_DIR: join(repo, "..", "profile") } });
+    expect(result.stderr.toString().trim()).toBe("base: origin/trunk");
+    expect(result.exitCode).toBe(0);
+    expect(JSON.parse(result.stdout.toString())).toMatchObject([{ branch: "feature", merged: true }]);
+    expect(Bun.spawnSync([process.execPath, join(import.meta.dir, "worktree-audit.ts"), "-h"], { timeout: 15_000 }).exitCode).toBe(0);
   }, 30_000);
 });

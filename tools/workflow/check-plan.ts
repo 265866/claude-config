@@ -41,7 +41,8 @@ export function validatePlan(contents: string): readonly PlanProblem[] {
       continue;
     }
     const marker = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(text);
-    if (marker !== null && fence === null) {
+    // CommonMark: a backtick fence's info string cannot contain a backtick, so such a line is text.
+    if (marker !== null && fence === null && !(marker[1]?.[0] === "`" && marker[2]?.includes("`"))) {
       fence = { marker: marker[1]?.[0] ?? "`", length: marker[1]?.length ?? 3 };
       continue;
     }

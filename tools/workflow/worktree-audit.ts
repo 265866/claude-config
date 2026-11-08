@@ -131,15 +131,27 @@ async function recentSessions(profile: string, paths: readonly string[]): Promis
   return sessions;
 }
 
+export function resolveBase(repo: string, base?: string): string {
+  const exists = (ref: string) => optionalGit(repo, ["rev-parse", "--verify", "--quiet", `${ref}^{commit}`]) !== null;
+  if (base !== undefined) {
+    if (!exists(base)) throw new Error(`base ref not found: ${base}`);
+    return base;
+  }
+  const candidates = [optionalGit(repo, ["symbolic-ref", "--short", "refs/remotes/origin/HEAD"]), "origin/main", "origin/master"];
+  const found = candidates.find((ref): ref is string => ref !== null && ref !== "" && exists(ref));
+  if (found === undefined) throw new Error("base ref not found: origin/HEAD, origin/main, and origin/master are missing; pass --base <ref>");
+  return found;
+}
+
 export async function auditWorktrees(repo: string, options: {
   readonly profile?: string;
   readonly base?: string;
   readonly includeSize?: boolean;
 } = {}): Promise<readonly AuditRow[]> {
+  const base = resolveBase(repo, options.base);
   const worktrees = parseWorktrees(git(repo, ["worktree", "list", "--porcelain"]));
   const profile = resolveAuditProfile(options.profile);
   const sessions = await recentSessions(profile, worktrees.slice(1).map((worktree) => worktree.path));
-  const base = options.base ?? "origin/main";
   const rows: AuditRow[] = [];
   for (const worktree of worktrees.slice(1)) {
     const porcelain = optionalGit(worktree.path, ["status", "--porcelain"]);
@@ -165,8 +177,8 @@ export async function auditWorktrees(repo: string, options: {
 }
 
 export async function main(args: readonly string[]): Promise<number> {
-  if (args.includes("--help")) {
-    console.log("Usage: bun worktree-audit.ts [repo] [--base <ref>] [--size] [--json]\nRead-only snapshot. No fetch, remote API, or deletion. Squash merges require separate PR review.");
+  if (args.includes("--help") || args.includes("-h")) {
+    console.log("Usage: bun worktree-audit.ts [repo] [--base <ref>] [--size] [--json]\nRead-only snapshot. No fetch, remote API, or deletion. Squash merges require separate PR review.\nWithout --base, MERGED checks against origin/HEAD, then origin/main, then origin/master. The chosen base goes to stderr.");
     return 0;
   }
   let repo: string | undefined;
@@ -186,7 +198,9 @@ export async function main(args: readonly string[]): Promise<number> {
   }
   try {
     const root = repo ?? git(process.cwd(), ["rev-parse", "--show-toplevel"]);
-    const rows = await auditWorktrees(root, { base, includeSize });
+    const resolved = resolveBase(root, base);
+    console.error(`base: ${resolved}`);
+    const rows = await auditWorktrees(root, { base: resolved, includeSize });
     if (json) console.log(JSON.stringify(rows, null, 2));
     else {
       console.log("BYTES\tAGE_DAYS\tMERGED\tDIRTY\tREMOTE\tLAST_SESSION\tBUCKET\tWORKTREE");
