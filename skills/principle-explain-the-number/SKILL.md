@@ -11,7 +11,7 @@ A measured number is a claim about a system. Before you trust it, report it, or 
 
 **Pattern:**
 
-- **Write the decision before you run.** Name the result that would change a decision, and the noise floor. Stop when the run-to-run spread is larger than the effect.
+- **Write the decision before you run.** Name the result that would change a decision, and the noise floor. When the run-to-run spread is larger than the effect you named, report no measurable difference instead of adding runs to chase it. The benchmark-checklist skill decides borderline gaps.
 - **For a performance number, ask "why not double?"** Name the resource or code path that bounds the result, such as a core, a lock, the disk, the network, or the load generator itself. Get it from a profile or system counters taken in a run you do not report, then map it to source. A guess from reading the code is not a limiter.
 - **List what else the number could be measuring, and rule out each one with evidence.** The usual suspects are errors, skipped results, results served from a cache that production would not have, an untuned side, noise, and a piece too small to matter end to end.
 - **Keep the evidence with the number.** Put the run count, the range, and, for a performance number, the limiter in the notes or a linked artifact, so a reader can check the claim.

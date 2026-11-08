@@ -155,6 +155,7 @@ For each change in a commit, decide together whether it fits this profile.
    When a new upstream file is ported, add it to [Where each file came from](#where-each-file-came-from).
 
 6. Move [Base commit](#base-commit) to this commit.
+   In the grouped layout (step 7), this happens once, in the final base commit.
    Update the commit in both table rows and the full hash.
    Read each plugin's version at this commit:
 
@@ -177,6 +178,7 @@ For each change in a commit, decide together whether it fits this profile.
    Its body lists every upstream commit with nothing ported, and every skipped change, each with its reason.
 
 8. Go back to step 3 with the next commit.
+   In the grouped layout, step 7's commits wait until every upstream commit has a decision.
    Stop when none are left or when the user says to stop.
 
 9. At the end of the sync, check that [Base commit](#base-commit) names the last upstream commit you reviewed,

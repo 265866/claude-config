@@ -30,7 +30,7 @@ Install the verifier and its runtime, such as the TLA+ tools and a Java runtime 
 - **Findings stay findings.** When the current code breaks the property, report it with the counterexample in the code's terms. Do not weaken the property or the model until it passes, and do not change product code unless the user asks.
 - **Honest about scope.** Say what is verified, under which bounds and assumptions, and what is left out. A pass covers the model or the bound, not the whole system.
 - **Readable without the tool.** State the property and the harm in one plain sentence each. Tell a counterexample as a short sequence of steps in the code's words.
-- **Cheap to rerun.** One command, a pinned tool version, and a run short enough that the next agent will use it on every relevant change.
+- **Cheap to rerun.** One command, a pinned tool version, and a run short enough that the next agent will use it on every relevant change. Verifier output, such as TLC's `states/` directory, goes to a temporary directory or is ignored output the verifier regenerates.
 - **Kept in step with the code.** Record which files and functions each check covers, and the commit at which you last confirmed that the verification describes them. When the covered code changes after that commit, the next agent can see that the verification needs another look.
 
 ## Generate the verify skill

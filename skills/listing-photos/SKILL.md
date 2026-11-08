@@ -109,13 +109,14 @@ Fix a failure by editing that entry, then re-render. Rendering replaces the numb
   first when straightening clips the item.
 - `lift`: 0 to 0.5, one value per item.
 - `crop`: `[x0, y0, x1, y1]` fractions read off `straight/<item>-NN.jpg`, the straightened frame
-  before cropping.
+  before cropping. Each side keeps at least 5% of the frame.
 
 When the item cannot fit the cover's magenta square, as with a tall stack shot close up, choose
 another cover or flag a reshoot from farther back. Never pad the frame with a border.
 
 When no edit beats the original, set `rotate: 0`, plus `keystone: 0` on a standing shot. Leave
-`lift` at the item's value, or set it to 0 on every photo of the item. The photo still gets sRGB
+`lift` at the item's value. Set it to 0 on every photo of the item only when the user asked
+for original tones. The photo still gets sRGB
 conversion, levels, and metadata stripping.
 
 ## 5. Flag gaps

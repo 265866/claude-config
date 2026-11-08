@@ -57,6 +57,8 @@ MIN_EDGE_CONF = 0.4
 # Colton chose this look from side-by-sides. It also lightens dark printing
 # (navy reads lighter and bluer), so it must match across an item's photos.
 DEFAULT_LIFT = 0.25
+# A thinner crop collapses to zero pixels when the render scales it to the listing size.
+MIN_CROP = 0.05
 MAX_PHOTOS_PER_ITEM = 10
 
 
@@ -223,11 +225,10 @@ def shadow_lift(
     return to_srgb8(np.where(gain > 1.0001, np.maximum(rolled, lin), lin))
 
 
-def upright(
-    rgb8: np.ndarray, rotate_cw: float, pitch: float, vfov: float
-) -> np.ndarray:
-    """Rotate clockwise by rotate_cw degrees, undo `pitch` degrees of keystone, then crop to the largest valid centered rectangle."""
-    h, w = rgb8.shape[:2]
+def upright_geometry(
+    w: int, h: int, rotate_cw: float, pitch: float, vfov: float
+) -> tuple[np.ndarray, tuple[int, int, int, int] | None]:
+    """Homography for a clockwise rotation plus keystone undo, and the largest valid centered window, or None when under 30% of the frame stays valid."""
     f = (h / 2) / math.tan(math.radians(vfov) / 2)
     k = np.array([[f, 0, w / 2], [0, f, h / 2], [0, 0, 1.0]])
     p, r = math.radians(pitch), math.radians(rotate_cw)
@@ -242,9 +243,6 @@ def upright(
     hom = (
         np.array([[1, 0, w / 2 - c[0] / c[2]], [0, 1, h / 2 - c[1] / c[2]], [0, 0, 1]])
         @ hom
-    )
-    out = cv2.warpPerspective(
-        rgb8, hom, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE
     )
     valid = cv2.warpPerspective(
         np.full((h, w), 255, np.uint8), hom, (w, h), flags=cv2.INTER_NEAREST
@@ -261,13 +259,27 @@ def upright(
 
     lo, hi = 0.3, 1.0
     if not fits(lo):
-        sys.exit(
-            f"rotation {rotate_cw:+.1f} with keystone {pitch:+.1f} leaves under 30% of the frame"
-        )
+        return hom, None
     for _ in range(20):
         s = (lo + hi) / 2
         lo, hi = (s, hi) if fits(s) else (lo, s)
-    x0, y0, cw, ch = window(lo)
+    return hom, window(lo)
+
+
+def upright(
+    rgb8: np.ndarray, rotate_cw: float, pitch: float, vfov: float
+) -> np.ndarray:
+    """Rotate clockwise by rotate_cw degrees, undo `pitch` degrees of keystone, then crop to the largest valid centered rectangle."""
+    h, w = rgb8.shape[:2]
+    hom, win = upright_geometry(w, h, rotate_cw, pitch, vfov)
+    if win is None:
+        sys.exit(
+            f"rotation {rotate_cw:+.1f} with keystone {pitch:+.1f} leaves under 30% of the frame"
+        )
+    out = cv2.warpPerspective(
+        rgb8, hom, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE
+    )
+    x0, y0, cw, ch = win
     return out[y0 : y0 + ch, x0 : x0 + cw]
 
 
@@ -462,51 +474,103 @@ def auto_geometry(entry: dict, a: dict) -> tuple[float, float, str]:
     if trusted_pitch:
         pitch = g["pitch"] * KEYSTONE
     if entry.get("rotate") is not None:
-        rotate = float(entry["rotate"])
+        rotate = plan_number(entry["rotate"])
         why = [f"override {rotate:+.1f}"]
     if entry.get("keystone") is not None:
         pitch = g["pitch"] * float(entry["keystone"])
     return rotate, pitch, "; ".join(why) or "no rotation"
 
 
+def plan_number(value) -> float:
+    """A finite JSON number; raises TypeError or ValueError on anything else, including a boolean or numeric text."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise TypeError("not a JSON number")
+    try:
+        number = float(value)
+    except OverflowError as e:
+        raise ValueError("out of range") from e
+    if not math.isfinite(number):
+        raise ValueError("not a finite number")
+    return number
+
+
+def plan_lift(entry: dict) -> float:
+    """Shadow lift for a plan entry; raises TypeError or ValueError on a non-numeric value."""
+    lift = entry.get("lift")
+    return DEFAULT_LIFT if lift is None else plan_number(lift)
+
+
 def validate_plan(plan: list[dict], analysis: dict) -> list[dict]:
     """Reject the whole plan before any output is touched."""
+    if not isinstance(plan, list) or not all(isinstance(p, dict) for p in plan):
+        sys.exit("plan.json problems:\n  the plan must be a list of photo objects")
     chosen = [p for p in plan if p.get("include", True)]
     problems = []
     for p in chosen:
         pid = p.get("id")
-        if pid not in analysis:
+        if not isinstance(pid, str) or pid not in analysis:
             problems.append(f"{pid}: unknown id")
             continue
-        if p.get("shot") not in SHOTS:
+        if not isinstance(p.get("shot"), str) or p["shot"] not in SHOTS:
             problems.append(f"{pid}: shot must be one of {sorted(SHOTS)}")
-        if not SLUG.fullmatch(p.get("item") or ""):
+        if not isinstance(p.get("item"), str) or not SLUG.fullmatch(p["item"]):
             problems.append(f"{pid}: item must be a lowercase-hyphen slug")
-        if p.get("keystone") is not None and (
-            p.get("shot") != "standing" or not 0 <= float(p["keystone"]) <= 1
-        ):
-            problems.append(
-                f"{pid}: keystone is a 0-1 fraction for standing shots only"
-            )
-        lift = DEFAULT_LIFT if p.get("lift") is None else float(p["lift"])
-        if not 0 <= lift <= 0.5:
+        if p.get("keystone") is not None:
+            try:
+                keystone_ok = (
+                    p.get("shot") == "standing" and 0 <= plan_number(p["keystone"]) <= 1
+                )
+            except (TypeError, ValueError):
+                keystone_ok = False
+            if not keystone_ok:
+                problems.append(
+                    f"{pid}: keystone is a 0-1 fraction for standing shots only"
+                )
+        if p.get("rotate") is not None:
+            try:
+                rotate_ok = abs(plan_number(p["rotate"])) <= 180
+            except (TypeError, ValueError):
+                rotate_ok = False
+            if not rotate_ok:
+                problems.append(f"{pid}: rotate must be degrees from -180 to 180")
+        try:
+            lift_ok = 0 <= plan_lift(p) <= 0.5
+        except (TypeError, ValueError):
+            lift_ok = False
+        if not lift_ok:
             problems.append(f"{pid}: lift must be 0-0.5")
-        for box in [*(p.get("blur") or []), *([p["crop"]] if p.get("crop") else [])]:
-            if len(box) != 4 or not (
-                0 <= box[0] < box[2] <= 1 and 0 <= box[1] < box[3] <= 1
-            ):
+        blur = p.get("blur") or []
+        boxes = [*(blur if isinstance(blur, list) else [blur])]
+        boxes += [p["crop"]] if p.get("crop") else []
+        for box in boxes:
+            try:
+                x0, y0, x1, y1 = (plan_number(v) for v in box)
+                box_ok = 0 <= x0 < x1 <= 1 and 0 <= y0 < y1 <= 1
+            except (TypeError, ValueError):
+                box_ok = False
+            if not box_ok:
                 problems.append(f"{pid}: box must be [x0, y0, x1, y1] fractions: {box}")
+        if p.get("crop"):
+            try:
+                x0, y0, x1, y1 = (plan_number(v) for v in p["crop"])
+                # The slack keeps an exact 5% side, such as 0.95 - 0.9, from failing on float error.
+                if min(x1 - x0, y1 - y0) < MIN_CROP - 1e-9:
+                    problems.append(
+                        f"{pid}: crop must keep at least {MIN_CROP:.0%} of each side"
+                    )
+            except (TypeError, ValueError):
+                pass  # The box check above already reported a malformed crop.
     # One item's photos sit side by side in a listing, so a tone edit on only some
     # of them shows as a color mismatch between photos of the same box.
-    for item in {p.get("item") for p in chosen}:
-        tones = {
-            (
-                DEFAULT_LIFT if p.get("lift") is None else float(p["lift"]),
-                bool(p.get("wb")),
-            )
-            for p in chosen
-            if p.get("item") == item
-        }
+    for item in {p["item"] for p in chosen if isinstance(p.get("item"), str)}:
+        tones = set()
+        for p in chosen:
+            if p.get("item") != item:
+                continue
+            try:
+                tones.add((plan_lift(p), bool(p.get("wb"))))
+            except (TypeError, ValueError):
+                pass  # A non-numeric lift fails the plan without a tone to compare.
         if len(tones) > 1:
             problems.append(
                 f"{item}: use the same lift and wb on every photo of an item"
@@ -551,6 +615,20 @@ def render(args: argparse.Namespace) -> None:
     chosen = validate_plan(
         json.loads((work / "plan.json").read_text(encoding="utf-8")), analysis
     )
+    # Check every photo's geometry before deleting any earlier output, so a plan
+    # that cannot render leaves the last good render in place.
+    too_tight = []
+    for entry in chosen:
+        a = analysis[entry["id"]]
+        rotate, pitch, _ = auto_geometry(entry, a)
+        if (rotate or pitch) and upright_geometry(
+            a["width"], a["height"], rotate, pitch, a["geocalib"]["vfov"]
+        )[1] is None:
+            too_tight.append(
+                f"{entry['id']}: rotation {rotate:+.1f} with keystone {pitch:+.1f} leaves under 30% of the frame"
+            )
+    if too_tight:
+        sys.exit("plan.json problems:\n  " + "\n  ".join(too_tight))
     for sub in ("compare", "straight"):
         (work / sub).mkdir(exist_ok=True)
         for stale in (work / sub).glob("*.jpg"):
@@ -593,7 +671,7 @@ def render(args: argparse.Namespace) -> None:
         rgb8 = auto_level(rgb8)
         if entry.get("wb"):
             rgb8 = white_balance(rgb8)
-        lift = DEFAULT_LIFT if entry.get("lift") is None else float(entry["lift"])
+        lift = plan_lift(entry)
         rgb8 = shadow_lift(rgb8, lift)
         scale = LONG_EDGE / max(rgb8.shape[:2])
         if scale < 1:

@@ -4,7 +4,7 @@ The main coordinator selects the procedure and execution method using CLAUDE.md.
 
 ## Frame the run
 
-Record the authorized outcome, input revision or source scope, required work units, dependency order, owned resources, verification boundary, and stopping point. Define a finite worker/round budget and an observable deadline when work can stall. Count investigation, implementation, review, retries, and synthesis in that budget. The review-loop skill is the exception CLAUDE.md names. The loop runs without a round budget or deadline unless the user names a cap, wherever this reference asks for one. The upstream sync review loop in UPSTREAM.md step 10 also has no round limit, by the user's choice.
+Record the authorized outcome, input revision or source scope, required work units, dependency order, owned resources, verification boundary, and stopping point. Define a finite worker/round budget and an observable deadline when work can stall. Count investigation, implementation, review, retries, and synthesis in that budget. CLAUDE.md names two exceptions. The review-loop skill runs without a round budget or deadline unless the user names a cap, wherever this reference asks for one. The upstream sync review loop in UPSTREAM.md step 10 has no round limit, by the user's choice.
 
 Prefer an existing deterministic command for a known transformation. Validate a newly authored transformation like any other code change. A long wait or a large file count alone does not require agent orchestration.
 
@@ -114,11 +114,11 @@ Use native goal tracking only for an explicitly requested sustained outcome. Sel
 T3 Code's tools come from its `t3-code` MCP server. Use them only when this session runs in a T3 thread, which a call such as `t3_worktree_status` confirms. `t3_thread_configure`, called without `threadId`, returns this thread's ID. When they are not listed, load them with one ToolSearch call, then try one direct call. When that fails, or the session is not in a T3 thread, use the method that the playbook or rule that sent you here gives for sessions outside T3.
 
 - Only the main conversation calls `watch_pull_request`, asks the user with AskUserQuestion, and owns thread schedules. A worker or a delegated T3 task returns those needs to it in its result. Every `delegate_task` brief, on top of any skill's own list, tells the child that it is a delegated task.
-- Between babysit runs, a wait that qualifies for Babysit's T3 standby uses `watch_pull_request`. The watch wakes the thread when a check fails, required checks pass, someone else comments or reviews, or the branch conflicts. It does not wake on a merge, a close, or a merge-queue removal. A watch also ends when the thread settles or is archived. Unwatch with `unwatch_pull_request`. Merging a linked PR can settle the thread, so a standby re-arms its watches at the end of a run that finds the thread settled, and its deadline covers the gap.
+- Between babysit runs, a wait that qualifies for Babysit's T3 standby uses `watch_pull_request`. The watch wakes the thread when a check fails, required checks pass, someone else comments or reviews, or the branch conflicts. It does not wake on a merge, a close, or a merge-queue removal. A watch also ends when the thread settles or is archived. Unwatch with `unwatch_pull_request`. Merging a linked PR can settle the thread, so a standby re-arms its watches at the end of a run that finds the thread settled, and its deadline covers the gap. At the end of a run it also watches any newly qualifying PR.
 - Link each PR the thread opens with `link_pull_request`, or several with `link_pull_requests`, as Opening a PR says.
 - End a standby as Babysit's T3 standby says, so the thread leaves the Working list. A reply that ends a turn while standing by keeps the standby.
 - Watches and thread schedules belong to the thread, so they outlive the session. Read `list_scheduled_tasks` before adding a schedule. `list_thread_pull_requests` lists the thread's linked PRs, not its watches, so a resume note records which PRs were watched. Disable or delete your own schedules when their purpose ends.
-- A delegated T3 task (`delegate_task`) notifies the parent when it finishes. Do not poll it. Read `task_status` only after its completion notice arrives or once its deadline has passed, and stop a stalled one with `task_cancel`.
+- A delegated T3 task (`delegate_task`) notifies the parent when it finishes. Do not poll it. Read `task_status` only after its completion notice arrives. Past its deadline the task may still be running, so check the child thread's status with `t3_thread_read` first, as pause-safely does, and read `task_status` once it has finished. Stop a stalled one with `task_cancel`.
 
 ## Evidence, project facts, and resume
 
@@ -128,11 +128,11 @@ Reconcile the current revision, sources, partial changes, and external-operation
 
 Use a project/run-scoped evidence ledger when work spans runs. One coordinator accepts worker evidence into it. Bind code verdicts to the exact PR and head SHA; bind source claims to provenance and relevant source/retrieval dates. Keep unresolved gaps and decisions visible.
 
-The Orchestrate store's plain files hold coarse cross-run work-unit metadata, exact-head verdicts, stack branch/base/PR relationships, decision gates, and standing orders. They do not dispatch agents or form a completion inbox. Unit state describes project progress, not individual agent lifecycle. Native run state is the authority for active/completed nodes and retries.
+The Orchestrate store's plain files hold coarse cross-run work-unit metadata, exact-head verdicts, stack branch/base/PR relationships, decision gates, standing orders, landing records, and withdrawal details. They do not dispatch agents or form a completion inbox. Unit state describes project progress, not individual agent lifecycle. Native run state is the authority for active/completed nodes and retries.
 
 The Orchestrate store's `ledger.tsv` records the evidence level behind an accepted verdict rather than the PASS/ISSUES/BLOCKED/INCONCLUSIVE status itself. Record a PASS as `live-ui-verified`, `unit-test-verified`, or `type-check-only`, according to the strongest evidence that supports it. Record ISSUES as `verifier-failed`, and record BLOCKED or INCONCLUSIVE as `verifier-blocked`.
 
-Run helpers by resolved absolute paths, for example `bun "<profile>/tools/workflow/watch-pr/watch-pr.ts" --owner <owner> --repo <repo> --pr <number> --status-only`. Other helpers provide plan checks, decision logging, worktree inventory, and current PR readiness. Current Git/GitHub observations remain necessary even when a prior ledger receipt exists.
+Run helpers by resolved absolute paths, for example `bun "<profile>/tools/workflow/watch-pr/watch-pr.ts" --owner <owner> --repo <repo> --pr <number> --status-only`. Other helpers provide plan checks, decision logging, and worktree inventory. Current Git/GitHub observations remain necessary even when a prior ledger receipt exists.
 
 ## Validate routing changes
 

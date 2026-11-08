@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { validatePlan } from "./check-plan.ts";
 import { appendDecision } from "./decision-log.ts";
-import { auditWorktrees, comparablePath, parseWorktrees, projectDirectoryName, resolveAuditProfile } from "./worktree-audit.ts";
+import { auditWorktrees, comparablePath, parseWorktrees, projectDirectoryName, resolveAuditProfile, resolveBase } from "./worktree-audit.ts";
 
 const directories: string[] = [];
 async function directory(): Promise<string> {
@@ -205,12 +205,12 @@ describe("native worktree audit", () => {
     const unrelated = join(profile, "projects", "unrelated-project");
     await mkdir(unrelated, { recursive: true });
     await writeFile(join(unrelated, "session.jsonl"), `${JSON.stringify({ cwd: worktree })}\n`);
-    expect((await auditWorktrees(repo, { base: "main", profile }))[0])
+    expect((await auditWorktrees(repo, { base: resolveBase(repo, "main"), profile }))[0])
       .toMatchObject({ lastSession: null, bucket: "review-merged" });
     const matching = join(profile, "projects", projectDirectoryName(worktree));
     await mkdir(matching, { recursive: true });
     await writeFile(join(matching, "session.jsonl"), `${JSON.stringify({ cwd: worktree })}\n`);
-    expect((await auditWorktrees(repo, { base: "main", profile }))[0])
+    expect((await auditWorktrees(repo, { base: resolveBase(repo, "main"), profile }))[0])
       .toMatchObject({ bucket: "verify-recent-session" });
   });
 
@@ -222,13 +222,13 @@ describe("native worktree audit", () => {
     expect(projectDirectoryName(other)).toBe(projectDirectoryName(worktree));
     await mkdir(project, { recursive: true });
     await writeFile(join(project, "other.jsonl"), `${JSON.stringify({ cwd: other })}\n`);
-    const rows = await auditWorktrees(repo, { base: "main", profile });
+    const rows = await auditWorktrees(repo, { base: resolveBase(repo, "main"), profile });
     expect(rows.find((row) => row.branch === "feature"))
       .toMatchObject({ lastSession: null, bucket: "review-merged" });
     expect(rows.find((row) => row.branch === "other"))
       .toMatchObject({ bucket: "verify-recent-session" });
     await writeFile(join(project, "wrong-cwd.jsonl"), `${JSON.stringify({ cwd: repo })}\n`);
-    expect((await auditWorktrees(repo, { base: "main", profile })).find((row) => row.branch === "feature"))
+    expect((await auditWorktrees(repo, { base: resolveBase(repo, "main"), profile })).find((row) => row.branch === "feature"))
       .toMatchObject({ lastSession: null });
   });
 
@@ -245,16 +245,16 @@ describe("native worktree audit", () => {
     const unsupported = join(profile, "projects", `${worktree.replace(/[^a-zA-Z0-9]/g, "-").slice(0, 200)}-unsupported`);
     await mkdir(unsupported, { recursive: true });
     await writeFile(join(unsupported, "session.jsonl"), `${JSON.stringify({ cwd: worktree })}\n`);
-    expect((await auditWorktrees(repo, { base: "main", profile }))[0]).toMatchObject({ lastSession: null });
+    expect((await auditWorktrees(repo, { base: resolveBase(repo, "main"), profile }))[0]).toMatchObject({ lastSession: null });
     for (const name of names) {
       const project = join(profile, "projects", name);
       await mkdir(project, { recursive: true });
       await writeFile(join(project, "session.jsonl"), `${JSON.stringify({ cwd: worktree })}\n`);
-      expect((await auditWorktrees(repo, { base: "main", profile }))[0])
+      expect((await auditWorktrees(repo, { base: resolveBase(repo, "main"), profile }))[0])
         .toMatchObject({ bucket: "verify-recent-session" });
       await rm(project, { recursive: true });
     }
-    expect((await auditWorktrees(repo, { base: "main", profile }))[0]).toMatchObject({ lastSession: null });
+    expect((await auditWorktrees(repo, { base: resolveBase(repo, "main"), profile }))[0]).toMatchObject({ lastSession: null });
   });
 
   it("leaves active custom project mappings unknown and ignores an override without a config directory", async () => {
@@ -269,9 +269,9 @@ describe("native worktree audit", () => {
     try {
       process.env.CLAUDE_CONFIG_DIR = profile;
       process.env.CLAUDE_CODE_PROJECT_DIR_NAME = "custom-project";
-      expect((await auditWorktrees(repo, { base: "main", profile }))[0]).toMatchObject({ lastSession: null });
+      expect((await auditWorktrees(repo, { base: resolveBase(repo, "main"), profile }))[0]).toMatchObject({ lastSession: null });
       delete process.env.CLAUDE_CONFIG_DIR;
-      expect((await auditWorktrees(repo, { base: "main", profile }))[0])
+      expect((await auditWorktrees(repo, { base: resolveBase(repo, "main"), profile }))[0])
         .toMatchObject({ bucket: "verify-recent-session" });
     } finally {
       if (previousConfig === undefined) delete process.env.CLAUDE_CONFIG_DIR;
@@ -298,7 +298,7 @@ describe("native worktree audit", () => {
     git(repo, ["worktree", "add", "--detach", merged, "main"]);
     await writeFile(join(feature, "tracked.txt"), "edited\n");
 
-    const rows = await auditWorktrees(repo, { base: "main", profile });
+    const rows = await auditWorktrees(repo, { base: resolveBase(repo, "main"), profile });
     expect(rows).toHaveLength(2);
     expect(rows.find((row) => row.branch === "feature")).toMatchObject({ dirty: "tracked", bucket: "hold-wip", bytes: null });
     expect(rows.find((row) => row.branch === "")).toMatchObject({ dirty: "clean", merged: true, bucket: "review-merged", lastSession: null });
@@ -307,29 +307,50 @@ describe("native worktree audit", () => {
     await mkdir(project, { recursive: true });
     await writeFile(join(project, "session.jsonl"),
       `${JSON.stringify({ type: "metadata", unknown: true })}\n${JSON.stringify({ cwd: merged })}\npartial write`);
-    expect((await auditWorktrees(repo, { base: "main", profile })).find((row) => row.branch === ""))
+    expect((await auditWorktrees(repo, { base: resolveBase(repo, "main"), profile })).find((row) => row.branch === ""))
       .toMatchObject({ bucket: "verify-recent-session" });
     git(repo, ["worktree", "lock", "--reason", "active job", merged]);
-    expect((await auditWorktrees(repo, { base: "main", profile, includeSize: true })).find((row) => row.branch === ""))
+    expect((await auditWorktrees(repo, { base: resolveBase(repo, "main"), profile, includeSize: true })).find((row) => row.branch === ""))
       .toMatchObject({ bucket: "hold-lock", locked: true });
     expect(git(feature, ["status", "--porcelain"])).toContain("tracked.txt");
     // Each git call spawns a process; on Windows the whole test can exceed Bun's 5-second default.
   }, 30_000);
 
   it("rejects a base ref that does not resolve instead of reporting every worktree unmerged", async () => {
-    const { repo, profile } = await worktreeFixture();
-    await expect(auditWorktrees(repo, { base: "origin/missing", profile })).rejects.toThrow("base ref not found: origin/missing");
-    await expect(auditWorktrees(repo, { profile })).rejects.toThrow("base ref not found");
+    const { repo } = await worktreeFixture();
+    expect(() => resolveBase(repo, "origin/missing")).toThrow("base ref not found: origin/missing");
+    expect(() => resolveBase(repo)).toThrow("base ref not found");
     const result = Bun.spawnSync([process.execPath, join(import.meta.dir, "worktree-audit.ts"), repo, "--base", "origin/missing"],
       { timeout: 15_000 });
     expect(result.exitCode).toBe(1);
     expect(result.stderr.toString()).toContain("base ref not found: origin/missing");
   }, 30_000);
 
+  it("reports git's own error for a path that is not a repository or does not exist", async () => {
+    const outside = await directory();
+    const missing = join(outside, "missing");
+    expect(() => resolveBase(missing)).toThrow("cannot change to");
+    // The ceiling stops discovery from reaching a repository that happens to enclose the temp directory.
+    const env = { ...process.env, GIT_CEILING_DIRECTORIES: resolve(outside, "..") };
+    for (const [path, message] of [[outside, "not a git repository"], [missing, "cannot change to"]] as const) {
+      const result = Bun.spawnSync([process.execPath, join(import.meta.dir, "worktree-audit.ts"), path], { timeout: 15_000, env });
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr.toString()).toContain(message);
+      expect(result.stderr.toString()).not.toContain("base ref not found");
+    }
+  }, 30_000);
+
+  async function divergedFixture(): Promise<{ repo: string; profile: string; base: string; feature: string }> {
+    const { repo, worktree, profile } = await worktreeFixture();
+    const base = git(repo, ["rev-parse", "HEAD"]);
+    git(worktree, ["commit", "--allow-empty", "-m", "feature"]);
+    return { repo, profile, base, feature: git(worktree, ["rev-parse", "HEAD"]) };
+  }
+
   it("defaults the base to origin/HEAD ahead of origin/main and names it on stderr", async () => {
-    const { repo } = await worktreeFixture();
-    git(repo, ["update-ref", "refs/remotes/origin/trunk", "HEAD"]);
-    git(repo, ["update-ref", "refs/remotes/origin/main", "HEAD"]);
+    const { repo, base, feature } = await divergedFixture();
+    git(repo, ["update-ref", "refs/remotes/origin/trunk", feature]);
+    git(repo, ["update-ref", "refs/remotes/origin/main", base]);
     git(repo, ["symbolic-ref", "refs/remotes/origin/HEAD", "refs/remotes/origin/trunk"]);
     const command = [process.execPath, join(import.meta.dir, "worktree-audit.ts"), repo, "--json"];
     const result = Bun.spawnSync(command, { timeout: 15_000, env: { ...process.env, CLAUDE_CONFIG_DIR: join(repo, "..", "profile") } });
@@ -337,5 +358,28 @@ describe("native worktree audit", () => {
     expect(result.exitCode).toBe(0);
     expect(JSON.parse(result.stdout.toString())).toMatchObject([{ branch: "feature", merged: true }]);
     expect(Bun.spawnSync([process.execPath, join(import.meta.dir, "worktree-audit.ts"), "-h"], { timeout: 15_000 }).exitCode).toBe(0);
+  }, 30_000);
+
+  it("falls back to origin/main when origin/HEAD dangles and to origin/master when origin/main is missing", async () => {
+    const { repo, profile, feature } = await divergedFixture();
+    git(repo, ["symbolic-ref", "refs/remotes/origin/HEAD", "refs/remotes/origin/gone"]);
+    git(repo, ["update-ref", "refs/remotes/origin/main", feature]);
+    expect(resolveBase(repo)).toEqual({ ref: "refs/remotes/origin/main", label: "origin/main" });
+    expect((await auditWorktrees(repo, { base: resolveBase(repo), profile }))[0]).toMatchObject({ merged: true });
+    git(repo, ["update-ref", "-d", "refs/remotes/origin/main"]);
+    git(repo, ["update-ref", "refs/remotes/origin/master", feature]);
+    expect(resolveBase(repo)).toEqual({ ref: "refs/remotes/origin/master", label: "origin/master" });
+    expect((await auditWorktrees(repo, { base: resolveBase(repo), profile }))[0]).toMatchObject({ merged: true });
+  }, 30_000);
+
+  it("checks the remote origin/main even when a local branch of that name points elsewhere", async () => {
+    const { repo, profile, base, feature } = await divergedFixture();
+    git(repo, ["update-ref", "refs/remotes/origin/main", base]);
+    git(repo, ["update-ref", "refs/heads/origin/main", feature]);
+    const resolved = resolveBase(repo);
+    expect(resolved).toEqual({ ref: "refs/remotes/origin/main", label: "remotes/origin/main" });
+    expect((await auditWorktrees(repo, { base: resolved, profile }))[0]).toMatchObject({ branch: "feature", merged: false });
+    // An explicit --base keeps git's normal resolution, where the local branch wins.
+    expect((await auditWorktrees(repo, { base: resolveBase(repo, "origin/main"), profile }))[0]).toMatchObject({ merged: true });
   }, 30_000);
 });

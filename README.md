@@ -30,9 +30,9 @@ but `.gitignore` keeps them out of the repo.
 
 **Optional**
 
-- [Google Chrome](https://www.google.com/chrome/) on colton-desktop, kept for agents only,
+- [Google Chrome](https://www.google.com/chrome/) on colton-desktop, or the machine `AGENT_CHROME_HOST` names, kept for agents only,
   for the agent-chrome skill, which reads pages that block plain fetching and pages behind your sign-ins.
-  Other machines hand those runs to colton-desktop through T3 Code and need no Chrome.
+  Other machines hand those runs to that machine through T3 Code and need no Chrome.
   See [Agent Chrome](#agent-chrome).
   When `AGENT_CHROME_HOST` names a Linux machine instead, also install `xdotool` there so that Chrome stays minimized.
 - [tmux](https://github.com/tmux/tmux/wiki/Installing), for driving terminal apps
@@ -76,10 +76,10 @@ When `bun` is not on Claude Code's PATH, those calls show a hook error.
 On Windows, PATH needs the real `bun.exe`, as the bun.sh installer, winget, and scoop provide, since Claude Code cannot start a `bun.cmd` shim without a shell.
 Run `bun test hooks/` from `~/.claude` to check the hook against recorded block pages and known false positives.
 
-The agent Chrome and its sign-ins live on colton-desktop, and `signin` runs only there.
-On other machines, the skill hands each run to colton-desktop through T3 Code.
+The `AGENT_CHROME_HOST` environment variable names the machine that holds the agent Chrome and its sign-ins, and it defaults to `colton-desktop`.
+`signin` runs only on that machine.
+On other machines, the skill hands each run to that machine through T3 Code.
 Outside T3 Code there is no hand-off, so the skill reports the page as blocked.
-The `AGENT_CHROME_HOST` environment variable names the machine that holds the agent Chrome, and it defaults to `colton-desktop`.
 The skill needs Google Chrome 149 or later.
 It supports Windows.
 When `AGENT_CHROME_HOST` names a macOS or Linux machine, it supports that machine with Google's Chrome package, and other Unix-like systems are unsupported.
@@ -99,7 +99,7 @@ Its workers drive Chrome with [Chrome DevTools MCP](https://github.com/ChromeDev
 which Bun downloads on first use at the version pinned in `skills/agent-chrome/scripts/agent-chrome.ts`.
 Nothing needs installing beyond Chrome and Bun.
 
-On colton-desktop, sign in to the sites you want agents to read:
+On the machine that holds the agent Chrome, colton-desktop by default, sign in to the sites you want agents to read:
 
 ```bash
 bun ~/.claude/skills/agent-chrome/scripts/agent-chrome.ts signin

@@ -131,24 +131,31 @@ async function recentSessions(profile: string, paths: readonly string[]): Promis
   return sessions;
 }
 
-export function resolveBase(repo: string, base?: string): string {
+export interface ResolvedBase {
+  /** Passed to git; a full ref for the defaults so a local branch named origin/main cannot shadow the remote one. */
+  readonly ref: string;
+  readonly label: string;
+}
+
+export function resolveBase(repo: string, base?: string): ResolvedBase {
+  git(repo, ["rev-parse", "--git-dir"]);
   const exists = (ref: string) => optionalGit(repo, ["rev-parse", "--verify", "--quiet", `${ref}^{commit}`]) !== null;
   if (base !== undefined) {
     if (!exists(base)) throw new Error(`base ref not found: ${base}`);
-    return base;
+    return { ref: base, label: base };
   }
-  const candidates = [optionalGit(repo, ["symbolic-ref", "--short", "refs/remotes/origin/HEAD"]), "origin/main", "origin/master"];
+  const candidates = [optionalGit(repo, ["symbolic-ref", "refs/remotes/origin/HEAD"]), "refs/remotes/origin/main", "refs/remotes/origin/master"];
   const found = candidates.find((ref): ref is string => ref !== null && ref !== "" && exists(ref));
   if (found === undefined) throw new Error("base ref not found: origin/HEAD, origin/main, and origin/master are missing; pass --base <ref>");
-  return found;
+  return { ref: found, label: git(repo, ["rev-parse", "--abbrev-ref", found]) };
 }
 
 export async function auditWorktrees(repo: string, options: {
+  readonly base: ResolvedBase;
   readonly profile?: string;
-  readonly base?: string;
   readonly includeSize?: boolean;
-} = {}): Promise<readonly AuditRow[]> {
-  const base = resolveBase(repo, options.base);
+}): Promise<readonly AuditRow[]> {
+  const base = options.base.ref;
   const worktrees = parseWorktrees(git(repo, ["worktree", "list", "--porcelain"]));
   const profile = resolveAuditProfile(options.profile);
   const sessions = await recentSessions(profile, worktrees.slice(1).map((worktree) => worktree.path));
@@ -199,7 +206,7 @@ export async function main(args: readonly string[]): Promise<number> {
   try {
     const root = repo ?? git(process.cwd(), ["rev-parse", "--show-toplevel"]);
     const resolved = resolveBase(root, base);
-    console.error(`base: ${resolved}`);
+    console.error(`base: ${resolved.label}`);
     const rows = await auditWorktrees(root, { base: resolved, includeSize });
     if (json) console.log(JSON.stringify(rows, null, 2));
     else {
