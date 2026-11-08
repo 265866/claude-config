@@ -43,6 +43,8 @@ Before applying any Accepted edit, present the Accepted/Rejected/Backlog report 
 
 Include backlog items in the report. Filing tickets or messages requires explicit approval for that external action; do not file them automatically.
 
+Edit only skills tracked in this profile's repository or in the project. A skill under the profile's `skills/synced/` or `plugins/` is an installed copy. For each such skill, show its destination `skills/<skill>/` under the profile in the report before approval. After approval, copy the skill's folder there and edit the copy. The original stays installed, so do not promise that the copy overrides it.
+
 For each approved Accepted item, follow the Routing field exactly:
 
 - Trivial existing-skill edit (a one-line bullet, a tightened sentence, a stale fact corrected): parent does directly.
