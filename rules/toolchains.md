@@ -39,7 +39,7 @@ Before committing, run in order: `go build ./...`; `gofumpt -l -w .` followed by
 
 ## Rust
 
-Encode invariants in types, borrow when ownership is unnecessary, avoid needless allocation/copying, and return contextual Result errors for recoverable failures. Do not panic on user-controlled input or I/O. Add rustfmt and clippy with rustup component add if missing. These are user-profile installs, not throwaway tooling; leave them installed and report each one by name.
+Encode invariants in types, borrow when ownership is unnecessary, avoid needless allocation/copying, and return contextual Result errors for recoverable failures. Do not panic on user-controlled input or I/O. Add rustfmt and clippy with rustup component add if missing. These are user-profile installs, not throwaway tooling; leave them installed and report each one by name. When creating a Rust project or its CI and release automation, read `skills/rust-best-practices/references/project-setup.md`, because the rust-best-practices skill loads only after a Rust file is read.
 
 Use the repository's feature matrix, otherwise --all-features. Run cargo fmt --all -- --check; cargo check --all-targets --all-features; cargo clippy --all-targets --all-features -- -D warnings; cargo test --all-targets --all-features; and, when the crate has a library target, cargo test --doc --all-features, because --all-targets does not run doctests. A heavy workspace may use a contained crate test when that scope is justified. Update Cargo.lock only for dependency or feature metadata changes.
 

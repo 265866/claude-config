@@ -62,8 +62,8 @@ Use conventional commits unless the repository history clearly uses another styl
 <type>(<scope>): <subject>
 ```
 
-- `type`: `feat`, `fix`, `chore`, `refactor`, `test`, `docs`, `style`, `perf`, `build`, or `ci`
-- `scope`: optional module, crate, package, or area name
+- `type`: `feat`, `fix`, `chore`, `refactor`, `test`, `docs`, `style`, `perf`, `build`, `ci`, or `revert`
+- `scope`: module, crate, package, or area name. It is optional unless the repository's commit check requires one, as the rust-best-practices project-setup template's check does.
 - `subject`: imperative mood, first word lowercase after the type prefix (keep proper nouns and code symbols in their real case), no trailing period, under about 72 chars
 
 Examples:

@@ -20,7 +20,7 @@ Scan for:
 
 ## Scope to skills and tools the session actually used
 
-Findings must point to skills, tools, or MCPs invoked in this transcript. Speculative routings to skills the parent never opened do not count. Two routings are exceptions: `tune description: <skill path>` for a catalog skill that should have triggered but did not, and `new skill: <kebab-name>` for a recurring pattern no existing skill covers. To check whether a skill was used, scan the transcript for:
+Findings must point to skills, tools, or MCPs invoked in this transcript. Speculative routings to skills the parent never opened do not count. Two routings are exceptions: `tune description: <skill path>` for a catalog skill that should have triggered but did not, and `new skill via author-skill: <kebab-name>` for a recurring pattern no existing skill covers. To check whether a skill was used, scan the transcript for:
 
 - Native `Skill` invocations and results naming the skill, with its path resolved from the session's actual skill catalog. A skill loaded this way does not need a separate Read call to count as used.
 - `Read` tool calls against any `SKILL.md` file (project-local `.claude/skills/`, user skills under the active configuration directory, or explicitly connected plugin paths)
@@ -37,7 +37,7 @@ The "skill should have been invoked but wasn't" bullet above is the canonical mi
 List each durable learning you find. For each:
 - Principle: one sentence naming the contrarian or second-order observation. Don't restate the obvious learning. Name the one beneath it.
 - Evidence: the exact moment in the transcript (turn number or short quote, including what was said AND what wasn't).
-- Routing: most relevant existing skill (give the `SKILL.md` path as it appears in the transcript), OR `tune description: <skill path>` when the skill should have triggered but didn't, OR "new skill: <kebab-name>".
+- Routing: most relevant existing skill (give the `SKILL.md` path as it appears in the transcript), OR `tune description: <skill path>` when the skill should have triggered but didn't, OR "new skill via author-skill: <kebab-name>".
 
 Skip trivial things. Skip anything already obvious from the existing skill the parent followed. Skip implementation details that drift: specific SHAs, current file paths, version numbers, exact byte counts. Only surface principles and patterns that survive code drift.
 

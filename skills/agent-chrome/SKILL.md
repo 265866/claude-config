@@ -5,7 +5,7 @@ description: Read web pages, or act on the user's signed-in accounts, in the use
 
 # Agent Chrome
 
-The user keeps Google Chrome for agents only; their everyday browser is a different one. The agent Chrome uses its own profile folder, which holds the user's sign-ins: `%LOCALAPPDATA%\agent-chrome` on Windows, `~/Library/Application Support/agent-chrome` on macOS, and `$XDG_DATA_HOME/agent-chrome` (default `~/.local/share/agent-chrome`) on Linux. A separate Claude Code process, the worker, browses with Chrome DevTools MCP tools and nothing else. This session is the coordinator. It writes the brief, runs the worker through [agent-chrome.ts](${CLAUDE_SKILL_DIR}/scripts/agent-chrome.ts), and relays the report.
+The user keeps Google Chrome for agents only; their everyday browser is a different one. The agent Chrome uses its own profile folder, which holds the user's sign-ins: `%LOCALAPPDATA%\agent-chrome` on Windows. When `AGENT_CHROME_HOST` names a macOS or Linux machine, as in Which machine runs it, the folder there is `~/Library/Application Support/agent-chrome` on macOS and `$XDG_DATA_HOME/agent-chrome` (default `~/.local/share/agent-chrome`) on Linux. A separate Claude Code process, the worker, browses with Chrome DevTools MCP tools and nothing else. This session is the coordinator. It writes the brief, runs the worker through [agent-chrome.ts](${CLAUDE_SKILL_DIR}/scripts/agent-chrome.ts), and relays the report.
 
 ## When to use
 
@@ -27,17 +27,17 @@ Only the script and its workers touch the agent Chrome. Never launch it, close i
 
 ## Which machine runs it
 
-The signed-in agent Chrome lives only on the user's Windows desktop, `colton-desktop`, a real machine with a GPU that passes bot checks. The script checks the machine's hostname.
+The signed-in agent Chrome lives only on the user's Windows desktop, `colton-desktop`, a real machine with a GPU that passes bot checks. The script compares the machine's hostname, ignoring case, with the `AGENT_CHROME_HOST` environment variable, which defaults to `colton-desktop`. Set it to another machine's hostname only to move the agent Chrome to that machine.
 
 - On `colton-desktop`, follow Run a worker below. This includes a T3 task that another machine handed to the desktop.
-- On any other machine, such as moss or the MacBook, `run` starts no Chrome and returns `status: "hand_off"`, and `signin` refuses. Hand the run to the desktop through T3 as below. Do not install Chrome, create an agent-chrome profile, or sign in on that machine. For dev servers and public pages that need no sign-in, use that machine's own T3 browser (`preview_*` tools) or control-ui instead.
+- On any other machine, such as moss or the MacBook, `run` starts no Chrome and returns `status: "hand_off"`, and `signin` refuses. Hand the run to the desktop through T3 as below. Do not install Chrome, create an agent-chrome profile, or sign in on that machine. Use that machine's own T3 browser (`preview_*` tools) or control-ui only for dev servers and local pages. Every page listed under When to use, including a public page that blocks plain fetching, goes to the desktop.
 
 To hand a run to the desktop:
 
 1. Call `t3_environment_links` and find the link labeled `colton-desktop`. When it is missing, expired, or unreachable, report the page as blocked. Its `human_action`: turn on the desktop and open T3, or re-link it in T3 under Settings, Environments, Linked environments, because links expire after 30 days.
 2. Call `t3_project_list` with that `environmentId` and take the project titled `~`.
-3. Call `delegate_task` with that `target.environmentId` and `target.projectId`, `mode: "wait"`, and a `timeoutMs` of about 900000. Make the task: "Use the agent-chrome skill to run one worker with the brief below. Reply with the script's JSON output verbatim and nothing else." Follow it with the full brief, written as in Write the brief. The desktop child acts as this skill's coordinator there and runs the script.
-4. Treat the child's reply as the script's JSON, and handle it as in After the worker returns. Approvals for ask-first actions are still given in this session, and the brief states them.
+3. Call `delegate_task` with that `target.environmentId` and `target.projectId`, the desktop's Claude Code provider as `target.providerInstanceId` (the `claudeAgent` entry that `orchestrator_capabilities` lists for that `environmentId`), `mode: "wait"`, and a `timeoutMs` of about 900000. Make the task: "You are a delegated T3 task. Do not ask the user anything; return any question in your reply instead. Use the agent-chrome skill to run one worker with the brief below. Reply with the script's JSON output verbatim and nothing else, or with your question." Follow it with the full brief, written as in Write the brief. The desktop child acts as this skill's coordinator there and runs the script.
+4. Treat the child's reply as the script's JSON, and handle it as in After the worker returns. Approvals for ask-first actions are still given in this session, and the brief states them. `close`, `status`, and `signin` act on the desktop's Chrome. Run any `close` or `status` that After the worker returns calls for through another `delegate_task` to the same target. For a `not_signed_in` blocker, tell the user to run `agent-chrome.ts signin` on colton-desktop.
 
 The hand-off works only from a T3 thread started on that machine in full-access mode. A thread that a link started cannot use that machine's links. Outside T3, such as `claude` over SSH, there is no hand-off, so report the page as blocked.
 
@@ -59,13 +59,14 @@ Write the brief to a file in a temporary directory, then run it with the Bash to
 bun "${CLAUDE_SKILL_DIR}/scripts/agent-chrome.ts" run --brief <brief file> [--timeout <seconds>]
 ```
 
-The script starts the agent Chrome out of the user's way, runs the worker, and closes Chrome afterward. On Windows Chrome starts minimized and focus returns to the user's window, and on macOS it starts hidden in the background. On Linux it is minimized when `xdotool` is installed and an X11 or XWayland display is available; otherwise its window shows while the worker runs. Chrome closes after every run because Chrome's debugging port lets any local process read its cookies while it is open. A watchdog closes Chrome and stops the worker if the run is killed. The worker runs as `claude -p` in restricted mode with an empty config directory, the Chrome DevTools MCP tools, and `Read` and `Grep` for snapshots too large to return directly. It reaches the model through the API settings in this session's environment, so start runs from a Claude Code session. JavaScript evaluation, network, performance, emulation, and memory tools are off. Screenshots, `select_page`, and Lighthouse are denied because they bring the window to the front, and file upload is denied. A worker is stopped after `--timeout` seconds, 300 at most and by default.
+The script starts the agent Chrome out of the user's way, runs the worker, and closes Chrome afterward. On Windows Chrome starts minimized and focus returns to the user's window. When `AGENT_CHROME_HOST` names a macOS or Linux machine, Chrome there starts hidden in the background on macOS. On Linux it is minimized when `xdotool` is installed and an X11 or XWayland display is available; otherwise its window shows while the worker runs. Chrome closes after every run because Chrome's debugging port lets any local process read its cookies while it is open. A watchdog closes Chrome and stops the worker if the run is killed. The worker runs as `claude -p` in restricted mode with an empty config directory, the Chrome DevTools MCP tools, and `Read` and `Grep` for snapshots too large to return directly. It reaches the model through the API settings in this session's environment, so start runs from a Claude Code session. JavaScript evaluation, network, performance, emulation, and memory tools are off. Screenshots, `select_page`, and Lighthouse are denied because they bring the window to the front, and file upload is denied. A worker is stopped after `--timeout` seconds, 300 at most and by default.
 
 Workers run one at a time, because each run closes Chrome when it finishes. Put a few pages from one site or source in one brief, so one run reads them within the timeout. Split larger sets into separate runs, because a timed-out run returns none of the pages it read. Start independent tasks as separate runs. A run waits while other runs hold the browser, in no fixed order, and reports `busy` after about 4 minutes at the default timeout.
 
 The script prints one JSON object:
 
 - `status`: `finished`, `worker_failed`, or `worker_timeout`. When no worker ran, it is `hand_off`, `busy`, `chrome_unavailable`, or `error`, each with a `detail`.
+- `host`: present with `hand_off`. It names the machine that holds the agent Chrome, from `AGENT_CHROME_HOST`.
 - `worker`: the worker's Claude Code JSON output. Its report is the text in `worker.result`, sometimes wrapped in a code fence. `permission_denials` lists tools the worker tried and does not have.
 - `stderr`: present when the worker wrote any.
 - `chromeClosed`: `false` when Chrome stayed open after the run with its debugging port. Run `agent-chrome.ts close`.

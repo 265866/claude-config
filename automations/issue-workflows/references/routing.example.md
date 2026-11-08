@@ -42,15 +42,6 @@ fallback:
     tracker_team: ""
   owners: []
   allow_feature_owner_ping: false
-
-ping_policy:
-  default: "off"
-  allow:
-    - "configured-feature-owner"
-    - "confirmed-regression-author"
-  deny:
-    - "broad-on-call-group"
-    - "unverified-owner"
 ```
 
 ## Rules

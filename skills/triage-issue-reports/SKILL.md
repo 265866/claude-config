@@ -161,7 +161,7 @@ The configured adapter must provide:
 
 If a required operation is unavailable or lacks action authorization, fail closed for that write. Read and prepare the proposed issue/update/verdict first; do not treat configuration as a grant.
 
-Resolve configured team, project, status, and labels at runtime. Do not invent IDs, create labels, assign owners, or set priority unless the config explicitly requires it.
+Resolve configured team, project, status, and labels at runtime. For the team, use the matched route's `destination.tracker_team` when it is set, or the fallback's when the fallback route applies, and otherwise the configured `tracker.team`. Do not invent IDs, create labels, assign owners, or set priority unless the config explicitly requires it.
 
 ## 7. Dedupe
 

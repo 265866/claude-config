@@ -21,7 +21,8 @@ but `.gitignore` keeps them out of the repo.
 
 - JavaScript and TypeScript: Bun from the list above.
   Projects that already use [pnpm](https://pnpm.io/installation) also need pnpm.
-- [uv](https://docs.astral.sh/uv/getting-started/installation/) for Python
+- [uv](https://docs.astral.sh/uv/getting-started/installation/) for Python.
+  The listing-photos skill also needs uv, because its script is a uv script.
 - [Go](https://go.dev/doc/install).
   Claude installs `gofumpt`, `golangci-lint`, and `govulncheck` when they are missing.
 - [Rust](https://rustup.rs/) through rustup.
@@ -29,10 +30,11 @@ but `.gitignore` keeps them out of the repo.
 
 **Optional**
 
-- [Google Chrome](https://www.google.com/chrome/), kept for agents only,
+- [Google Chrome](https://www.google.com/chrome/) on colton-desktop, kept for agents only,
   for the agent-chrome skill, which reads pages that block plain fetching and pages behind your sign-ins.
+  Other machines hand those runs to colton-desktop through T3 Code and need no Chrome.
   See [Agent Chrome](#agent-chrome).
-  On Linux, also install `xdotool` so that Chrome stays minimized.
+  When `AGENT_CHROME_HOST` names a Linux machine instead, also install `xdotool` there so that Chrome stays minimized.
 - [tmux](https://github.com/tmux/tmux/wiki/Installing), for driving terminal apps
 
 ## Install
@@ -73,24 +75,31 @@ Claude Code starts the hook with Bun directly, without a shell, so it does not m
 When `bun` is not on Claude Code's PATH, those calls show a hook error.
 On Windows, PATH needs the real `bun.exe`, as the bun.sh installer, winget, and scoop provide, since Claude Code cannot start a `bun.cmd` shim without a shell.
 Run `bun test hooks/` from `~/.claude` to check the hook against recorded block pages and known false positives.
+
+The agent Chrome and its sign-ins live on colton-desktop, and `signin` runs only there.
+On other machines, the skill hands each run to colton-desktop through T3 Code.
+Outside T3 Code there is no hand-off, so the skill reports the page as blocked.
+The `AGENT_CHROME_HOST` environment variable names the machine that holds the agent Chrome, and it defaults to `colton-desktop`.
 The skill needs Google Chrome 149 or later.
-It supports Windows, macOS, and Linux with Google's Chrome package, and other Unix-like systems are unsupported.
+It supports Windows.
+When `AGENT_CHROME_HOST` names a macOS or Linux machine, it supports that machine with Google's Chrome package, and other Unix-like systems are unsupported.
 The skill runs Chrome from its own profile folder, which keeps your sign-ins:
 
 - Windows: `%LOCALAPPDATA%\agent-chrome`
-- macOS: `~/Library/Application Support/agent-chrome`
-- Linux: `$XDG_DATA_HOME/agent-chrome`, by default `~/.local/share/agent-chrome`
+- macOS, when `AGENT_CHROME_HOST` names it: `~/Library/Application Support/agent-chrome`
+- Linux, when `AGENT_CHROME_HOST` names it: `$XDG_DATA_HOME/agent-chrome`, by default `~/.local/share/agent-chrome`
 
 During a task, Chrome runs out of your way with a local debugging port, and the skill closes it when the task ends.
-On Windows it starts minimized and on macOS hidden.
-On Linux it is minimized only when [xdotool](https://github.com/jordansissel/xdotool) is installed and the session has an X11 or XWayland display;
+On Windows it starts minimized.
+When `AGENT_CHROME_HOST` names a macOS machine, it starts hidden there.
+When it names a Linux machine, Chrome there is minimized only when [xdotool](https://github.com/jordansissel/xdotool) is installed and the session has an X11 or XWayland display;
 otherwise its window shows while a task runs.
 On Linux the skill expects Google's package, which installs Chrome at `/opt/google/chrome`.
 Its workers drive Chrome with [Chrome DevTools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp),
 which Bun downloads on first use at the version pinned in `skills/agent-chrome/scripts/agent-chrome.ts`.
 Nothing needs installing beyond Chrome and Bun.
 
-Sign in to the sites you want agents to read:
+On colton-desktop, sign in to the sites you want agents to read:
 
 ```bash
 bun ~/.claude/skills/agent-chrome/scripts/agent-chrome.ts signin
@@ -125,7 +134,7 @@ On the other machine, with `~/.claude` on `main`, pull it:
 
 ```bash
 cd ~/.claude
-git pull --ff-only origin main
+git pull --ff-only --no-rebase --no-autostash origin main
 ```
 
 Or tell Claude "sync profile". The sync-profile skill commits and pushes this machine's changes, pulls them on each other machine it can reach over SSH, then shows which commit each one is on.

@@ -20,7 +20,7 @@ In the main T3 conversation, review rounds run through [review-loop](${CLAUDE_SK
 2. **Prove it.** Get the proof described below for every change in the diff.
 3. **Review it** with review-loop on the diff, and fix what it finds.
 4. **File the PR** with [Opening a PR](${CLAUDE_SKILL_DIR}/../../playbooks/opening-a-pr.md).
-5. **Babysit it** in `drive` mode with [Babysit](${CLAUDE_SKILL_DIR}/../../playbooks/babysit.md) until each PR is merge-ready. Fix real findings and CI failures, and prove each fix before you push it.
+5. **Babysit it** in `drive` mode with [Babysit](${CLAUDE_SKILL_DIR}/../../playbooks/babysit.md) until each PR is merge-ready. Fix real findings and CI failures, and prove each fix before you push it. Outside T3 Code, the watch's deadline is Colton's, or 24 hours from its start when he gave none, the same default as Babysit's T3 standby.
 6. **Full send only.** Land the PRs through [Shipping](${CLAUDE_SKILL_DIR}/../../playbooks/shipping.md) one at a time, applying the deploy rules below before and after each landing, then clean up as described below. Full stop skips this step.
 7. **Report** as described below.
 
@@ -45,7 +45,7 @@ Then fetch. For each PR that `gh pr view` shows merged at the head you pushed, c
 
 1. When this session runs in the main checkout and that checkout holds the branch, switch it to the default branch and fast-forward it.
 2. When this session runs in the task's own worktree and that worktree holds the branch, detach it at `origin/<default>` and leave the worktree for Colton.
-3. Remove the task's other worktrees that hold the branch, as steps 3 and 4 of [worktree cleanup](${CLAUDE_SKILL_DIR}/../../playbooks/worktree-cleanup.md) say.
+3. Remove the task's other worktrees that hold the branch, as steps 2 through 4 of [worktree cleanup](${CLAUDE_SKILL_DIR}/../../playbooks/worktree-cleanup.md) say.
 4. Delete the branch on the remote unless an open PR still targets it. Delete it locally with `git branch -D` only when its tip is that head, because a squash merge leaves it unmerged in local history.
 
 Leave the branches of PRs that did not land, and any checkout that holds other work, as they are. Name every branch and worktree you left in the report.

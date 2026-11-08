@@ -15,5 +15,5 @@ The human supervises asynchronously. Agents must stay unblocked. Make reasonable
 
 **Boundaries:**
 - **Ask-first actions** are the ones CLAUDE.md (Authorization and ownership) lists because other people see them or they cannot be recovered. Confirm the exact action before taking it.
-- **Reversible actions** (write code, edit notes, split tasks, commit, push a branch you created for the task, add a dependency) should proceed without blocking. Report what you did.
+- **Reversible actions** (write code, edit notes, split tasks, commit, push a branch you created for the task unless a default or protection rule covers it, add a dependency) should proceed without blocking. Report what you did.
 - **Product direction** comes from the human. *Execution* should not block.

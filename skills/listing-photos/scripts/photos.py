@@ -488,7 +488,8 @@ def validate_plan(plan: list[dict], analysis: dict) -> list[dict]:
             problems.append(
                 f"{pid}: keystone is a 0-1 fraction for standing shots only"
             )
-        if not 0 <= float(p.get("lift") or 0) <= 0.5:
+        lift = DEFAULT_LIFT if p.get("lift") is None else float(p["lift"])
+        if not 0 <= lift <= 0.5:
             problems.append(f"{pid}: lift must be 0-0.5")
         for box in [*(p.get("blur") or []), *([p["crop"]] if p.get("crop") else [])]:
             if len(box) != 4 or not (
@@ -499,7 +500,10 @@ def validate_plan(plan: list[dict], analysis: dict) -> list[dict]:
     # of them shows as a color mismatch between photos of the same box.
     for item in {p.get("item") for p in chosen}:
         tones = {
-            (float(p.get("lift") or 0), bool(p.get("wb")))
+            (
+                DEFAULT_LIFT if p.get("lift") is None else float(p["lift"]),
+                bool(p.get("wb")),
+            )
             for p in chosen
             if p.get("item") == item
         }
@@ -589,7 +593,7 @@ def render(args: argparse.Namespace) -> None:
         rgb8 = auto_level(rgb8)
         if entry.get("wb"):
             rgb8 = white_balance(rgb8)
-        lift = float(entry.get("lift") or DEFAULT_LIFT)
+        lift = DEFAULT_LIFT if entry.get("lift") is None else float(entry["lift"])
         rgb8 = shadow_lift(rgb8, lift)
         scale = LONG_EDGE / max(rgb8.shape[:2])
         if scale < 1:
