@@ -59,7 +59,7 @@ git checkout -f main
 > `git checkout -f` replaces your local `CLAUDE.md`, `settings.json`, and any other tracked file.
 > Untracked runtime files stay as they are.
 
-The `tools/workflow/orch` and `tools/workflow/watch-pr` tools install the workflow dependencies the first time either runs.
+The `tools/workflow/watch-pr` tool installs the workflow dependencies the first time it runs.
 To run the tests or typecheck before that, install them first:
 
 ```bash
