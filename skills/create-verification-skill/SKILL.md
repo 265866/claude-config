@@ -5,7 +5,7 @@ description: "Generate a project-local verification skill that drives your app t
 
 # Create a verification skill
 
-Every serious project needs a scripted way to drive the real app and prove behavior: launch it, exercise a feature the way a user would, and capture evidence. This skill generates that as a project-local skill (`.claude/skills/verify-<app>/`) tailored to the repo. You write the generator's output for the next agent, not for a human. It will be read cold, mid-task, by an agent that has never seen the app. For a property that tests and live driving cannot reach, such as an event-order race or an invariant over every input, use the create-formal-verification-skill skill instead.
+Every serious project needs a scripted way to drive the real app and prove behavior: launch it, exercise a feature the way a user would, and capture evidence. This skill generates that as a project-local skill (`.claude/skills/verify-<app>/`) tailored to the repo. You write the generator's output for the next agent, not for a human. It will be read cold, mid-task, by an agent that has never seen the app.
 
 The main coordinator selects the executor using [execution guidance](${CLAUDE_SKILL_DIR}/../../references/execution.md). A small app can be inspected and driven directly. Broader independent source investigation may be batched, but shared live instances have one serial driver. Assigned investigators do not restart routing or generate another enclosing verification procedure.
 

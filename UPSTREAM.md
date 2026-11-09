@@ -74,8 +74,8 @@ Anything not listed here is original to this profile.
 These come from the skill of the same name under pstack's `skills/`:
 
 `architect`, `arena`, `benchmark-checklist`, `blast-radius`,
-`create-formal-verification-skill`, `create-verification-skill`, `figure-it-out`, `how`, `interrogate`,
-`maintain-formal-verification-skill`, `maintain-verification-skill`, `recall`, `reflect`, `show-me-your-work`,
+`create-verification-skill`, `figure-it-out`, `how`, `interrogate`,
+`maintain-verification-skill`, `recall`, `reflect`, `show-me-your-work`,
 `swarm`, `tdd`, `teach`,
 `technical-writing`, `typescript-best-practices`, `why`,
 and every `principle-*` skill.
