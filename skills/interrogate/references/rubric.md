@@ -53,6 +53,20 @@ Can you tell that this code works from reading it?
 - Check the real thing, not a proxy. If the code checks liveness via file mtime or cached state instead of reading the actual value, that's a verification gap.
 - For delegated or async work: does the code verify actual output artifacts, or does it trust self-reports and summaries?
 
+## Blast Radius
+
+What could this break outside the diff? Listing callers is the easy part. Look where a symbol search stops, such as the pinned library's own source, when code runs (microtasks, teardown), wire formats, DB columns, feature flags, and code a few hops downstream.
+
+A risky-looking change is usually safe because of one fact. Name that fact and take it as far down this ladder as is cheap, then say where it stopped:
+
+1. Asserted. Worthless on its own.
+2. Pointed at a real `file:line` or the library's own source.
+3. Traced execution and showed it never reaches the bad case.
+4. Ran a script or test that calls the real code and fails loud if the fact is wrong.
+5. Reproduced it in the running app.
+
+A fact that stops above step 4 is unproven. Say so.
+
 ## Complexity Budget
 
 Is the complexity justified by what the code accomplishes?

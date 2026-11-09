@@ -39,6 +39,7 @@ Anything not listed here is original to this profile.
 - `CLAUDE.md`, `references/execution.md`, and `references/principles.md`
   ← `skills/poteto-mode/SKILL.md`, rewritten
 - `playbooks/` ← `skills/poteto-mode/playbooks/`
+- `playbooks/figure-it-out.md` ← `skills/figure-it-out/SKILL.md`, converted from a skill to a playbook
 - `references/review-bot-triage.md` ← `skills/poteto-mode/references/bugbot-triage.md`
 
 **Tools**
@@ -60,23 +61,21 @@ Anything not listed here is original to this profile.
 **Renamed skills**
 
 - `skills/edit-prose/` ← `skills/unslop/`
-- `skills/plain-language/` ← `skills/bro/`
 - `skills/review-comments/` ← `skills/no-comments/`
 
-**Issue automation**
+**Merged skills**
 
-- `skills/triage-issue-reports/` and `skills/reproduce-and-fix-issues/` ← `automations/benny/skills/`
-- `automations/issue-workflows/`
-  ← `automations/benny/templates/` and the references of the two skills above
+- `skills/create-verification-skill/` ← `skills/create-verification-skill/`,
+  with `skills/maintain-verification-skill/` merged in as its Audit and maintain section
+- `skills/interrogate/references/rubric.md` ← `skills/interrogate/references/rubric.md`,
+  with the proof ladder from `skills/blast-radius/` added as its Blast Radius section
 
 **Skills with the same name upstream**
 
 These come from the skill of the same name under pstack's `skills/`:
 
-`architect`, `arena`, `benchmark-checklist`, `blast-radius`,
-`create-verification-skill`, `figure-it-out`, `how`, `interrogate`,
-`maintain-verification-skill`, `recall`, `reflect`, `show-me-your-work`,
-`swarm`, `tdd`, `teach`,
+`architect`, `arena`, `benchmark-checklist`, `how`, `interrogate`,
+`recall`, `reflect`, `show-me-your-work`, `swarm`,
 `technical-writing`, `typescript-best-practices`, `why`,
 and every `principle-*` skill.
 
@@ -85,6 +84,27 @@ and every `principle-*` skill.
 - `skills/control-cli/` ← `skills/control-cli/`
 - `skills/control-ui/` ← `skills/control-ui/`
 - `skills/clean-code/` ← `skills/deslop/`
+
+## Removed on purpose
+
+This profile ported these from pstack and later removed them.
+A later sync recommends skipping them and their upstream changes.
+
+- `skills/bro/`, ported as `plain-language`.
+  CLAUDE.md's "simpler wording" trigger says how to restate a response, so the skill added nothing.
+- `skills/tdd/`.
+  Its essentials moved into step 5 of `playbooks/bug-fix.md`, and `rules/toolchains.md` already asks for a failing regression test first.
+- `skills/teach/`.
+  It repeated what `how` and `why` already cover for explanations.
+- `skills/blast-radius/`.
+  Its proof ladder moved into interrogate's rubric, which every interrogate and review-loop reviewer reads.
+- `skills/maintain-verification-skill/`.
+  It was merged into `skills/create-verification-skill/`.
+- `automations/benny/`, ported as `automations/issue-workflows/`,
+  `skills/triage-issue-reports/`, and `skills/reproduce-and-fix-issues/`.
+  They need a Slack harness and configuration that this profile does not have.
+- `skills/create-formal-verification-skill/` and `skills/maintain-formal-verification-skill/`, removed in 463fae3.
+  They were never used, and the one candidate project would need Java and TLA+ plus a full modeling session.
 
 ## Related projects and sources
 
@@ -98,7 +118,7 @@ They are worth reading if you want to understand where this setup comes from.
 - **[benny](https://github.com/cursor/plugins/tree/main/pstack/automations/benny)**
   is pstack's automation pack.
   It triages Slack issue reports, then reproduces and fixes confirmed bugs with real UI evidence.
-  Here it became `automations/issue-workflows/` and the two issue automation skills.
+  This profile ported it once and later removed it, as [Removed on purpose](#removed-on-purpose) says.
 - **[cursor-team-kit](https://github.com/cursor/plugins/tree/main/cursor-team-kit)**
   is the plugin that pstack expects next to it.
   pstack uses its `deslop`, `control-cli`, and `control-ui` skills.
@@ -144,7 +164,7 @@ For each change in a commit, decide together whether it fits this profile.
 
 4. Present each change in the commit to the user, one at a time. For each change, give:
    - what upstream added or changed, and why, from the commit message
-   - the matching local file from [Where each file came from](#where-each-file-came-from), or that there is none
+   - the matching local file from [Where each file came from](#where-each-file-came-from), or that there is none, or that [Removed on purpose](#removed-on-purpose) lists it
    - how the change compares with the local version
    - a recommendation to port, adapt, or skip, with the reason
 
@@ -193,7 +213,7 @@ For each change in a commit, decide together whether it fits this profile.
       - `playbooks/`
       - `skills/`
 
-      Any other changed path, such as `tools/` or `automations/`,
+      Any other changed path, such as `tools/` or `hooks/`,
       goes to the closest area or gets its own reviewer.
 
       Each reviewer reads its area in full.

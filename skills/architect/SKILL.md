@@ -27,7 +27,7 @@ Skip Phase A only when the work is genuinely greenfield with no surrounding syst
 
 ## Phase B: Sketch
 
-For an unresolved consequential choice with materially different viable approaches, use the **arena** comparison contract with the Phase A grounding. Resolve `references/runner-prompt.md` and `references/rationale-template.md` for candidate assignments. Each candidate produces a package shaped by that template. Make interface depth and the one-file-change test below criteria in the arena rubric, so arena's rubric-first pick applies them.
+For an unresolved consequential choice with materially different viable approaches, use the [arena](${CLAUDE_SKILL_DIR}/../arena/SKILL.md) comparison contract with the Phase A grounding. Resolve `references/runner-prompt.md` and `references/rationale-template.md` for candidate assignments. Each candidate produces a package shaped by that template. Make interface depth and the one-file-change test below criteria in the arena rubric, so arena's rubric-first pick applies them.
 
 Compare at least two structurally distinct viable approaches when that choice warrants independent exploration. Whole-shape alternatives matter more than point fixes inside one shape. When existing conventions or an already approved design settle the shape, produce one proportionate sketch and proceed within that scope; do not force a second candidate unless the user explicitly asked for competing designs, in which case say why comparison looks unnecessary and run it.
 

@@ -10,7 +10,7 @@
    - **Shared mutable state.** Split independent targets where useful (the **principle-separate-before-serializing-shared-state** skill). Give shared branches, lockfiles, integrations, and live UI sessions one owner.
 4. Implement through the selected execution method. Give delegated units exact file ownership and success criteria, inheriting the configured model and effort unless CLAUDE.md allows another choice. Name the data shape and organizing structure before writing logic, per **principle-model-the-domain**. Prefer a state machine over scattered booleans, a table/registry over branching, and a typed model over repeated shape assumptions.
 
-   Use **arena** when independent alternatives can resolve a consequential uncertainty, rather than for every stylistic choice. Non-trivial implementation gets fresh-context review regardless of how it was executed. Workers own their assigned unit; the coordinator arranges other phases and independent review.
+   Use [arena](../skills/arena/SKILL.md) when independent alternatives can resolve a consequential uncertainty, rather than for every stylistic choice. Non-trivial implementation gets fresh-context review regardless of how it was executed. Workers own their assigned unit; the coordinator arranges other phases and independent review.
 
    Follow the comment rules in CLAUDE.md (Verification and communication) for every file you produce, including delegated diffs. Keep edits narrow and re-ground upstream-derived files against source. Apply shared-primitive improvements to every consumer and verify each. Commit in small verified units.
 5. Verify on the matching surface. "Inconclusive" or wrong-surface is not a pass. Flag it.

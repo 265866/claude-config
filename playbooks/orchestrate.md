@@ -1,6 +1,6 @@
 ### Orchestrate
 
-Own a standing program through briefs, cross-run project facts, verification receipts, and a completion predicate. Use this for work that outlives one agent session. A single task belongs in autonomous-run; one ambitious run needing a bespoke procedure belongs in figure-it-out; a planning-only request belongs in multi-phase-plan. Choose execution using [the execution reference](../references/execution.md).
+Own a standing program through briefs, cross-run project facts, verification receipts, and a completion predicate. Use this for work that outlives one agent session. A single task belongs in autonomous-run; one ambitious run needing a bespoke procedure belongs in [Figure it out](figure-it-out.md); a planning-only request belongs in multi-phase-plan. Choose execution using [the execution reference](../references/execution.md).
 
 #### Roles and placement
 

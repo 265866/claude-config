@@ -1,6 +1,7 @@
 ---
 name: reflect
 description: "Review the active conversation for durable lessons and propose improvements to existing skills. Use when the user requests reflection, lessons from the session, or instruction improvements. Profile edits require approval of the proposed changes."
+disable-model-invocation: true
 ---
 
 # Reflect

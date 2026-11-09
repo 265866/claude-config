@@ -39,7 +39,8 @@ Native Workflow owns its within-run execution state. Native Tasks presents the m
 - Version-specific package, SDK, CLI, or API facts, or whether an existing dependency already covers a need before adding a new one: the source-docs-researcher agent.
 - An unresolved consequential structural choice: architect. Compare concrete alternatives when they can change the decision. Settled mechanical work follows the existing pattern.
 - Partitioned investigation or coverage: swarm. Competing artifacts with base selection and grafting: arena. Complementary independent review: interrogate.
-- Changed behavior, a bug, a migration, or a measured performance problem: its matching playbook below.
+- Arena and reflect are user-only skills, so the Skill tool refuses them. When the user did not type /arena or /reflect, read skills/arena/SKILL.md or skills/reflect/SKILL.md by path and follow it, resolving its `${CLAUDE_SKILL_DIR}` to that file's folder.
+- Changed behavior, a bug, a migration, or a measured performance problem: its matching playbook below. "Figure it out" that asks for a working result, a large or cross-cutting task, or one no narrower playbook fits: playbooks/figure-it-out.md. A request only to find a cause is a read-only diagnosis.
 - Running a benchmark, measuring performance yourself, or reporting a speedup or regression you measured: benchmark-checklist, before you run, and before you report or act on the number.
 - Before asking an approach question, check observable facts within scope. Ask for product or preference decisions that evidence cannot settle. Prototype only when an implementation request authorizes it.
 - Prose revision: edit-prose. Substantial documentation: technical-writing. Skill authoring: author-skill.
@@ -53,7 +54,7 @@ Native Workflow owns its within-run execution state. Native Tasks presents the m
 - Authorized landing: Shipping, with independent exact-head receipts for the contiguous run.
 - Long or unattended work: show-me-your-work for meaningful decisions and evidence.
 - Requested history or resumption: recall or Session pickup within the named history scope.
-- Requested retrospective: reflect. Requested simpler wording: plain-language.
+- Requested retrospective: reflect. Requested simpler wording: restate the last response plainly and concisely, without jargon or new investigation, keeping its meaning and uncertainty.
 
 For substantial engineering work, consult references/principles.md and load relevant leaf skills. Favor clear domain shapes, deletion before abstraction, separation of shared state, and proof against the real artifact. Explain a principle when it changes a meaningful choice; ordinary replies do not need a principle inventory.
 
@@ -95,7 +96,7 @@ These definitions bound the lists above. Throwaway build, test, or inspection to
 
 Outside a turn that only answers a question or delivers a requested read-only result, stop or end a turn with a question only at a concrete blocker: an ask-first action above, a product or preference decision that evidence cannot settle (including any finding that references/review-bot-triage.md routes to `ask`), missing access, hardware, or credentials with no available substitute, or an exhausted budget after a revised approach also failed. A known defect, a failing check, a proven reviewer finding, a hard fix, a fix in another layer or language of the same deliverable, and an upstream cause are not blockers. Before calling something unfixable or untestable, try the cheapest workaround or test within reach that keeps the existing design. Continue other work while a blocker waits. In T3 Code, the main conversation asks a blocker question with AskUserQuestion, so the thread shows as waiting. When that tool is unavailable or the call is refused, ask in the final message instead, and later runs hold the work that depends on the answer until it comes. A worker or delegated T3 task returns the question in its result instead. The T3 Code section of references/execution.md says how to tell which one you are. Put the exact command, artifact, or options and their evidence in the question. Before asking, finish any work that does not depend on the answer, as review-loop does with its other open items, or launch it in the background when it needs nothing more from this conversation before the answer. The question holds the turn until it is answered, and PR watch wakes, scheduled runs, and delegated-task notices wait until then.
 
-Assign exclusive files or responsibility, acceptance criteria, required checks, and a report contract. Tell writers they share the codebase and must preserve others' edits. Shared schemas, branches, lockfiles, browser sessions, and external records also need ownership. Use isolated worktrees for overlapping writes and one integration owner. Verify the intended base revision; automatic worktrees can start from the remote default branch.
+Assign exclusive files or responsibility, acceptance criteria, required checks, and a report contract. Delegated implementation, and investigation that may edit, runs as the engineer agent, in a native Workflow too. Read-only reviewers and researchers may run as general-purpose or Explore, with the brief carrying their boundaries. A brief that names another agent type deliberately keeps it. Tell writers they share the codebase and must preserve others' edits. Shared schemas, branches, lockfiles, browser sessions, and external records also need ownership. Use isolated worktrees for overlapping writes and one integration owner. Verify the intended base revision; automatic worktrees can start from the remote default branch.
 
 Workers inherit the configured model and effort unless an authorized experiment requires another choice or I name a model. Scope independent reviewers to the original request, actual artifact, and relevant evidence (in the review-loop skill, its decision log), without the implementer's conversation or reasoning. Inspect every result and resolve findings with evidence. A reviewer's severity, "non-blocking", or "pre-existing" label sets fix order, not whether a proven defect in scope gets fixed.
 
@@ -122,7 +123,7 @@ For findings from automated reviewers, meaning bots and review services that com
 
 ## Playbooks
 
-Use the closest existing procedure. A large or cross-cutting task uses figure-it-out to adapt that procedure when its coordination or acceptance needs are not covered. A standing multi-day program uses Orchestrate. A bespoke Markdown procedure is a plan; its execution may use direct tools, ordinary delegation, or native Workflow.
+Use the closest existing procedure. A large or cross-cutting task uses playbooks/figure-it-out.md to adapt that procedure when its coordination or acceptance needs are not covered. A standing multi-day program uses Orchestrate. A bespoke Markdown procedure is a plan; its execution may use direct tools, ordinary delegation, or native Workflow.
 
 When the main conversation follows a playbook for multi-step work, open its task list with that playbook's numbered steps before any task-specific items: each step's lead sentence as the subject and its full text as the description. A step you choose not to do stays in the list marked `skip: <reason>`, so a dropped step is always visible. A read-only or single-pass request, such as a status check, needs no list. Add native Tasks only for other meaningful multi-step milestones. Workers report their assigned stage's status without requiring task tools.
 
@@ -143,6 +144,7 @@ When the main conversation follows a playbook for multi-step work, open its task
 | PR/stack status or authorized repair | playbooks/babysit.md |
 | Authorized verified landing | playbooks/shipping.md |
 | Sustained task with an explicit exit condition | playbooks/autonomous-run.md |
+| Large, cross-cutting, or unmatched task, or "figure it out" with a working result | playbooks/figure-it-out.md |
 | Standing project-scale program | playbooks/orchestrate.md |
 | Authorized independent PR queue | playbooks/autopilot-full.md |
 | Reviewed stack delivered for the user to land | playbooks/autopilot-stack.md |

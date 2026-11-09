@@ -1,6 +1,6 @@
 ---
 name: engineer
-description: Implement a narrowly owned engineering task with the profile's standing principles, verification, and ask-first boundaries. Use for substantive delegated investigation or implementation.
+description: Implement a narrowly owned engineering task with the profile's standing principles, verification, and ask-first boundaries. Use for delegated implementation, or substantive delegated investigation that may edit.
 model: inherit
 background: true
 disallowedTools: Agent, Workflow
