@@ -76,8 +76,19 @@ These come from the skill of the same name under pstack's `skills/`:
 
 `architect`, `arena`, `benchmark-checklist`, `how`, `interrogate`,
 `recall`, `reflect`, `show-me-your-work`, `swarm`,
-`technical-writing`, `typescript-best-practices`, `why`,
-and every `principle-*` skill.
+`technical-writing`, `typescript-best-practices`, and `why`.
+
+**Principles**
+
+- `references/principles/<name>.md` ← `skills/principle-<name>/SKILL.md`.
+  They moved out of the skill menu into reference files, with the frontmatter dropped
+  and the description's trigger kept as an "Apply when" lead.
+  As skills they cost about 5,800 characters of menu text in every session, and agents read them by file path anyway.
+- `references/principles/subtract-first.md` ← `skills/principle-laziness-protocol/`,
+  `skills/principle-subtract-before-you-add/`, `skills/principle-migrate-callers-then-delete-legacy-apis/`,
+  and `skills/principle-outcome-oriented-execution/`, merged into one file.
+- `skills/principle-never-block-on-the-human/` and `skills/principle-guard-the-context-window/` were dropped.
+  [Removed on purpose](#removed-on-purpose) says why.
 
 ### From cursor-team-kit
 
@@ -105,6 +116,11 @@ A later sync recommends skipping them and their upstream changes.
   They need a Slack harness and configuration that this profile does not have.
 - `skills/create-formal-verification-skill/` and `skills/maintain-formal-verification-skill/`, removed in 463fae3.
   They were never used, and the one candidate project would need Java and TLA+ plus a full modeling session.
+- `skills/principle-never-block-on-the-human/`.
+  It restated CLAUDE.md's Authorization and ownership section, which already says to do reversible work without asking and to fix proven defects before reporting.
+- `skills/principle-guard-the-context-window/`.
+  It restated `references/execution.md`, which owns delegation and worker scope.
+  Its two rules found nowhere else moved there, under Ordinary delegation and Worker contract.
 
 ## Related projects and sources
 

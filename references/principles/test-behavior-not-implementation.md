@@ -1,9 +1,6 @@
----
-name: principle-test-behavior-not-implementation
-description: "Apply when you write, change, or keep a test. Exercise a real behavior or contract and assert an independently specified result or effect. Judge what the assertion proves for its input, not the matcher name."
----
-
 # Test Behavior, Not Implementation
+
+Apply when you write, change, or keep a test.
 
 A behavioral test calls the code the way its users do and asserts the result or effect they observe against an independently specified expectation. Interaction, data, and type assertions can also verify real contracts; identify which contract each test protects.
 

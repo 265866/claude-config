@@ -5,14 +5,14 @@ description: "Vet a perf measurement (limiter, tuning, limits, errors, repeatabi
 
 # Benchmark checklist
 
-Use this when you produce a performance number: a PR's before and after, a regression claim, a hillclimb harness, or a library or config choice. [Explain the Number](../principle-explain-the-number/SKILL.md) says why. Answer each question below with evidence from a run, not from a guess about the code. [Tools by OS](#tools-by-os) lists the commands for each step.
+Use this when you produce a performance number: a PR's before and after, a regression claim, a hillclimb harness, or a library or config choice. [Explain the Number](${CLAUDE_SKILL_DIR}/../../references/principles/explain-the-number.md) says why. Answer each question below with evidence from a run, not from a guess about the code. [Tools by OS](#tools-by-os) lists the commands for each step.
 
 For a quick ballpark the user asked for, one run is enough. Still check questions 4 and 7, and say that it is one run. Skip the other questions unless that run looks wrong. A choice between options is never a ballpark.
 
 ## Before you run anything
 
 - Write down the claim you expect to make, in the words you would ship ("export is 30% faster at p50 on the 60k-row dataset"). The questions test that sentence.
-- Name the result that would change a decision, and the noise floor, as [Explain the Number](../principle-explain-the-number/SKILL.md) says. A requested ballpark needs neither.
+- Name the result that would change a decision, and the noise floor, as [Explain the Number](${CLAUDE_SKILL_DIR}/../../references/principles/explain-the-number.md) says. A requested ballpark needs neither.
 - Read the measurement script. Note what it times, what it counts, and what it ignores.
 - In a read-only task, leave the project's files and data unchanged. Regenerable build output is fine. Saved measurements, such as Criterion baselines under `target/criterion/`, are data. Work in fresh `mktemp -d` directories outside the project, unless In place below applies:
   - **Sides.** Run each side from its own copy, and set up every copy the same way with the project's locked install, such as `uv sync --locked`. Run each side with the lockfile frozen, such as `uv run --locked`. Copy the working tree for the current side, including uncommitted and untracked files but not build output or installed dependencies. Check that the copy matches the project before setup. When `<project>/.git` is a file, as in a linked worktree, leave it out, because Git in the copy can write to the project's repository. Do not copy an environment such as `.venv`, because it can still load the project's code. Take a side at another revision from `git clone --no-checkout <project> <dir>`, then check out the SHA that `git -C <project> rev-parse --verify '<rev>^{commit}'` prints. Resolve it in the project, because the clone's `origin/*` names point at the project's local branches. Make any script change the questions call for, such as question 2's tuning or question 4's error count, in the copies.

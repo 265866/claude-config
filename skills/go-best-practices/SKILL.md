@@ -6,7 +6,7 @@ paths: ["**/*.go"]
 
 # Go best practices
 
-Apply the **principle-type-system-discipline** principle skill first.
+Apply [Type System Discipline](${CLAUDE_SKILL_DIR}/../../references/principles/type-system-discipline.md) first.
 
 Check the `go` directive in go.mod before applying version-gated APIs: `slices`, `maps`, `cmp`, and `log/slog` need Go 1.21, and `errors.Join` needs 1.20. Many of their functions are newer (`slices.Concat` and `cmp.Or` need 1.22; `maps.Keys`, `maps.Values`, `maps.All`, `maps.Collect`, `slices.Sorted`, `slices.Collect`, and `slices.Values` need 1.23), so check each function's added-in version against the directive. On an older floor, use `golang.org/x/exp/slices` or `golang.org/x/exp/maps` only when the module already depends on them; otherwise write the small helper. For `log/slog` below 1.21, keep the module's existing logger.
 

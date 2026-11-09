@@ -1,9 +1,6 @@
----
-name: principle-sequence-verifiable-units
-description: "Apply to multi-step work (sweeps, migrations, runs of similar edits) and to how you stack commits and PRs. Break work into verifiable units, check prerequisites before dependent work, and order delivery so the sequence proves itself to a reviewer."
----
-
 # Sequence work into verifiable units
+
+Apply when work has multiple steps, such as sweeps, migrations, or runs of similar edits, and when you stack commits and PRs.
 
 Break work into small units, each ending in a state you can check. Verify a prerequisite before building on it. Independent units can run in parallel.
 
@@ -13,4 +10,4 @@ Break work into small units, each ending in a state you can check. Verify a prer
 
 **Delivery.** Stack commits and PRs in dependency order. Demonstrate a failing regression before applying its fix, then deliver a self-contained, passing change. Other useful orders are a subtraction before the reshape, a baseline capture before the treatment, and the scaffold before the feature. Each commit has its own verification and the sequence reads as an argument.
 
-The sequencing complement to the **principle-prove-it-works** principle skill, which keeps each check real, and the **principle-build-the-lever** principle skill, which makes the per-unit check cheap.
+The sequencing complement to [Prove It Works](prove-it-works.md), which keeps each check real, and [Build the Lever](build-the-lever.md), which makes the per-unit check cheap.

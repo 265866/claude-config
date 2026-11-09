@@ -1,6 +1,6 @@
 # Python patterns
 
-Code examples for each rule in `SKILL.md`. The underlying principles are language-agnostic. See the **principle-type-system-discipline** and **principle-boundary-discipline** principle skills. Everything targets Python 3.12+.
+Code examples for each rule in `SKILL.md`. The underlying principles are language-agnostic. See [Type System Discipline](../../../references/principles/type-system-discipline.md) and [Boundary Discipline](../../../references/principles/boundary-discipline.md). Everything targets Python 3.12+.
 
 ## Modern annotations
 

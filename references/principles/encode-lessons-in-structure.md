@@ -1,9 +1,6 @@
----
-name: principle-encode-lessons-in-structure
-description: "Apply when you catch yourself writing the same instruction a second time, or notice a recurring correction. Encode the rule as a lint, metadata flag, runtime check, or script instead of more text."
----
-
 # Encode Lessons in Structure
+
+Apply when you catch yourself writing the same instruction a second time, or notice a recurring correction.
 
 Encode recurring fixes in mechanisms (tools, code, metadata, automation) instead of textual instructions. Every error, human correction, and unexpected outcome is a learning signal. Capture it, route it, and close the loop.
 
@@ -22,7 +19,7 @@ When you catch yourself writing the same instruction a second time:
 **Feedback loop:**
 - **Capture every correction.** When the human intervenes or tests fail, decide if it's a one-off or a pattern.
 - **Route to the right layer.** One-off -> current task note. Recurring fix in the project you are working on -> that project's lint rule, test, type, or script, within the task's scope. Recurring fix to agent instructions -> a proposed skill or principle edit. Systemic issue -> a proposed principle.
-- **Close the loop.** Don't just record. Apply project-scope encodings now when the task authorizes them. Changes to installed skills, principles, or this profile happen only in requested profile maintenance (such as the **reflect** skill's approval step). During other work, put the concrete proposed edit in the task report instead of applying it. Never write automatic memory.
+- **Close the loop.** Don't just record. Apply project-scope encodings now when the task authorizes them. Changes to installed skills, principles, or this profile happen only in requested profile maintenance (such as the approval step in [reflect](../../skills/reflect/SKILL.md)). During other work, put the concrete proposed edit in the task report instead of applying it. Never write automatic memory.
 
 **Anti-patterns:**
 - Acknowledging without recording ("I'll keep that in mind" does not persist; put it in the task note or report)

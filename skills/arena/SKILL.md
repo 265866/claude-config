@@ -26,7 +26,7 @@ The N candidates will receive the same prompt, plus at most a named design direc
 1. State the artifact each candidate is producing.
 2. Derive the rubric. State what success looks like for *this* task, then turn it into 3-6 concrete gradeable criteria. The rubric is the picker's tool in Phase D. Candidates only see the task.
 3. Pick independent runners that inherit the profile model. Default to three candidates; add more only when the task has more than three substantive design directions. Same-model independent attempts are the supported default. Do not claim model diversity.
-4. Assign isolated outputs under the execution guide's ownership rules. Use the **principle-separate-before-serializing-shared-state** skill. If the design is settled or the task is mechanical, skip the candidate comparison and use the applicable narrower procedure, unless the user explicitly asked for competing attempts; then say why the comparison looks unnecessary and run it. Match each candidate's workspace to its artifact and to what the request authorizes; an invoking skill's own workspace rule, such as architect's runner prompt, takes precedence. Implementation candidates need a request that authorizes implementation and a git repository: give each its own git worktree. Without worktrees, compare sketches or reports instead, tell the user the comparison ran on sketches and why, and implement the chosen design afterward through the matching playbook. Sketch or report candidates work in their own subdirectories of a directory in the OS temporary directory. Keep the run's records (each candidate's rationale, any snapshot of the base candidate, the synthesis note, and verification output) in a run directory in the OS temporary directory that no candidate is given. Without implementation authorization, the user's repository stays unchanged, except for prose the user asked for there (see Outputs).
+4. Assign isolated outputs under the execution guide's ownership rules. Apply [Separate Before Serializing Shared State](${CLAUDE_SKILL_DIR}/../../references/principles/separate-before-serializing-shared-state.md). If the design is settled or the task is mechanical, skip the candidate comparison and use the applicable narrower procedure, unless the user explicitly asked for competing attempts; then say why the comparison looks unnecessary and run it. Match each candidate's workspace to its artifact and to what the request authorizes; an invoking skill's own workspace rule, such as architect's runner prompt, takes precedence. Implementation candidates need a request that authorizes implementation and a git repository: give each its own git worktree. Without worktrees, compare sketches or reports instead, tell the user the comparison ran on sketches and why, and implement the chosen design afterward through the matching playbook. Sketch or report candidates work in their own subdirectories of a directory in the OS temporary directory. Keep the run's records (each candidate's rationale, any snapshot of the base candidate, the synthesis note, and verification output) in a run directory in the OS temporary directory that no candidate is given. Without implementation authorization, the user's repository stays unchanged, except for prose the user asked for there (see Outputs).
 
 ## Phase B: Fan out
 
@@ -46,7 +46,7 @@ Read every candidate end to end before picking.
 
 Score each candidate against the rubric criterion by criterion, not on holistic feel. Compare against the cross-judge. Agreement on the base confirms the pick. Investigate disagreement for bias or an ambiguous rubric. Read both rationales before deciding.
 
-Pick the base with the strongest rubric scores. Between candidates the rubric leaves close, prefer the one a future maintainer can extend most easily without breaking invariants, then the cleaner boundary or smaller API, per the Laziness Protocol.
+Pick the base with the strongest rubric scores. Between candidates the rubric leaves close, prefer the one a future maintainer can extend most easily without breaking invariants, then the cleaner boundary or smaller API, per [Subtract First](${CLAUDE_SKILL_DIR}/../../references/principles/subtract-first.md).
 
 Record the pick and the reason in a short synthesis note in the run directory, including the cross-judge's verdict.
 
@@ -54,7 +54,7 @@ Record the pick and the reason in a short synthesis note in the run directory, i
 
 Walk each losing candidate once more and identify what is worth porting into the base. The signal is usually one or two things per candidate, not most of it.
 
-When the user asked for competing attempts, first save the base candidate's original artifact in the run directory (for a worktree, run `git add --intent-to-add .` there, then save `git diff --binary <accepted revision>`) so it can still be linked, and say when it includes a shared pre-written test. Fold each graft in by hand, per the **principle-redesign-from-first-principles** principle skill. Don't paste mechanically. The result has to remain coherent under one mental model.
+When the user asked for competing attempts, first save the base candidate's original artifact in the run directory (for a worktree, run `git add --intent-to-add .` there, then save `git diff --binary <accepted revision>`) so it can still be linked, and say when it includes a shared pre-written test. Fold each graft in by hand, per [Redesign from First Principles](${CLAUDE_SKILL_DIR}/../../references/principles/redesign-from-first-principles.md). Don't paste mechanically. The result has to remain coherent under one mental model.
 
 Record what was grafted, from which candidate, and what was rejected and why.
 
@@ -62,7 +62,7 @@ When N candidates converge on the same shape, that is a strong agreement signal.
 
 ## Phase F: Verify
 
-The synthesized artifact has to hold up under the same scrutiny as any other output, per the **principle-prove-it-works** principle skill.
+The synthesized artifact has to hold up under the same scrutiny as any other output, per [Prove It Works](${CLAUDE_SKILL_DIR}/../../references/principles/prove-it-works.md).
 
 If verification surfaces a problem the arena did not catch, check whether Phase A was wrong or a candidate caught the issue and you missed the graft. Reframe and rerun when the brief was wrong; return to Phase E when a useful candidate finding was missed. Investigate other causes when the evidence points elsewhere. Do not hide the failure.
 

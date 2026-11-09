@@ -6,7 +6,7 @@ paths: ["**/*.rs", "**/Cargo.toml", "**/rust-toolchain.toml", "**/rust-toolchain
 
 # Rust best practices
 
-Apply the **principle-type-system-discipline** principle skill first.
+Apply [Type System Discipline](${CLAUDE_SKILL_DIR}/../../references/principles/type-system-discipline.md) first.
 
 Respect `rust-version` in Cargo.toml before applying version-gated syntax: let-else needs Rust 1.65. On an older floor, use `match` or `if let` with an early return.
 

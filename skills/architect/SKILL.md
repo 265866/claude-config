@@ -55,7 +55,7 @@ Deviations from the sketch are signal worth surfacing, not friction to absorb si
 
 ## Phase E: Scrap when the architecture is wrong
 
-If implementation keeps producing friction the sketch can't absorb, throw the sketch out. Don't bolt fixes onto a wrong design, per the **principle-redesign-from-first-principles** and **principle-fix-root-causes** principle skills.
+If implementation keeps producing friction the sketch can't absorb, throw the sketch out. Don't bolt fixes onto a wrong design, per [Redesign from First Principles](${CLAUDE_SKILL_DIR}/../../references/principles/redesign-from-first-principles.md) and [Fix Root Causes](${CLAUDE_SKILL_DIR}/../../references/principles/fix-root-causes.md).
 
 The signal is a *pattern*, not single instances. Tells:
 
@@ -72,7 +72,7 @@ When you scrap:
 
 1. Re-run the **how** skill over what's been built.
 2. Redesign as if the new constraints had been day-one assumptions, per redesign-from-first-principles.
-3. Subtract before adding, per the **principle-subtract-before-you-add** principle skill. The new sketch should be smaller than the old one before it grows.
+3. Subtract before adding, per [Subtract First](${CLAUDE_SKILL_DIR}/../../references/principles/subtract-first.md). The new sketch should be smaller than the old one before it grows.
 4. Return to Phase B and reassess the unresolved choice. Repeat comparison only when new evidence warrants it.
 
 ## Outputs

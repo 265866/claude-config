@@ -1,6 +1,6 @@
 # Rust patterns
 
-Code examples for the rules in `SKILL.md` that benefit from one. The underlying principles are language-agnostic. See the **principle-type-system-discipline** and **principle-boundary-discipline** principle skills.
+Code examples for the rules in `SKILL.md` that benefit from one. The underlying principles are language-agnostic. See [Type System Discipline](../../../references/principles/type-system-discipline.md) and [Boundary Discipline](../../../references/principles/boundary-discipline.md).
 
 ## Newtypes for domain values
 

@@ -36,7 +36,7 @@ Assign one independent synthesis stage the resolved `references/synthesizer.md`,
 
 ### 4. Structural enforcement check
 
-Sanity-check the synthesizer's Accepted list. For any item that would be enforced more reliably by a lint rule, script, metadata flag, or runtime check, move it from Accepted to Backlog. See the **principle-encode-lessons-in-structure** principle skill.
+Sanity-check the synthesizer's Accepted list. For any item that would be enforced more reliably by a lint rule, script, metadata flag, or runtime check, move it from Accepted to Backlog. See [Encode Lessons in Structure](${CLAUDE_SKILL_DIR}/../../references/principles/encode-lessons-in-structure.md).
 
 ### 5. Apply
 

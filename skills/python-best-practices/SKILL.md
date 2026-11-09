@@ -6,7 +6,7 @@ paths: ["**/*.py"]
 
 # Python best practices
 
-Apply the **principle-type-system-discipline** principle skill first.
+Apply [Type System Discipline](${CLAUDE_SKILL_DIR}/../../references/principles/type-system-discipline.md) first.
 
 Check `requires-python` in pyproject.toml before applying version-gated syntax: PEP 695 needs 3.12; `StrEnum`, `TaskGroup`, `asyncio.timeout`, `except*`, and `assert_never` need 3.11. On older floors use the pre-695 equivalents (`TypeVar`, `TypeAlias`). `X | None` needs 3.10, and builtin generics such as `list[str]` need 3.9, wherever the expression is evaluated at runtime (runtime-evaluated annotations, type alias values, `cast` arguments). `match`, `@dataclass(slots=True)` and `kw_only=True`, `typing.TypeGuard`, and `typing.TypeAlias` need 3.10. Below 3.10, dispatch with `if`/`isinstance`, omit `slots=True` and `kw_only=True` (order defaulted fields last, because a non-default field after a defaulted one, including one inherited from a base, raises `TypeError`; give such subclass fields defaults), and import `TypeGuard` and `TypeAlias` from `typing_extensions` when the project already depends on it; otherwise use an implicit alias and a plain `bool` return.
 
@@ -16,7 +16,7 @@ Check `requires-python` in pyproject.toml before applying version-gated syntax: 
 | Tagged unions | Model variants as a union of frozen dataclasses dispatched with `match` plus `assert_never`. No optional-field bags, no `kind` string checked with `if`. |
 | Domain primitives | `NewType` for ids and units so they can't be mixed up; `Enum`/`StrEnum` for closed sets of values. Validate once at creation. |
 | Dataclasses over dicts | `@dataclass(frozen=True, slots=True)` for data that crosses a function boundary. No dict-passing, no hand-written `__init__`/`__eq__`/`__repr__`. Use attrs for validators or converters when the project already depends on it. Add it only when its validators or converters earn a new dependency, and report it. |
-| Boundary validation | Parse external data once at the edge and trust types inside. Use pydantic (`model_validate`, `TypeAdapter`) when the project already depends on it; otherwise a `TypedDict` or dataclass plus one checking function. Add pydantic only when the boundary earns a new dependency, and report it. No re-validation or `isinstance` checks deep in call chains. See the **principle-boundary-discipline** principle skill. |
+| Boundary validation | Parse external data once at the edge and trust types inside. Use pydantic (`model_validate`, `TypeAdapter`) when the project already depends on it; otherwise a `TypedDict` or dataclass plus one checking function. Add pydantic only when the boundary earns a new dependency, and report it. No re-validation or `isinstance` checks deep in call chains. See [Boundary Discipline](${CLAUDE_SKILL_DIR}/../../references/principles/boundary-discipline.md). |
 | `Any` and `cast` discipline | External data enters as parsed types, never `Any`. `cast()` is an unchecked assertion earned only after validation. `# type: ignore` needs an error code and a reason. `TypeGuard` for narrowing helpers. |
 | Parameter variance | Accept the widest read-only protocol needed (`Iterable`, `Sequence`, `Mapping`); return concrete types. `list[Derived]` is not `list[Base]`. |
 | Narrow exceptions | Catch the specific type at the level that can respond, chain with `raise ... from e`, otherwise let it propagate. Never bare `except:` or blanket `except Exception` that swallows. |

@@ -42,7 +42,7 @@ Give each piece of state one owner. Other modules read it or ask the owner to ch
 
 The design supports more than one way to do the same task. An agent copies whichever way it finds first, so every way keeps gaining callers.
 
-Keep one way. Migrate callers and delete the others in the same wave, per [principle-migrate-callers-then-delete-legacy-apis](../../principle-migrate-callers-then-delete-legacy-apis/SKILL.md), unless external users depend on them. Report existing duplicates outside the task's scope instead of fixing them.
+Keep one way. Migrate callers and delete the others in the same wave, per [Subtract First](../../../references/principles/subtract-first.md), unless external users depend on them. Report existing duplicates outside the task's scope instead of fixing them.
 
 ## Importable internals
 

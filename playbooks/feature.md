@@ -7,15 +7,15 @@
 3. Record dependencies and shared-resource ownership in the plan, scaled to the work:
    - **Blocking first steps.** Gates run before fan-out.
    - **Independent workstreams.** Disjoint files, services, or layers parallelize. Shared writes serialize.
-   - **Shared mutable state.** Split independent targets where useful (the **principle-separate-before-serializing-shared-state** skill). Give shared branches, lockfiles, integrations, and live UI sessions one owner.
-4. Implement through the selected execution method. Give delegated units exact file ownership and success criteria, inheriting the configured model and effort unless CLAUDE.md allows another choice. Name the data shape and organizing structure before writing logic, per **principle-model-the-domain**. Prefer a state machine over scattered booleans, a table/registry over branching, and a typed model over repeated shape assumptions.
+   - **Shared mutable state.** Split independent targets where useful ([Separate Before Serializing Shared State](../references/principles/separate-before-serializing-shared-state.md)). Give shared branches, lockfiles, integrations, and live UI sessions one owner.
+4. Implement through the selected execution method. Give delegated units exact file ownership and success criteria, inheriting the configured model and effort unless CLAUDE.md allows another choice. Name the data shape and organizing structure before writing logic, per [Model the Domain](../references/principles/model-the-domain.md). Prefer a state machine over scattered booleans, a table/registry over branching, and a typed model over repeated shape assumptions.
 
    Use [arena](../skills/arena/SKILL.md) when independent alternatives can resolve a consequential uncertainty, rather than for every stylistic choice. Non-trivial implementation gets fresh-context review regardless of how it was executed. Workers own their assigned unit; the coordinator arranges other phases and independent review.
 
    Follow the comment rules in CLAUDE.md (Verification and communication) for every file you produce, including delegated diffs. Keep edits narrow and re-ground upstream-derived files against source. Apply shared-primitive improvements to every consumer and verify each. Commit in small verified units.
 5. Verify on the matching surface. "Inconclusive" or wrong-surface is not a pass. Flag it.
 6. Deliver small, ordered commits. Stack follow-ups. Prepare new commits from working-tree changes with the **commit-agent** agent. Rewrite existing commits (rebase, squash, reorder) when it gives a clearer history, but rewrite only unpushed commits, or commits on a branch you created that nobody else has pushed to.
-   Use the **principle-sequence-verifiable-units** skill: verify prerequisites before dependent work, allow independent units to run in parallel, check each unit before acceptance, and verify the combined artifact before calling it integrated. Deliver passing commits in dependency order.
+   Use [Sequence Work into Verifiable Units](../references/principles/sequence-verifiable-units.md): verify prerequisites before dependent work, allow independent units to run in parallel, check each unit before acceptance, and verify the combined artifact before calling it integrated. Deliver passing commits in dependency order.
 7. If the design is contested, `interrogate` before delivering in step 8.
 8. Run **Opening a PR** only when creation is explicitly requested or approved. Otherwise deliver the verified local result.
 

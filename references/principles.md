@@ -1,41 +1,36 @@
 # Engineering principles
-Use this catalog for substantial engineering or design work. Read only the leaf skills relevant to the current decision. A worker applies the assigned stage's principles without restarting coordinator routing.
+
+Use this index for substantial engineering or design work. Each line gives a principle's trigger and links its file. Read only the files relevant to the current decision. A worker applies the assigned stage's principles without restarting coordinator routing.
 
 **Core**
 
-- **Laziness Protocol** ([principle-laziness-protocol](../skills/principle-laziness-protocol/SKILL.md)). Refactoring, sizing a diff, or tempted to add abstractions, layers, or signal threading. Bias to deletion and the smallest change that solves the problem.
-- **Foundational Thinking** ([principle-foundational-thinking](../skills/principle-foundational-thinking/SKILL.md)). Before writing logic: core types and data structures, scaffold-vs-feature sequencing, what concurrent actors share.
-- **Redesign from First Principles** ([principle-redesign-from-first-principles](../skills/principle-redesign-from-first-principles/SKILL.md)). Integrating a new requirement into an existing design. Redesign as if it had been foundational from day one.
-- **Attack the Premise** ([principle-attack-the-premise](../skills/principle-attack-the-premise/SKILL.md)). Two or more fixes that share one premise have failed the same gate. Write the premise down and test it directly before you write another fix that assumes it.
-- **Subtract Before You Add** ([principle-subtract-before-you-add](../skills/principle-subtract-before-you-add/SKILL.md)). Sequencing an addition, refactor, or rewrite. Remove dead weight first, then build on the simpler base.
-- **Minimize Reader Load** ([principle-minimize-reader-load](../skills/principle-minimize-reader-load/SKILL.md)). Reviewing or shaping code that's hard to trace. Count layers and hidden state, collapse one-caller wrappers, shrink mutable scope.
-- **Outcome-Oriented Execution** ([principle-outcome-oriented-execution](../skills/principle-outcome-oriented-execution/SKILL.md)). Planned rewrites and migrations with explicit phase boundaries. Converge on the target architecture. Don't preserve throwaway compatibility states.
-- **Experience First** ([principle-experience-first](../skills/principle-experience-first/SKILL.md)). Product, UX, or feature-scope tradeoffs. Choose user delight over implementation convenience.
-- **Exhaust the Design Space** ([principle-exhaust-the-design-space](../skills/principle-exhaust-the-design-space/SKILL.md)). A novel interaction or architectural decision with no precedent. Build 2-3 competing prototypes when the request authorizes implementation, or sketches in the plan otherwise, and compare before committing.
-- **Build the Lever** ([principle-build-the-lever](../skills/principle-build-the-lever/SKILL.md)). Repeated transformations or fragile verification that an existing command cannot cover. Use the smallest reusable tool that earns its maintenance cost.
+- [Subtract First](principles/subtract-first.md). Sizing a diff, sequencing an addition, refactor, rewrite, or migration, replacing an internal API, or tempted to add an abstraction, layer, or signal threading.
+- [Foundational Thinking](principles/foundational-thinking.md). Before writing logic, when choosing core types and data structures, sequencing scaffold and feature work, or asking what concurrent actors share.
+- [Redesign from First Principles](principles/redesign-from-first-principles.md). Integrating a new requirement into an existing design.
+- [Attack the Premise](principles/attack-the-premise.md). Two or more fixes that share one premise have failed the same gate.
+- [Minimize Reader Load](principles/minimize-reader-load.md). Reviewing or shaping code that is hard to trace.
+- [Experience First](principles/experience-first.md). Product, UX, or feature-scope tradeoffs.
+- [Exhaust the Design Space](principles/exhaust-the-design-space.md). A novel UI interaction or architectural decision with no precedent in the codebase.
+- [Build the Lever](principles/build-the-lever.md). A repeated transformation or fragile verification that a deterministic codemod, script, or generator could do.
 
 **Architecture**
 
-- **Model the Domain** ([principle-model-the-domain](../skills/principle-model-the-domain/SKILL.md)). Writing stateful logic, or code that branches a lot or repeats a shape assumption across files. Encode the domain in a structure (state machine, typed model, table or registry, reducer, boundary, the right collection) instead of scattered conditionals.
-- **Boundary Discipline** ([principle-boundary-discipline](../skills/principle-boundary-discipline/SKILL.md)). Wiring validation, error handling, or framework adapters. Guards at system boundaries, trust internal types, keep business logic pure.
-- **Type System Discipline** ([principle-type-system-discipline](../skills/principle-type-system-discipline/SKILL.md)). Designing types or a signature in any typed language. Make illegal states unrepresentable, brand primitives, parse external data at boundaries.
-- **Make Operations Idempotent** ([principle-make-operations-idempotent](../skills/principle-make-operations-idempotent/SKILL.md)). Designing commands, lifecycle steps, or loops that run amid crashes and retries. Derive each step from the state that exists and leave nothing the next run cannot judge as stale, so every run converges to the same end state.
-- **Migrate Callers Then Delete Legacy APIs** ([principle-migrate-callers-then-delete-legacy-apis](../skills/principle-migrate-callers-then-delete-legacy-apis/SKILL.md)). Introducing a new internal API while old callers exist. Migrate and delete in one wave.
-- **Separate Before Serializing Shared State** ([principle-separate-before-serializing-shared-state](../skills/principle-separate-before-serializing-shared-state/SKILL.md)). Concurrent actors might write the same file, branch, key, or object. Eliminate the sharing first.
+- [Model the Domain](principles/model-the-domain.md). Writing stateful logic, or code that branches a lot or repeats a shape assumption across files.
+- [Boundary Discipline](principles/boundary-discipline.md). Wiring validation, error handling, or framework adapters.
+- [Type System Discipline](principles/type-system-discipline.md). Designing types, reviewing a signature, or writing code in any statically typed language.
+- [Make Operations Idempotent](principles/make-operations-idempotent.md). Designing commands, lifecycle steps, or loops that run amid crashes, restarts, and retries.
+- [Separate Before Serializing Shared State](principles/separate-before-serializing-shared-state.md). Concurrent actors might write the same file, branch, key, or state object.
 
 **Verification**
 
-- **Prove It Works** ([principle-prove-it-works](../skills/principle-prove-it-works/SKILL.md)). After a task, before declaring done. Verify against the real artifact, not a proxy or "it compiles".
-- **Fix Root Causes** ([principle-fix-root-causes](../skills/principle-fix-root-causes/SKILL.md)). Debugging. Trace each symptom back to the first place the system went wrong and fix it there. A guard is a fix only when the state it handles is legitimate.
-- **Sequence Work into Verifiable Units** ([principle-sequence-verifiable-units](../skills/principle-sequence-verifiable-units/SKILL.md)). Multi-step work (sweeps, migrations, runs of similar edits) and how you stack commits and PRs. Verify prerequisites before dependent work and each unit before acceptance. Independent units can run in parallel; check their combined result before integration.
-- **Test Behavior, Not Implementation** ([principle-test-behavior-not-implementation](../skills/principle-test-behavior-not-implementation/SKILL.md)). Writing, changing, or keeping a test. Exercise a real behavior or contract and assert an independently specified result or effect. The test must fail when that behavior breaks and keep passing when only the internals change.
-- **Explain the Number** ([principle-explain-the-number](../skills/principle-explain-the-number/SKILL.md)). Before you measure, and before you trust, report, or act on a number you measured (a speedup, a regression, a throughput, a latency, or an eval result). Name the result that would change a decision before you run. Rule out that it measured something other than the work you think, and for a performance number, find what limits it.
-
-**Delegation**
-
-- **Guard the Context Window** ([principle-guard-the-context-window](../skills/principle-guard-the-context-window/SKILL.md)). Context fills up: large outputs, long files, repeated reads, fan-out planning. Coordinators delegate bulky investigation within scope. Workers use targeted reads and report capacity blockers without creating another delegation tree.
-- **Never Block on the Human** ([principle-never-block-on-the-human](../skills/principle-never-block-on-the-human/SKILL.md)). Tempted to ask "should I do X?" on reversible work. Proceed, present the result, let the human course-correct.
+- [Prove It Works](principles/prove-it-works.md). A task is complete and you are about to declare it done.
+- [Fix Root Causes](principles/fix-root-causes.md). Debugging.
+- [Sequence Work into Verifiable Units](principles/sequence-verifiable-units.md). Multi-step work, such as sweeps, migrations, or runs of similar edits, and stacking commits and PRs.
+- [Test Behavior, Not Implementation](principles/test-behavior-not-implementation.md). Writing, changing, or keeping a test.
+- [Explain the Number](principles/explain-the-number.md). Before you measure, and before you trust, report, or act on a number you measured.
 
 **Meta**
 
-- **Encode Lessons in Structure** ([principle-encode-lessons-in-structure](../skills/principle-encode-lessons-in-structure/SKILL.md)). You catch yourself writing the same instruction a second time. Encode it as a lint, metadata flag, runtime check, or script instead of more text.
+- [Encode Lessons in Structure](principles/encode-lessons-in-structure.md). Writing the same instruction a second time, or noticing a recurring correction.
+
+Two former principles live elsewhere now. Proceeding on reversible work without asking is CLAUDE.md's Authorization and ownership section. Keeping large output out of the coordinator's context is the [execution reference](execution.md), under Ordinary delegation and Worker contract.

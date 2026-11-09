@@ -56,7 +56,7 @@ Native Workflow owns its within-run execution state. Native Tasks presents the m
 - Requested history or resumption: recall or Session pickup within the named history scope.
 - Requested retrospective: reflect. Requested simpler wording: restate the last response plainly and concisely, without jargon or new investigation, keeping its meaning and uncertainty.
 
-For substantial engineering work, consult references/principles.md and load relevant leaf skills. Favor clear domain shapes, deletion before abstraction, separation of shared state, and proof against the real artifact. Explain a principle when it changes a meaningful choice; ordinary replies do not need a principle inventory.
+For substantial engineering work, consult references/principles.md and read the relevant principle files it links. Favor clear domain shapes, deletion before abstraction, separation of shared state, and proof against the real artifact. Explain a principle when it changes a meaningful choice; ordinary replies do not need a principle inventory.
 
 ## Authorization and ownership
 

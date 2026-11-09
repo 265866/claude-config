@@ -4,13 +4,13 @@ When the task matches no narrower playbook, such as a large migration, an ambiti
 
 #### Start
 
-Consult [the principles reference](../references/principles.md) and load the relevant leaf guidance.
+Consult [the principles reference](../references/principles.md) and read the relevant principle files.
 
 #### Phase A: Frame
 
 Ground first, then commit. Don't start the run until you can state:
 
-- The definition of done as a falsifiable predicate (the **principle-prove-it-works** principle skill).
+- The definition of done as a falsifiable predicate ([Prove It Works](../references/principles/prove-it-works.md)).
 - Scope, quantified: rough units and effort, plus the blockers grounding surfaced.
 - The rigor level, biased high. One-way doors and high blast radius get more. Reversible low-stakes steps get less. Rigor is gates and artifacts, not "try harder".
 
@@ -18,11 +18,11 @@ Briefly state the framing, tradeoffs, and finite budget before a long run. Proce
 
 #### Phase B: Design the procedure and select execution
 
-Decompose into atomic, independently landable units. Sequence riskiest-unknown-first. Scaffold and verification come before features (the **principle-foundational-thinking** principle skill).
+Decompose into atomic, independently landable units. Sequence riskiest-unknown-first. Scaffold and verification come before features ([Foundational Thinking](../references/principles/foundational-thinking.md)).
 
 - Build the verification harness before the work, with the baseline captured from the pre-change state, so the check reads as "old value vs new value".
-- For unresolved consequential design decisions, use the **architect** skill and compare viable alternatives when warranted. Skip comparison for mechanical work whose shape is already concrete, and do not repeat a comparison over a settled design, which is over-engineering (the **principle-laziness-protocol** principle skill), unless the user explicitly asked for one; then run it through **architect**.
-- Decide what fans out. Parallelize only across seams, and give each writing worker its own worktree on its own branch, or disjoint file ownership, while read-only workers need neither (the **principle-separate-before-serializing-shared-state** principle skill). Don't over-fan.
+- For unresolved consequential design decisions, use the **architect** skill and compare viable alternatives when warranted. Skip comparison for mechanical work whose shape is already concrete, and do not repeat a comparison over a settled design, which is over-engineering ([Subtract First](../references/principles/subtract-first.md)), unless the user explicitly asked for one; then run it through **architect**.
+- Decide what fans out. Parallelize only across seams, and give each writing worker its own worktree on its own branch, or disjoint file ownership, while read-only workers need neither ([Separate Before Serializing Shared State](../references/principles/separate-before-serializing-shared-state.md)). Don't over-fan.
 - Write the designed phase list down. That list is what the human reviews.
 
 Choose execution from the procedure's coordination burden. Substantial independent batches, dependent phases, or bounded work/check/repair cycles favor native Workflow; deterministic transformations stay helpers. Track coarse milestones in Tasks rather than copying the executor's worker state. Execute under the Phase C loop discipline and weave the Phase D log through decisions as they land. Delegated workers complete their assigned stages without rebuilding this procedure.
@@ -30,7 +30,7 @@ Choose execution from the procedure's coordination burden. Substantial independe
 #### Phase C: Run the loop
 
 Each unit is an experiment. State the hypothesis, make the smallest change, measure against the predicate on the real artifact, keep it if it advanced, revert it if it didn't.
-Apply the **principle-sequence-verifiable-units** principle skill: verify prerequisites before dependent work, check each unit against its acceptance condition, and verify the combined artifact. Independent units with separate ownership may run in parallel; do not postpone all checks until the end.
+Apply [Sequence Work into Verifiable Units](../references/principles/sequence-verifiable-units.md): verify prerequisites before dependent work, check each unit against its acceptance condition, and verify the combined artifact. Independent units with separate ownership may run in parallel; do not postpone all checks until the end.
 
 - Verify by inspecting the artifact, never a self-report. When something passes too easily, suspect the observation method before the system.
 - Pair delegated work with a judge. If a worker games the gate, reset and harden the contract. If the gate itself is wrong, fix the gate in its own change rather than routing around it, with evidence that it measured the wrong thing; making it non-blocking or allowed to fail is weakening, not fixing.
@@ -42,6 +42,6 @@ Log the run via the **show-me-your-work** skill. This playbook's work is usually
 
 #### Phase E: Verify and hand back
 
-Check the whole against the Phase A predicate on the real product, not just the harness. Encode any recurring correction as a gate, a lint rule, a check, or a script (the **principle-encode-lessons-in-structure** principle skill).
+Check the whole against the Phase A predicate on the real product, not just the harness. Encode any recurring correction as a gate, a lint rule, a check, or a script ([Encode Lessons in Structure](../references/principles/encode-lessons-in-structure.md)).
 
 **Reply:** the playbook you designed, the rigor level and why, the decision-trail path, what's verified against the predicate, and what's still open with the concrete blocker holding each item.
