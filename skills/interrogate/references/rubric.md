@@ -20,7 +20,7 @@ When you find a potential bug, trace the execution path. Don't just flag "this c
 
 Is the code fixing the actual problem or papering over a symptom?
 
-Answering this often requires looking beyond the changed files. Read the surrounding code (callers, callees, type definitions, sibling modules) and understand the architecture the change lives in. Use the tools available to you (Read, Grep, Glob) to explore. Follow the call chain. Read the types. Understand why the code exists before judging whether the change addresses the right layer.
+Answering this often requires looking beyond the changed files. Read the surrounding code (callers, callees, type definitions, sibling modules) and understand the architecture the change lives in. Use the tools available to you (Read, Grep, Glob) to explore. Keep the repository read-only. Run scratch scripts only as the Blast Radius section allows. Follow the call chain. Read the types. Understand why the code exists before judging whether the change addresses the right layer.
 
 - Guard clauses that mask a deeper invariant violation
 - Retry logic that hides a broken contract
@@ -65,7 +65,11 @@ A risky-looking change is usually safe because of one fact. Name that fact and t
 4. Ran a script or test that calls the real code and fails loud if the fact is wrong.
 5. Reproduced it in the running app.
 
-A fact that stops above step 4 is unproven. Say so.
+A fact that stops at step 3 or earlier is unproven. Say so.
+
+For steps 4 and 5, run only non-destructive scratch scripts or app instances from a fresh `mktemp -d` directory in the OS temporary directory. They may read or import the repository's code but never run in or write to its working tree. Copy the repository there first when a run would write build output. They never mutate external records.
+
+Report the one fact the change is safe because of, the step its proof reached (or unproven), and the risks you checked and cleared.
 
 ## Complexity Budget
 

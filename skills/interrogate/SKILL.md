@@ -42,9 +42,9 @@ Write one clear paragraph. Ask the user only when evidence cannot settle the int
 
 ## Step 3, Independent Reviews
 
-Execute the review assignments using the selected executor. Resolve the supporting templates and evidence paths, keep the review read-only, and retain a result for every required reviewer. Missing reviews stay explicit gaps rather than agreement.
+Execute the review assignments using the selected executor. Resolve the supporting templates and evidence paths, keep the repository read-only, and retain a result for every required reviewer. Missing reviews stay explicit gaps rather than agreement.
 
-Each reviewer prompt forbids edits and requires every finding, including low-severity and uncertain ones, tagged with severity and confidence. Do not open a PR or modify configuration to make a different review model available.
+Each reviewer prompt forbids repository edits, allows scratch scripts only as the rubric's Blast Radius section says, and requires every finding, including low-severity and uncertain ones, tagged with severity and confidence. Do not open a PR or modify configuration to make a different review model available.
 
 Read `references/reviewer-prompt.md` and fill in the template with:
 1. The stated intent
@@ -65,6 +65,7 @@ As results come back, build a unified picture:
 3. **Identify lone-reviewer findings**. Still worth reading, but weight accordingly.
 4. **Deduplicate**. Different reviewers may describe the same issue differently. Merge these and note which reviewers raised it.
 5. **Note disagreements**. If one reviewer flags something and another explicitly says the opposite, that's useful context for the verdict.
+6. **Merge the Blast Radius blocks**. Keep each distinct safety fact the reviewers named and the highest step of the rubric's Blast Radius ladder it reached, and note when reviewers named different facts. On a change that can break code outside the diff, a fact that stops at ladder step 3 or earlier, is marked unproven, or is missing goes under Act On or Consider.
 
 ## Step 5, Lead Judgment
 
@@ -105,6 +106,9 @@ Present the verdict in this structure:
 
 ### Dismissed
 [Rejected findings with brief rationale.]
+
+### Blast Radius
+[Each safety fact the reviewers named, the highest ladder step it reached (or unproven), whether reviewers agree, and the risks they cleared. Omit when no reviewer found code outside the diff that the change can break.]
 
 ### Agreement Map
 [Where did reviewers agree, where did they diverge, and what does the pattern of agreement/disagreement tell us?]

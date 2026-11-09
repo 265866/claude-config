@@ -15,6 +15,6 @@ Use a deterministic tool when it makes repeated work or fragile proof more relia
 - A native Workflow script coordinates reasoning and checks; it is not a deterministic transformation merely because its orchestration is code. Use the execution method selected by the coordinator.
 - Commit the lever when the work outlives the session.
 
-**Balance:** Tool creation must earn its cost without expanding the task. Read-only investigations do not require writing a file, and ordinary tasks do not authorize modifying the installed profile. Per the [Subtract First](subtract-first.md), build the smallest tool that covers a real need.
+**Balance:** Tool creation must earn its cost without expanding the task. Read-only investigations do not require writing a file, and ordinary tasks do not authorize modifying the installed profile. Per [Subtract First](subtract-first.md), build the smallest tool that covers a real need.
 
 Distinct from [Encode Lessons in Structure](encode-lessons-in-structure.md), which makes a recurring instruction a durable guardrail. This is throughput and reviewability on the work in front of you. For scripting the verification itself, see [Prove It Works](prove-it-works.md).
