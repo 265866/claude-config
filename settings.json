@@ -6,7 +6,7 @@
     "DISABLE_EXTRA_USAGE_COMMAND": "1",
     "CLAUDE_CODE_ENABLE_TODO_TOOLS": "1",
     "CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS": "3600000",
-    "ANTHROPIC_BASE_URL": "http://moss:8317",
+    "ANTHROPIC_BASE_URL": "http://100.127.97.59:8317",
     "ANTHROPIC_AUTH_TOKEN": "(\\__/) (='.'=) (\")_(\") bunny guards this fake key",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
     "API_TIMEOUT_MS": "600000",
