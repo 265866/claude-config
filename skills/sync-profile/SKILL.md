@@ -5,7 +5,7 @@ description: Use when Colton says "sync profile" or asks to sync his Claude prof
 
 # Sync profile
 
-This profile is a clone of `265866/claude-config` at `~/.claude` on each of Colton's machines. Those machines are colton-desktop (Windows), moss (`ssh moss`), and the MacBook (`ssh macbook`). Find the current one with `hostname`, and treat the other two as the other machines. colton-desktop has no SSH host here, so from another machine report the command to run there. Pushing `main` and fast-forwarding the other machines need Colton's own request to sync the profile across his machines, as CLAUDE.md says.
+This profile is a clone of `265866/claude-config` at `~/.claude` on each of Colton's machines. Those machines are colton-desktop (Windows), redwood (`ssh redwood`), and the MacBook (`ssh macbook`). Find the current one with `hostname`, and treat the other two as the other machines. colton-desktop has no SSH host here, so from another machine report the command to run there. Pushing `main` and fast-forwarding the other machines need Colton's own request to sync the profile across his machines, as CLAUDE.md says.
 
 Run every command in `~/.claude` on whichever machine it runs, for example `git -C ~/.claude status`, whatever project this session started in. Run every git command that reaches GitHub, and every `ssh`, without prompts, as [rules/toolchains.md](${CLAUDE_SKILL_DIR}/../../rules/toolchains.md) says for credentials. On another machine, run each command as `ssh -o BatchMode=yes -o ConnectTimeout=10 <host> '<command>'`, with the command in single quotes so `~` expands on that machine. For the remote `git pull`, put the credential variables from rules/toolchains.md inside those quotes, so they apply on that machine.
 

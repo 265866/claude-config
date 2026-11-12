@@ -30,7 +30,7 @@ Only the script and its workers touch the agent Chrome. Never launch it, close i
 The signed-in agent Chrome lives only on the user's Windows desktop, `colton-desktop`, a real machine with a GPU that passes bot checks. The script compares the machine's hostname, ignoring case, with the `AGENT_CHROME_HOST` environment variable, which defaults to `colton-desktop`. Set it to another machine's hostname only to move the agent Chrome to that machine.
 
 - On `colton-desktop`, follow Run a worker below. This includes a T3 task that another machine handed to the desktop.
-- On any other machine, such as moss or the MacBook, `run` starts no Chrome and returns `status: "hand_off"`, and `signin` refuses. Hand the run to the desktop through T3 as below. Do not install Chrome, create an agent-chrome profile, or sign in on that machine. Use that machine's own T3 browser (`preview_*` tools) or control-ui only for dev servers and local pages. Every page listed under When to use, including a public page that blocks plain fetching, goes to the desktop.
+- On any other machine, such as redwood or the MacBook, `run` starts no Chrome and returns `status: "hand_off"`, and `signin` refuses. Hand the run to the desktop through T3 as below. Do not install Chrome, create an agent-chrome profile, or sign in on that machine. Use that machine's own T3 browser (`preview_*` tools) or control-ui only for dev servers and local pages. Every page listed under When to use, including a public page that blocks plain fetching, goes to the desktop.
 
 To hand a run to the desktop:
 

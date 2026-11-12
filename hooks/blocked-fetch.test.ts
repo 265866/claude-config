@@ -66,7 +66,7 @@ const cases: Case[] = [
   ["curl localhost bare", false, "curl", sh("curl -s localhost:3000/api/items", "{\"error\":\"Access Denied\"}")],
   ["curl local + Origin", false, "curl", sh("curl -s -H \"Origin: https://app.example.com\" http://localhost:3000/api", "Request blocked")],
   ["curl $API", false, "curl", sh("curl -s \"$API/items\"", "<title>Access Denied</title>")],
-  ["curl ts.net", false, "curl", sh("curl -sI https://moss.tail7dd884.ts.net:8317/", "HTTP/1.1 403")],
+  ["curl ts.net", false, "curl", sh("curl -sI https://redwood.tail7dd884.ts.net:8317/", "HTTP/1.1 403")],
   ["curl mapped v6 local", false, "curl", sh("curl -sI http://[::ffff:127.0.0.1]:3000/", "HTTP/1.1 403")],
   ["local in subshell", false, "curl", sh("curl -s https://x.com/p; (curl -s http://localhost:3000)", "HTTP/1.1 403")],
   ["echo mentions curl", false, "curl", sh("f(){ :; }; f; echo \"see curl https://example.net output: returned error: 403\"", "see curl https://example.net output: returned error: 403")],

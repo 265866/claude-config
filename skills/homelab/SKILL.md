@@ -1,6 +1,6 @@
 ---
 name: homelab
-description: Look up or update which host runs a self-hosted service, on which port, and where it is defined, across the user's tailnet (moss, redwood, mycelium, colton-router). Use when a task touches a self-hosted service, a port or URL on those hosts, or the tailnet's devices, and whenever a task adds, moves, or removes a permanent service.
+description: Look up or update which host runs a self-hosted service, on which port, and where it is defined, across the user's tailnet (redwood, moss, mycelium, colton-router). Use when a task touches a self-hosted service, a port or URL on those hosts, or the tailnet's devices, and whenever a task adds, moves, or removes a permanent service.
 ---
 
 # Homelab inventory
@@ -16,7 +16,7 @@ gh api repos/265866/homelab/contents/inventory/services.yaml --jq .content | bas
 gh api repos/265866/homelab/contents/inventory/hosts.yaml --jq .content | base64 -d
 ```
 
-On moss, read the clone at `~/src/homelab` instead. Each service records its host, ports, URL, purpose, and `source`, which says where to change it. Treat the inventory as a starting point and confirm on the host before you act on a port or container name.
+On redwood, read the clone at `~/src/homelab` instead. Each service records its host, ports, URL, purpose, and `source`, which says where to change it. Treat the inventory as a starting point and confirm on the host before you act on a port or container name.
 
 ## Keep it current
 
