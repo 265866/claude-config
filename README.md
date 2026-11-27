@@ -76,42 +76,47 @@ When `bun` is not on Claude Code's PATH, those calls show a hook error.
 On Windows, PATH needs the real `bun.exe`, as the bun.sh installer, winget, and scoop provide, since Claude Code cannot start a `bun.cmd` shim without a shell.
 Run `bun test hooks/` from `~/.claude` to check the hook against recorded block pages and known false positives.
 
-The `AGENT_CHROME_HOST` environment variable names the machine that holds the agent Chrome and its sign-ins, and it defaults to `colton-desktop`.
-`signin` runs only on that machine.
-On other machines, the skill hands each run to that machine through T3 Code.
+The agent Chrome runs on redwood, inside a Windows 11 VM, so agents can read pages whether or not your desktop is on.
+It is Windows rather than Linux because Akamai's bot manager, which Home Depot and other retailers use, refused every Linux Chrome tried from this network, while it serves Windows Chrome.
+`~/services/agent-chrome-win/README.md` on redwood covers the VM: setup, updates, its unactivated Windows 11 Pro license status, and removal.
+`AGENT_CHROME_HOST` names the machine that holds the agent Chrome and defaults to `redwood`.
+On other machines, the skill hands each run to redwood through T3 Code.
 Outside T3 Code there is no hand-off, so the skill reports the page as blocked.
-The skill needs Google Chrome 149 or later.
-It supports Windows.
-When `AGENT_CHROME_HOST` names a macOS or Linux machine, it supports that machine with Google's Chrome package, and other Unix-like systems are unsupported.
-The skill runs Chrome from its own profile folder, which keeps your sign-ins:
 
-- Windows: `%LOCALAPPDATA%\agent-chrome`
-- macOS, when `AGENT_CHROME_HOST` names it: `~/Library/Application Support/agent-chrome`
-- Linux, when `AGENT_CHROME_HOST` names it: `$XDG_DATA_HOME/agent-chrome`, by default `~/.local/share/agent-chrome`
+Your Windows desktop, `colton-desktop`, is the fallback for when redwood cannot be reached.
+It keeps its own agent Chrome and sign-ins in `%LOCALAPPDATA%\agent-chrome`, and needs Google Chrome 149 or later.
+`AGENT_CHROME_FALLBACK_HOST` names the fallback and defaults to `colton-desktop`; set it empty to turn the fallback off.
+When `AGENT_CHROME_HOST` names a macOS or Linux machine instead, the skill runs Google's Chrome package there:
+in `~/Library/Application Support/agent-chrome` on macOS, hidden in the background,
+and in `$XDG_DATA_HOME/agent-chrome` (by default `~/.local/share/agent-chrome`) on Linux, minimized when [xdotool](https://github.com/jordansissel/xdotool) is installed and the session has an X11 or XWayland display.
 
-During a task, Chrome runs out of your way with a local debugging port, and the skill closes it when the task ends.
-On Windows it starts minimized.
-When `AGENT_CHROME_HOST` names a macOS machine, it starts hidden there.
-When it names a Linux machine, Chrome there is minimized only when [xdotool](https://github.com/jordansissel/xdotool) is installed and the session has an X11 or XWayland display;
-otherwise its window shows while a task runs.
-On Linux the skill expects Google's package, which installs Chrome at `/opt/google/chrome`.
+During a task, Chrome runs with a debugging port that only that machine can reach, and the skill closes it when the last worker on that profile finishes.
+Up to 4 workers can share one profile's Chrome at the same time, and up to 8 run at once across all profiles on one machine.
 Its workers drive Chrome with [Chrome DevTools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp),
 which Bun downloads on first use at the version pinned in `skills/agent-chrome/scripts/agent-chrome.ts`.
-Nothing needs installing beyond Chrome and Bun.
 
-On the machine that holds the agent Chrome, colton-desktop by default, sign in to the sites you want agents to read:
+Sign in to the sites you want agents to read by running, on redwood or through an agent there:
 
 ```bash
 bun ~/.claude/skills/agent-chrome/scripts/agent-chrome.ts signin
 ```
 
-A normal Chrome window opens. Sign in to each account, keep "stay signed in" checked, and close the window.
+It opens Chrome on the VM's desktop and prints https://redwood.tail7dd884.ts.net:6080/, a viewer of that desktop in your browser.
+Sign in to each account, keep "stay signed in" checked, and close that Chrome window.
 Chrome closes after every task, so a sign-in that lasts only until the browser closes does not carry over.
 When a task reports that a site needs a sign-in, run the same command again.
+On the desktop, the same command opens a normal Chrome window there.
 
 > [!NOTE]
 > Sign in through that command, not through an agent Chrome that a task opened.
 > That command opens Chrome without its debugging port, which sign-in pages such as Google's may detect and refuse.
+
+### Profiles
+
+Each profile is a separate Chrome with its own sign-ins.
+Pass `--profile <name>` before the command, for example `agent-chrome.ts --profile marketplace signin`.
+Without it the skill uses `default`.
+In the VM, profiles live in `C:\agent-chrome\profiles\<name>`; on the desktop, `default` keeps `%LOCALAPPDATA%\agent-chrome` and named profiles live beside it in `agent-chrome-profiles\<name>`.
 
 ## Sync between machines
 
