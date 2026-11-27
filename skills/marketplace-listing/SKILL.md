@@ -13,12 +13,13 @@ number, the copy quotes only retail, and the user does the posting.
 Three things shape the listing. Ask for whatever is missing before researching:
 
 - **The item.** UPC, model number, product name, photo, or a link.
-- **Quantity.** One, or how many. More than one turns on the bulk block.
+- **Quantity.** One, or how many. The price script decides whether the listing gets a bulk block.
 - **Handoff.** Pickup or local meetup, which picks the footer.
 
-**Cost per unit** is optional and touches only the floor. Ask for one all-in number that already
-folds in freight, pallet fees, and storage, since the skill needs the figure that decides the veto
-rather than an itemized buy. It never appears in the listing.
+**Cost per unit** is optional and feeds only the price script: its tiers, minimums, and margin
+check. Ask for one all-in number that already folds in freight, pallet fees, and storage, since the
+skill needs the figure that decides the veto rather than an itemized buy. It never appears in the
+listing.
 
 When the user hands over item photos for the listing, prepare them with the **listing-photos**
 skill. The model number and UPC it reads from label close-ups feed step 1.
@@ -87,66 +88,71 @@ Open at **75% of the anchor**, then adjust:
 
 - Sold comps landing well under 75% pull the ask down. Thin supply and no local competition let it
   hold or climb.
-- For a lot, start high and discount hard on volume. The single-unit ask carries the margin; the
-  tiers move the pile.
+- For a lot, the single-unit ask carries the margin; the bulk tiers move the pile.
 - Used, opened, or missing packaging drops it further, and the copy says why.
 
 The listed price is an opening position. The user relists lower when something sits, so price for
 room to fall rather than for a fast clear.
 
-### Bulk tiers
+### Price script and bulk tiers
 
-Tiers appear only when quantity is above one. Unit price and pile depth decide the breaks together,
-and they pull opposite ways: a \$30 case and a \$300 machine want completely different numbers. Derive
-the breaks rather than reaching for a default ladder.
+Run the bundled script for every item, quantity 1 included. It prints the single-unit minimum, the
+cost halt, and any bulk tiers. The tiers and the lowest price the negotiating agent accepts come
+from one formula, so a quoted tier never undercuts what the agent may give. Never derive tiers by
+hand.
 
-1. **First break is where the spend gets real.** Divide about \$300 of total spend by the single-unit
-   ask, then round to a number a buyer recognizes: 2, 3, 5, 10, 25, 50, 100. A \$30 case lands near
-   10. A \$300 machine lands under 2, so clamp to 2, the smallest break that means anything.
-   When the break reaches the pile, drop it; the only tier is then `All`, under the single-unit ask.
-2. **Each later break roughly triples the one before it.** Add one such break normally, a second
-   only for a pile in the hundreds when the steps would otherwise jump too far, and never one that
-   reaches the pile.
-3. **The last tier is always `All`, and its price is the floor.** Set the floor first, then fill the
-   middle tiers between it and the single-unit ask.
+```bash
+bun "${CLAUDE_SKILL_DIR}/scripts/price-ladder.ts" --list <ask> --units <quantity> [--cost <cost ea>] [--retail <anchor with tax>] [--pace <units per week>] [--firm]
+```
 
-How deep the floor cuts tracks pile depth, not unit price:
+- Pass `--cost` whenever the user gave one and `--pace` when the user knows how fast the item sells.
+  Both change the tiers. `--retail` is the with-tax anchor from step 2.
+- Pass `--firm` when the user says the price is firm. A firm item gets no tiers.
+- Pass `--at <quantity>` when the user asks what a specific quantity can go for.
 
-- A handful, 2 to 5 units: 5% to 10% under the single-unit ask. There is little pile to move.
-- Dozens or hundreds: 25% to 35% under. Start the single ask high and let volume do the work.
-- Between a handful and dozens, interpolate between those two bands.
+Put the printed `Bulk Discounts lines` in the listing exactly as printed, adding the unit to the
+first break when it helps (`10+ cases`). The script may print no `All` line, or no tiers at all.
+Do not add or adjust a tier by hand; to change the ladder, change the ask. When the script prints
+`No bulk tiers`, leave the Bulk Discounts block out.
 
-Known cost per unit caps how far the floor falls: the floor never lands at or below cost. Cost
-constrains the floor and never lifts the ask. A buyer will not pay more because the pile cost more,
-so a bad buy surfaces as a shallower ladder or a halt, never as a marked-up listing.
+The `Minimum ea` column is the lowest the agent accepts at each tier. It never goes in the listing
+or the copy. Report the minimums to the user beside the tiers, outside the two copy blocks; they
+feed the negotiating agent.
 
-The two shapes this produces:
+Weekly drops: after a week with no sale and no new buyer message, the user may lower the ask by
+5% of the first ask, rounded to whole dollars. Rerun with `--list <new ask>`, `--original-list
+<first ask>`, and `--floor <whole-pile minimum>`, where the floor is the `Whole-pile minimum` the
+first run printed, locked when drops start. The ask never goes under the floor, and the tiers
+disappear once the ask reaches it.
 
-- 390 cases at \$30 each: `10+ cases = \$28 ea`, `30+ = \$26 ea`, `All = \$22 ea`.
-- 3 machines at \$300 each: `2 = \$285 ea`, `All 3 = \$270 ea`.
+Cost never lifts the ask. A buyer will not pay more because the pile cost more, so a bad buy
+surfaces as a shallower ladder or a halt, never as a marked-up listing.
 
-A pile in the hundreds can carry a fourth tier when the steps would otherwise jump too far. Three
-tiers is the normal shape. A handful gets two, or only `All` when the first break reaches the pile.
+The two shapes it produces, pace unknown:
 
-Price every tier per unit and label it `ea`, so the buyer never does arithmetic.
+- 390 cases at \$30, cost \$15: `10+ cases = \$29 ea`, `30+ = \$27 ea`, `100+ = \$25 ea`,
+  `All = \$24 ea`.
+- 3 machines at \$300, cost \$200: `2 = \$286 ea`, `All 3 = \$280 ea`.
+
+Every tier is priced per unit and labeled `ea`, so the buyer never does arithmetic.
 
 ### Margin check
 
-Run this once the ask and tiers exist, before writing any copy. Skip it when cost per unit is
-unknown.
+Run this from the script's output, before writing any copy. Skip it when cost per unit is unknown.
 
-Report one row per tier with price ea, margin ea, and margin %. Then two totals: what the pile cost
-(cost times quantity), and what it returns if all of it clears at the floor.
+Report the script's table: one row per tier with the quoted price, the minimum, and the margin at
+each. Then its totals: what the pile cost, and what it returns if all of it clears at the quoted
+`All` price and at the minimum.
 
-**Halt when any tier lands at or below cost.** Say which tier is underwater and by how much, then
-wait for the user before writing anything. Polished copy for an underwater pile wastes the work and
-invites posting it.
+**Halt when the single-unit ask is at or below cost.** The script prints `HALT`. Say by how much,
+then wait for the user before writing anything. Polished copy for an underwater pile wastes the
+work and invites posting it. The market price sits below what the pile cost, and no ladder fixes
+that. Holding, selling slowly at a loss, or eating it are all the user's call. When the user
+chooses to sell at a loss, rerun without `--cost` and tell the user that the agent's minimums are
+then not checked against cost.
 
-- A bulk tier underwater means the ladder reaches too deep. Raise the floor off cost and let the
-  middle tiers compress, or drop the deepest numeric break and give `All` that
-  break's price, and sell in smaller lots.
-- The single-unit ask underwater means the market price sits below what the pile cost. No ladder
-  fixes that. Holding, selling slowly at a loss, or eating it are all the user's call.
+With cost known, no bulk tier lands at or below cost: every minimum sits above cost and every quote
+sits above its minimum. Without cost, nothing checks the tiers against cost.
 
 A thin but positive margin gets reported, not halted.
 
@@ -204,12 +210,10 @@ $<ask> <unit> — <N>% off <retailer> (~$<anchor> including tax)
 
 <quantity> available (<derived total, when it helps>)
 
-Open to offers, especially on bulk deals        [quantity > 1 only]
+Open to offers, especially on bulk deals        [when the script prints tiers]
 
-Bulk Discounts:                                 [quantity > 1 only]
-• <break> = $<price> ea
-• <break> = $<price> ea
-• All = $<price> ea
+Bulk Discounts:                                 [when the script prints tiers]
+<the script's Bulk Discounts lines, exactly as printed>
 
 <footer>
 ```
@@ -243,7 +247,9 @@ Message me to arrange a time to meet or ask questions!
 
 ## Worked example
 
-The benchmark listing, with its breaks set by the rule above. Step 5 hands these over as two blocks.
+The benchmark listing. Its tiers come from
+`price-ladder.ts --list 30 --units 390 --cost 15 --retail 36`. Step 5 hands these over as two
+blocks.
 
 Title:
 
@@ -267,9 +273,10 @@ Brand new, factory sealed in box
 Open to offers, especially on bulk deals
 
 Bulk Discounts:
-• 10+ cases = \$28 ea
-• 30+ = \$26 ea
-• All = \$22 ea
+• 10+ cases = \$29 ea
+• 30+ = \$27 ea
+• 100+ = \$25 ea
+• All = \$24 ea
 
 Pickup in San Rafael.
 Zelle or cash only. Sold as-is.
@@ -319,8 +326,8 @@ Brand new, unopened, factory sealed
 Open to offers, especially on bulk deals
 
 Bulk Discounts:
-• 2 = \$200 ea
-• All 3 = \$190 ea
+• 2 = \$203 ea
+• All 3 = \$199 ea
 
 Pickup in San Rafael.
 Zelle or cash only. Sold as-is.
