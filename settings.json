@@ -1,4 +1,4 @@
-{
+  {
   "cleanupPeriodDays": 36500,
   "env": {
     "CLAUDE_CODE_ATTRIBUTION_HEADER": "0",
