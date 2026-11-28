@@ -65,10 +65,10 @@ const totalSlotPort = (slot: number) => LOCK_BASE - 1 - slot;
 
 // The signed-in agent Chrome lives on one machine. Elsewhere a fresh or stale profile would browse
 // without the user's sign-ins, so runs there go to that machine through T3 instead. See ../SKILL.md.
-// The fallback host runs its own agent Chrome, with its own sign-ins, only when the main host cannot
-// be reached. An empty value turns it off.
+// AGENT_CHROME_FALLBACK_HOST can name a fallback host that runs its own agent Chrome, with its own
+// sign-ins, only when the main host cannot be reached. It is unset, so there is no fallback.
 const AGENT_CHROME_HOST = process.env.AGENT_CHROME_HOST || "redwood";
-const FALLBACK_HOST = process.env.AGENT_CHROME_FALLBACK_HOST ?? "colton-desktop";
+const FALLBACK_HOST = process.env.AGENT_CHROME_FALLBACK_HOST ?? "";
 const isHost = (name: string) => Boolean(name) && hostname().toLowerCase() === name.toLowerCase();
 const onAgentChromeHost = isHost(AGENT_CHROME_HOST);
 const fallback = FALLBACK_HOST && !onAgentChromeHost && FALLBACK_HOST.toLowerCase() !== AGENT_CHROME_HOST.toLowerCase() ? FALLBACK_HOST : undefined;
@@ -761,7 +761,7 @@ const USAGE = `Usage: agent-chrome.ts [--profile <name>] <command>
   --profile names the Chrome profile, each with its own sign-ins. It defaults to "default".
   run --brief <file | -> [--timeout <seconds>] [--fallback]
             Run one browser worker and print its outcome as JSON. --brief - reads the brief from stdin. The timeout defaults to ${MAX_TIMEOUT_SECONDS} seconds.
-            --fallback runs it on the fallback host (AGENT_CHROME_FALLBACK_HOST, default colton-desktop) when the main host cannot be reached.
+            --fallback runs it on the fallback host (AGENT_CHROME_FALLBACK_HOST, unset by default) when the main host cannot be reached.
   signin
             Open the agent Chrome as a normal window, without debugging, for the user to sign in.
   status    Report whether the agent Chrome is open, whether it has its debugging port, whether a worker runs, and open tabs.

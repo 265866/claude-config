@@ -30,8 +30,9 @@ but `.gitignore` keeps them out of the repo.
 
 **Optional**
 
-- [Google Chrome](https://www.google.com/chrome/) on colton-desktop, or the machine `AGENT_CHROME_HOST` names, kept for agents only,
+- [Google Chrome](https://www.google.com/chrome/) on the machine `AGENT_CHROME_HOST` names, kept for agents only,
   for the agent-chrome skill, which reads pages that block plain fetching and pages behind your sign-ins.
+  By default that is the Windows VM on redwood, whose setup installs Chrome.
   Other machines hand those runs to that machine through T3 Code and need no Chrome.
   See [Agent Chrome](#agent-chrome).
   When `AGENT_CHROME_HOST` names a Linux machine instead, also install `xdotool` there so that Chrome stays minimized.
@@ -83,10 +84,10 @@ It is Windows rather than Linux because Akamai's bot manager, which Home Depot a
 On other machines, the skill hands each run to redwood through T3 Code.
 Outside T3 Code there is no hand-off, so the skill reports the page as blocked.
 
-Your Windows desktop, `colton-desktop`, is the fallback for when redwood cannot be reached.
-It keeps its own agent Chrome and sign-ins in `%LOCALAPPDATA%\agent-chrome`, and needs Google Chrome 149 or later.
-`AGENT_CHROME_FALLBACK_HOST` names the fallback and defaults to `colton-desktop`; set it empty to turn the fallback off.
-When `AGENT_CHROME_HOST` names a macOS or Linux machine instead, the skill runs Google's Chrome package there:
+There is no fallback: when redwood cannot be reached, the skill reports the page as blocked.
+`AGENT_CHROME_FALLBACK_HOST` can name a fallback machine, which then keeps its own agent Chrome and sign-ins; it is unset by default.
+When `AGENT_CHROME_HOST` names another machine instead, the skill runs Google's Chrome package there:
+in `%LOCALAPPDATA%\agent-chrome` on Windows (Chrome 149 or later), minimized,
 in `~/Library/Application Support/agent-chrome` on macOS, hidden in the background,
 and in `$XDG_DATA_HOME/agent-chrome` (by default `~/.local/share/agent-chrome`) on Linux, minimized when [xdotool](https://github.com/jordansissel/xdotool) is installed and the session has an X11 or XWayland display.
 
@@ -116,7 +117,7 @@ On the desktop, the same command opens a normal Chrome window there.
 Each profile is a separate Chrome with its own sign-ins.
 Pass `--profile <name>` before the command, for example `agent-chrome.ts --profile marketplace signin`.
 Without it the skill uses `default`.
-In the VM, profiles live in `C:\agent-chrome\profiles\<name>`; on the desktop, `default` keeps `%LOCALAPPDATA%\agent-chrome` and named profiles live beside it in `agent-chrome-profiles\<name>`.
+In the VM, profiles live in `C:\agent-chrome\profiles\<name>`. On another machine, `default` keeps the folder above and named profiles live beside it in `agent-chrome-profiles\<name>`.
 
 ## Sync between machines
 
